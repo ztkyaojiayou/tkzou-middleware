@@ -577,13 +577,6 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <!-- mysql数据库驱动 -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.46</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -625,16 +618,6 @@
             <artifactId>guava</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>6.2.3.Final</version>
-        </dependency>
-
         <!--集成swagger-->
         <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui -->
         <!--访问Swagger-UI：localhost:8080/swagger-ui.html-->
@@ -653,13 +636,6 @@
             <version>2.6.1</version>
         </dependency>
 
-        <!-- 引入swagger-bootstrap-ui包 /doc.html-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.github.xiaoymin</groupId>-->
-        <!--            <artifactId>swagger-bootstrap-ui</artifactId>-->
-        <!--            <version>1.9.1</version>-->
-        <!--        </dependency>-->
-
         <!--swagger注解包 -->
         <dependency>
             <groupId>io.swagger</groupId>
@@ -667,18 +643,5 @@
             <version>1.5.20</version>
         </dependency>
     </dependencies>
-
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>Nexus Release Repository</name>
-            <url>http://192.178.121.15:8081/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>Nexus Snapshot Repository</name>
-            <url>http://192.178.121.15:8081/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
 </project>
