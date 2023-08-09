@@ -617,31 +617,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-
-        <!--集成swagger-->
-        <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui -->
-        <!--访问Swagger-UI：localhost:8080/swagger-ui.html-->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <!--            <version>2.7.0</version>-->
-            <version>2.6.1</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <!--            <version>2.7.0</version>-->
-            <version>2.6.1</version>
-        </dependency>
-
-        <!--swagger注解包 -->
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.5.20</version>
-        </dependency>
     </dependencies>
 
 </project>
