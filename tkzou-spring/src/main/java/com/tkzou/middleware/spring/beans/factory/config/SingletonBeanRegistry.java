@@ -1,4 +1,4 @@
-package com.tkzou.middleware.spring.config;
+package com.tkzou.middleware.spring.beans.factory.config;
 
 /**
  * 单例bean的获取接口

@@ -1,7 +1,7 @@
 package com.tkzou.middleware.test.ioc;
 
-import com.tkzou.middleware.spring.config.BeanDefinition;
-import com.tkzou.middleware.spring.support.DefaultListableBeanFactory;
+import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
+import com.tkzou.middleware.spring.beans.factory.support.DefaultListableBeanFactory;
 import org.junit.Test;
 
 /**

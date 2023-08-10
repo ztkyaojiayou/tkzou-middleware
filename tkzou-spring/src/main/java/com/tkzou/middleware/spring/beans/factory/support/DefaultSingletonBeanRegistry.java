@@ -1,6 +1,6 @@
-package com.tkzou.middleware.spring.support;
+package com.tkzou.middleware.spring.beans.factory.support;
 
-import com.tkzou.middleware.spring.config.SingletonBeanRegistry;
+import com.tkzou.middleware.spring.beans.factory.config.SingletonBeanRegistry;
 
 import java.util.HashMap;
 import java.util.Map;

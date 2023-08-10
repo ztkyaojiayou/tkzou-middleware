@@ -1,6 +1,6 @@
-package com.tkzou.middleware.spring.support;
+package com.tkzou.middleware.spring.beans.factory.support;
 
-import com.tkzou.middleware.spring.config.BeanDefinition;
+import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 
 /**
  * BeanDefinition注册表接口

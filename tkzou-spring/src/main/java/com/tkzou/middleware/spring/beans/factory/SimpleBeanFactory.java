@@ -1,4 +1,4 @@
-package com.tkzou.middleware.spring;
+package com.tkzou.middleware.spring.beans.factory;
 
 import java.util.HashMap;
 import java.util.Map;

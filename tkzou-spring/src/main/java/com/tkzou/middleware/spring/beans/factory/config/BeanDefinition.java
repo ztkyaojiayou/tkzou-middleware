@@ -1,4 +1,4 @@
-package com.tkzou.middleware.spring.config;
+package com.tkzou.middleware.spring.beans.factory.config;
 
 /**
  * BeanDefinition实例保存bean的信息，包括class类型、方法构造参数、是否为单例等，

@@ -1,4 +1,6 @@
-package com.tkzou.middleware.spring;
+package com.tkzou.middleware.spring.beans.factory;
+
+import com.tkzou.middleware.spring.beans.BeansException;
 
 /**
  * bean容器/工厂

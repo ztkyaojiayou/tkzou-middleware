@@ -1,4 +1,4 @@
-package com.tkzou.middleware.spring;
+package com.tkzou.middleware.spring.beans;
 
 /**
  * 自定义bean相关的异常

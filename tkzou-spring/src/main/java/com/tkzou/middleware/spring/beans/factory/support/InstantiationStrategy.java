@@ -1,7 +1,7 @@
-package com.tkzou.middleware.spring.support;
+package com.tkzou.middleware.spring.beans.factory.support;
 
-import com.tkzou.middleware.spring.BeansException;
-import com.tkzou.middleware.spring.config.BeanDefinition;
+import com.tkzou.middleware.spring.beans.BeansException;
+import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 
 /**
  * Bean的实例化策略
