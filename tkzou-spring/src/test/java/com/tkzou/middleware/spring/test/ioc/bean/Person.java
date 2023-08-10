@@ -11,6 +11,14 @@ public class Person {
 
     private int age;
 
+    /**
+     * 新增引用类
+     * 此时，在注入的时候我们会先去容器中以该名称为beanName查找对应的bean来注入，
+     * 若没有，则先创建该bean并注入，同时存入ioc容器！！！
+     * 为了简单起见，这里暂先不考虑循环依赖的问题！！！
+     */
+    private Car car;
+
     public String getName() {
         return name;
     }
@@ -27,11 +35,20 @@ public class Person {
         this.age = age;
     }
 
+    public Car getCar() {
+        return car;
+    }
+
+    public void setCar(Car car) {
+        this.car = car;
+    }
+
     @Override
     public String toString() {
         return "Person{" +
                 "name='" + name + '\'' +
                 ", age=" + age +
+                ", car=" + car +
                 '}';
     }
 }

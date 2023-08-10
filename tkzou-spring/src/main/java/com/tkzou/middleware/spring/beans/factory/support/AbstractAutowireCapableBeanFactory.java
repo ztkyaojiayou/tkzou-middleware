@@ -1,8 +1,10 @@
 package com.tkzou.middleware.spring.beans.factory.support;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
+import com.tkzou.middleware.spring.beans.factory.config.BeanReference;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -75,29 +77,30 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
         try {
-            Class beanClass = beanDefinition.getBeanClass();
             //循环设置各属性的值
             for (PropertyValue propertyValue : beanDefinition.getPropertyValues().getPropertyValues()) {
-                //属性名称
+                //1.获取属性
+                //1.1属性名称
                 String name = propertyValue.getName();
-                //属性值
+                //1.2属性值
                 Object value = propertyValue.getValue();
+                //1.2.1新增校验，判断该属性值是否也为bean
+                if (value instanceof BeanReference) {
+                    //若是，则表示当前bean依赖该bean，则先实例化该bean
+                    //todo 注意：由于不想增加代码的复杂度和理解难度，暂时不⽀持循环依赖，后续再议！
+                    BeanReference beanReference = (BeanReference) value;
+                    //先获取该bean（若没有，则会先实例化该bean）
+                    value = super.getBean(beanReference.getBeanName());
+                }
+                //2.再通过反射设置属性
+                //todo 注意：而不是通过所谓的全参构造器来构造，因为该方法本质也是实例化
+                //  但我们的思路并不是通过全参构造器直接实例化该bean，
+                //  而是先使用无参构造器实例化，再使用set的方式设置属性，这一点务必注意！！！
+                //原方法
+//                setFieldValue(beanDefinition, bean, name, value);
+                //改用现成工具类完成
+                BeanUtil.setFieldValue(bean, name, value);
 
-                //1.根据属性的set方法设置属性
-                //1.1根据name获得类中属性对象，此时返回的是该属性的全类名！！！
-                //如：private com.tkzou.middleware.spring.beans.factory.config.BeanDefinition.beanClass
-                Field field = beanClass.getDeclaredField(name);
-                //1.2再获取对应的类型，如BeanDefinition
-                Class<?> fieldType = field.getType();
-
-                //2.根据方法名获取对应的set方法
-                //2.1构造set方法名
-                String setMethodName = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
-                //2.2获取对应的set方法--根据方法名称和入参类型（这样才能确定一个具体的方法呀！！！因为可能有重载！）
-                Method setMethod = beanClass.getDeclaredMethod(setMethodName, fieldType);
-
-                //3.调用该set方法，设置值--给这个bean设置值
-                setMethod.invoke(bean, value);
             }
         } catch (Exception e) {
             throw new BeansException("属性注入错误，该bean为： " + beanName, e);
@@ -114,7 +117,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     protected Object createBeanInstance(BeanDefinition beanDefinition) {
         return instantiate(beanDefinition);
     }
-
 
     /**
      * 生成bean实例
@@ -142,6 +144,36 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
+     * 通过反射设置属性
+     *
+     * @param bean
+     * @param name
+     * @param value
+     */
+    protected void setFieldValue(BeanDefinition beanDefinition, Object bean, String name, Object value) {
+        Class beanClass = beanDefinition.getBeanClass();
+        try {
+            //1.根据属性的set方法设置属性
+            //1.1根据name获得类中属性对象，此时返回的是该属性的全类名！！！
+            //如：private com.tkzou.middleware.spring.beans.factory.config.BeanDefinition.beanClass
+            Field field = beanClass.getDeclaredField(name);
+            //1.2再获取对应的类型，如BeanDefinition
+            Class<?> fieldType = field.getType();
+
+            //2.根据方法名获取对应的set方法
+            //2.1构造set方法名
+            String setMethodName = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+            //2.2获取对应的set方法--根据方法名称和入参类型（这样才能确定一个具体的方法呀！！！因为可能有重载！）
+            Method setMethod = beanClass.getDeclaredMethod(setMethodName, fieldType);
+
+            //3.调用该set方法，设置值--给这个bean设置值
+            setMethod.invoke(bean, value);
+        } catch (Exception e) {
+            throw new BeansException("Error setting property values for property name: " + name, e);
+        }
+    }
+
+    /**
      * set方法
      *
      * @param instantiationStrategy
@@ -149,4 +181,5 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     public void setInstantiationStrategy(InstantiationStrategy instantiationStrategy) {
         this.instantiationStrategy = instantiationStrategy;
     }
+
 }
