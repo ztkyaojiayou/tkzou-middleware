@@ -1,7 +1,7 @@
 package com.tkzou.middleware.spring.beans.factory.support;
 
-import com.tkzou.middleware.spring.beans.factory.BeanFactory;
 import com.tkzou.middleware.spring.beans.BeansException;
+import com.tkzou.middleware.spring.beans.factory.BeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -30,7 +30,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      */
     @Override
     public Object getBean(String beanName) throws BeansException {
-        //1.先直接获取单例对象
+        //1.先直接去bean工厂/容器中获取该bean对象
+        //这里我们默认获取的是单例对象
         Object singleton = super.getSingleton(beanName);
         if (ObjectUtils.isNotEmpty(singleton)) {
             return singleton;

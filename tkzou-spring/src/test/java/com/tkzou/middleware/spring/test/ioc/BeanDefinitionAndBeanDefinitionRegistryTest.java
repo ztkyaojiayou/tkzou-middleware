@@ -1,10 +1,12 @@
-package com.tkzou.middleware.test.ioc;
+package com.tkzou.middleware.spring.test.ioc;
 
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.support.DefaultListableBeanFactory;
+import com.tkzou.middleware.spring.test.ioc.service.HelloSpringService;
 import org.junit.Test;
 
 /**
+ * ioc容器测试
  * @author zoutongkun
  * @description: TODO
  * @date 2023/8/9 15:38

@@ -1,4 +1,4 @@
-package com.tkzou.middleware.test;
+package com.tkzou.middleware.spring.test;
 
 import org.junit.Test;
 

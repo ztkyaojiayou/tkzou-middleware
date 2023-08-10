@@ -18,7 +18,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
     public Object instantiate(BeanDefinition beanDefinition) {
         Class beanClass = beanDefinition.getBeanClass();
         try {
-            //使用无参构造器构造对象实例（默认）
+            //使用无参构造器构造对象实例（默认）--此时即便有属性，也先不管，后续会统一使用set设置属性值！！！
             //关于getDeclaredConstructor，参考：https://blog.csdn.net/weixin_49116772/article/details/131170855
             Constructor declaredConstructor = beanClass.getDeclaredConstructor();
             return declaredConstructor.newInstance();

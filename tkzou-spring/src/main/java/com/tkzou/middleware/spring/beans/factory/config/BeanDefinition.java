@@ -1,8 +1,11 @@
 package com.tkzou.middleware.spring.beans.factory.config;
 
+import com.tkzou.middleware.spring.beans.PropertyValues;
+import org.apache.commons.lang3.ObjectUtils;
+
 /**
  * BeanDefinition实例保存bean的信息，包括class类型、方法构造参数、是否为单例等，
- * 此处简化，只包含class类型
+ * 此处简化，只包含class类型和bean属性
  *
  * @author zoutongkun
  * @description: TODO
@@ -15,13 +18,9 @@ public class BeanDefinition {
     private Class beanClass;
 
     /**
-     * 构造器
-     *
-     * @param beanClass
+     * bean的属性集合
      */
-    public BeanDefinition(Class beanClass) {
-        this.beanClass = beanClass;
-    }
+    private PropertyValues propertyValues;
 
     /**
      * 默认构造器（这不需要，我们就使用有参构造器即可）
@@ -31,7 +30,28 @@ public class BeanDefinition {
     }
 
     /**
-     * 获取bean的class对象
+     * 构造器
+     *
+     * @param beanClass
+     */
+    public BeanDefinition(Class beanClass) {
+        this.beanClass = beanClass;
+    }
+
+    /**
+     * 全参构造器
+     *
+     * @param beanClass
+     * @param propertyValues
+     */
+    public BeanDefinition(Class beanClass, PropertyValues propertyValues) {
+        this.beanClass = beanClass;
+        //加个判空处理
+        this.propertyValues = ObjectUtils.isNotEmpty(propertyValues) ? propertyValues : new PropertyValues();
+    }
+
+    /**
+     * get-set方法
      *
      * @return
      */
@@ -39,12 +59,15 @@ public class BeanDefinition {
         return beanClass;
     }
 
-    /**
-     * setBeanClass方法
-     *
-     * @param beanClass
-     */
     public void setBeanClass(Class beanClass) {
         this.beanClass = beanClass;
+    }
+
+    public PropertyValues getPropertyValues() {
+        return propertyValues;
+    }
+
+    public void setPropertyValues(PropertyValues propertyValues) {
+        this.propertyValues = propertyValues;
     }
 }

@@ -1,4 +1,4 @@
-package com.tkzou.middleware.test.ioc;
+package com.tkzou.middleware.spring.test.ioc.service;
 
 /**
  * 用于测试的类
