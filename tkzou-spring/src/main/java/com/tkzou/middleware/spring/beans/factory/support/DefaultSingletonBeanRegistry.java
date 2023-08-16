@@ -17,7 +17,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      * 使用map存放单例对象
      * 因此易知，需要先将所有的单例bean对象存入
      */
-    private Map<String, Object> singletonObjectMap = new HashMap<>();
+    private Map<String, Object> singletonObjects = new HashMap<>();
 
     /**
      * 注册单例对象到map中
@@ -27,7 +27,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      * @param singletonObject
      */
     protected void addSingleton(String beanName, Object singletonObject) {
-        singletonObjectMap.put(beanName, singletonObject);
+        singletonObjects.put(beanName, singletonObject);
     }
 
     /**
@@ -38,6 +38,6 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      */
     @Override
     public Object getSingleton(String beanName) {
-        return singletonObjectMap.get(beanName);
+        return singletonObjects.get(beanName);
     }
 }
