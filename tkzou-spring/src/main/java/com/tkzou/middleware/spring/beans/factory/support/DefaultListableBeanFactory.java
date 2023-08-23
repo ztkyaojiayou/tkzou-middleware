@@ -1,11 +1,13 @@
 package com.tkzou.middleware.spring.beans.factory.support;
 
 import com.tkzou.middleware.spring.beans.BeansException;
+import com.tkzou.middleware.spring.beans.factory.ConfigurableListableBeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * beanDefinitionMap容器
@@ -17,7 +19,7 @@ import java.util.Map;
  * @description: TODO
  * @date 2023/8/9 14:16
  */
-public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements BeanDefinitionRegistry {
+public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
     /**
      * 存放beanName和对应的BeanDefinition的map/容器
      */
@@ -32,7 +34,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
      * @return
      */
     @Override
-    protected BeanDefinition getBeanDefinition(String beanName) {
+    public BeanDefinition getBeanDefinition(String beanName) {
         //才容器中获取
         BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
         //判空
@@ -50,6 +52,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
      *    我们可以先在测试类中注册，测试，之后就可以通过扫描包下的注解来完成呀！！！
      *    比如，对应@Autowired注解，我们就可以根据该注解获取该类的beanName（首字母小写的类名）和对应的beanDefinition（该类的class对象）了呀！！！
      *   见测试类：BeanDefinitionAndBeanDefinitionRegistryTest
+     *
      * @param beanName
      * @param beanDefinition
      */
@@ -57,4 +60,34 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         beanDefinitionMap.put(beanName, beanDefinition);
     }
+
+    @Override
+    public boolean containsBeanDefinition(String beanName) {
+        return beanDefinitionMap.containsKey(beanName);
+    }
+
+    @Override
+    public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
+        Map<String, T> res = new HashMap<>();
+        //遍历beanDefinitionMap
+        beanDefinitionMap.forEach((beanName, beanDefinition) -> {
+            Class beanClass = beanDefinition.getBeanClass();
+            //isAssignableFrom:是用来判断子类和父类的关系的，或接口的实现类和接口的关系的,默认所有的类的终极父类都是Object
+            //当A.isAssignableFrom(B)结果是true,则说明B可以转换成为A,也就是A可以由B转换而来
+            if (type.isAssignableFrom(beanClass)) {
+                //强转成泛型T，注意这里是(T)而不是<T>
+                T bean = (T) this.getBean(beanName);
+                res.put(beanName, bean);
+            }
+        });
+
+        return res;
+    }
+
+    @Override
+    public String[] getBeanDefinitionNames() {
+        Set<String> beanNames = beanDefinitionMap.keySet();
+        return beanNames.toArray(new String[beanNames.size()]);
+    }
+
 }

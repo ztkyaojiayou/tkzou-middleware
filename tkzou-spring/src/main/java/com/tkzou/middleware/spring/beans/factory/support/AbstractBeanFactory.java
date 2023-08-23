@@ -1,8 +1,8 @@
 package com.tkzou.middleware.spring.beans.factory.support;
 
 import com.tkzou.middleware.spring.beans.BeansException;
-import com.tkzou.middleware.spring.beans.factory.BeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
+import com.tkzou.middleware.spring.beans.factory.config.ConfigurableBeanFactory;
 import org.apache.commons.lang3.ObjectUtils;
 
 /**
@@ -17,7 +17,13 @@ import org.apache.commons.lang3.ObjectUtils;
  * @description: TODO
  * @date 2023/8/9 14:29
  */
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
+
+    @Override
+    public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+        //又是链式调用
+        return ((T) this.getBean(name));
+    }
 
     /**
      * 这里获取单例bean对象
@@ -37,7 +43,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             return singleton;
         } else {
             //通过反射生成对象，同时注册进容器
-            BeanDefinition beanDefinition = getBeanDefinition(beanName);
+            BeanDefinition beanDefinition = this.getBeanDefinition(beanName);
             return createBean(beanName, beanDefinition);
         }
     }

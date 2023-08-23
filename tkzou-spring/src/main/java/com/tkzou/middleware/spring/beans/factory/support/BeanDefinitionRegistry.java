@@ -1,5 +1,6 @@
 package com.tkzou.middleware.spring.beans.factory.support;
 
+import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 
 /**
@@ -18,4 +19,29 @@ public interface BeanDefinitionRegistry {
      * @param beanDefinition
      */
     void registerBeanDefinition(String beanName, BeanDefinition beanDefinition);
+
+
+    /**
+     * 根据beanName查找BeanDefinition
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
+    BeanDefinition getBeanDefinition(String beanName) throws BeansException;
+
+
+    /**
+     * 是否包含指定beaName的BeanDefinition
+     *
+     * @param beanName
+     * @return
+     */
+    boolean containsBeanDefinition(String beanName);
+
+    /**
+     * 返回定义的所有bean的名称
+     *
+     * @return
+     */
+    String[] getBeanDefinitionNames();
 }

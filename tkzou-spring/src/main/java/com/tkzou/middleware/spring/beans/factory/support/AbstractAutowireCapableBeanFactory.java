@@ -3,6 +3,7 @@ package com.tkzou.middleware.spring.beans.factory.support;
 import cn.hutool.core.bean.BeanUtil;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
+import com.tkzou.middleware.spring.beans.factory.config.AutowireCapableBeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.config.BeanReference;
 
@@ -17,7 +18,7 @@ import java.lang.reflect.Method;
  * @description: TODO
  * @date 2023/8/9 15:02
  */
-public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
+public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
     /**
      * 默认使用无参构造函数实例化对象

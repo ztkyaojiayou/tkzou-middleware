@@ -19,8 +19,9 @@ public class BeanDefinition {
 
     /**
      * bean的属性集合
+     * 初始化一下，防止在调用addPropertyValue方法时出现NPE
      */
-    private PropertyValues propertyValues;
+    private PropertyValues propertyValues = new PropertyValues();
 
     /**
      * 默认构造器（这不需要，我们就使用有参构造器即可）

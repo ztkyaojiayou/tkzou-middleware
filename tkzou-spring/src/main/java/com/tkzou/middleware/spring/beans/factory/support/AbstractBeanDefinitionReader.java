@@ -7,7 +7,8 @@ import com.tkzou.middleware.spring.core.io.ResourceLoader;
 /**
  * BeanDefinitionReader的抽象实现
  * 这里要特别传达一个观念，那就是：抽象类是可以只实现接口中的部分方法的，
- * 未实现的方法依旧拥有，只是依旧是抽象的，具体交给子类实现
+ * 未实现的方法依旧拥有，已经可以被调用，只是依旧是抽象的，具体交给子类实现，
+ * 其实抽象类中已实现的方法也是子类在调！
  *
  * @author zoutongkun
  * @description: TODO
@@ -17,7 +18,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
     /**
      * 接口中有获取BeanDefinitionRegistry和ResourceLoader方法，
      * 那么一般而言在实现类中就应该定义了这两个变量；
-     * 另外，抽象类也是类，当然可以声明成员变量！
+     * 抽象类也是类，当然可以声明成员变量！
+     * 另外，对于final类型的成员变量，无法被set
      */
     private final BeanDefinitionRegistry registry;
     private ResourceLoader resourceLoader;
@@ -37,7 +39,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
      * 5.构造方法中的参数并不一定是和定义的成员变量的名称或个数相同，二者并没有关系，
      * 构造方法是一个自定义的方法，其名称固定，但参数并没有约束，只要完成了对成员变量初始化的功能即可！！！
      * 且也不要求其对所有的成员变量都初始化，因为类的成员变量在实例化的过程中本身就会被赋一个初始化值！！！
-     *
+     * <p>
      * 6.可能为一个类写了多个构造器，有时可能想在一个构造器里面调用另外一个构造器，为了减少代码的重复，可用this关键字做到这一点。
      * 抽象类可以声明并定义构造函数。因为你不可以创建抽象类的实例，
      * 所以构造函数只能通过构造函数链调用（Java中构造函数链指的是从其他构造函数调用一个构造函数），
@@ -64,7 +66,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
      * @param registry
      */
     public AbstractBeanDefinitionReader(BeanDefinitionRegistry registry) {
-        //直接调用上面的全参构造器，这个也是常用手法!
+        //直接调用上面的全参构造器，这个也是常用手法!即构造器的链式调用
+        //调用的时机是在子类的实例化时
+        //默认new了一个DefaultResourceLoader
         this(registry, new DefaultResourceLoader());
     }
 
@@ -76,6 +80,15 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
     @Override
     public ResourceLoader getResourceLoader() {
         return resourceLoader;
+    }
+
+    /**
+     * set方法
+     *
+     * @param resourceLoader
+     */
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
     }
 
     /**
@@ -96,6 +109,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 //    public void loadBeanDefinitions(String location) throws BeansException {
 //
 //    }
+
     @Override
     public void loadBeanDefinitions(String[] locations) throws BeansException {
 //该方法属于重载方法，单个locations调用其另一个重载方法
