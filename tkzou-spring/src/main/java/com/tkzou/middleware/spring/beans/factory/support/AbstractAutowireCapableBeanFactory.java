@@ -5,7 +5,9 @@ import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
 import com.tkzou.middleware.spring.beans.factory.config.AutowireCapableBeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
+import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
 import com.tkzou.middleware.spring.beans.factory.config.BeanReference;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -57,6 +59,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             //     但是对于没有属性的对象则会报NPE错，比如之前的HelloSpringService类，
             //     这里先注掉，后续会兼容！！！
             applyPropertyValues(beanName, bean, beanDefinition);
+            //新增：执行bean的初始化和和BeanPostProcessor的前置和后置处理方法（核心）
+            bean = initializeBean(beanName, bean, beanDefinition);
         } catch (Exception e) {
             throw new BeansException("bean:" + beanName + "实例化失败", e);
         }
@@ -66,6 +70,37 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         //4.同时返回该生成的bean对象
         return bean;
+    }
+
+    /**
+     * bean的初始化（核心）
+     * 不是抽象方法
+     *
+     * @param beanName
+     * @param bean
+     * @param beanDefinition
+     * @return
+     */
+    protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
+        Object wrappedBean = this.applyBeanPostProcessorBeforeInitialization(bean, beanName);
+        //执行bean的初始化的方法
+        // todo 后续再实现
+        this.invokeInitMethods(beanName, wrappedBean, beanDefinition);
+        //执行BeanPostProcessor的后置处理
+        wrappedBean = this.applyBeanPostProcessorAfterInitialization(bean, beanName);
+        return wrappedBean;
+    }
+
+    /**
+     * 执行bean的初始化的方法
+     *
+     * @param beanName
+     * @param wrappedBean
+     * @param beanDefinition
+     */
+    protected void invokeInitMethods(String beanName, Object wrappedBean, BeanDefinition beanDefinition) {
+        //TODO 后面再实现
+        System.out.println("执行bean[" + beanName + "]的初始化方法");
     }
 
     /**
@@ -183,4 +218,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         this.instantiationStrategy = instantiationStrategy;
     }
 
+    @Override
+    public Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) {
+        Object result = existingBean;
+        //易知，从这里就开始获取所有的BeanPostProcessor，
+        //也即此时我们自定义的实现类都会被扫描到并依次执行里面的这个postProcessBeforeInitialization方法！！！
+        //这个思路很重要，这也是我们自定义扩展点能生效的原因！！！
+        for (BeanPostProcessor processor : getBeanPostProcessors()) {
+            //执行初始化前的方法
+            Object current = processor.postProcessBeforeInitialization(result, beanName);
+            //判空一下，为空时返回原始bean对象
+            if (ObjectUtils.isEmpty(current)) {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
+
+    @Override
+    public Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) {
+        //同理
+        Object result = existingBean;
+        //同上，从这里就开始获取所有的BeanPostProcessor，
+        //也即此时我们自定义的实现类都会被扫描到并依次执行里面的这个postProcessAfterInitialization方法！！！
+        //这个思路很重要，这也是我们自定义扩展点能生效的原因！！！
+        for (BeanPostProcessor processor : getBeanPostProcessors()) {
+            //执行初始化后的方法
+            Object current = processor.postProcessAfterInitialization(result, beanName);
+            //判空一下，为空时返回原始bean对象
+            if (ObjectUtils.isEmpty(current)) {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
 }

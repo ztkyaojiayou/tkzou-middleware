@@ -45,6 +45,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         return beanDefinition;
     }
 
+    @Override
+    public void preInstantiateSingletons() throws BeansException {
+        this.beanDefinitionMap.keySet().forEach(this::getBean);
+    }
+
     /**
      * 维护/注册beanName和对应的BeanDefinition（关键方法）
      * 入参是beanName和对应的beanDefinition，刚好就可以通过在一个类上加一个注解（如大名鼎鼎的@Autowired）获取！！！

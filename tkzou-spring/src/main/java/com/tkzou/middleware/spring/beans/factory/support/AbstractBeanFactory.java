@@ -2,8 +2,12 @@ package com.tkzou.middleware.spring.beans.factory.support;
 
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
+import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
 import com.tkzou.middleware.spring.beans.factory.config.ConfigurableBeanFactory;
 import org.apache.commons.lang3.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * bean抽象工厂
@@ -18,6 +22,12 @@ import org.apache.commons.lang3.ObjectUtils;
  * @date 2023/8/9 14:29
  */
 public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
+
+    /**
+     * 增加后置处理器属性，用于在bean的初始化前后进行拓展
+     */
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
@@ -66,4 +76,18 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * @return
      */
     protected abstract BeanDefinition getBeanDefinition(String beanName);
+
+    @Override
+    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+        //若已有该后置处理器，则先删除
+        if (beanPostProcessors.contains(beanPostProcessor)) {
+            this.beanPostProcessors.remove(beanPostProcessor);
+        }
+        //再注册/添加
+        this.beanPostProcessors.add(beanPostProcessor);
+    }
+
+    public List<BeanPostProcessor> getBeanPostProcessors() {
+        return this.beanPostProcessors;
+    }
 }

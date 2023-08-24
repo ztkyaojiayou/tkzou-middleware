@@ -3,6 +3,7 @@ package com.tkzou.middleware.spring.beans.factory;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.factory.config.AutowireCapableBeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
+import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
 import com.tkzou.middleware.spring.beans.factory.config.ConfigurableBeanFactory;
 
 /**
@@ -31,4 +32,20 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Au
      * @throws BeansException 如果找不到BeanDefinition
      */
     BeanDefinition getBeanDefinition(String beanName) throws BeansException;
+
+    /**
+     * 提前实例化所有单例实例
+     * 也即使用beanDefinitionMap进行实例化
+     *
+     * @throws BeansException
+     */
+    void preInstantiateSingletons() throws BeansException;
+
+    /**
+     * 添加/扫描/注册BeanPostProcessor
+     *
+     * @param beanPostProcessor
+     */
+    @Override
+    void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 }
