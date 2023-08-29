@@ -66,7 +66,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
 
         //3.将该beanName和生成的bean对象绑定，并存入bean容器中！！！
-        addSingleton(beanName, bean);
+        this.addSingleton(beanName, bean);
 
         //4.同时返回该生成的bean对象
         return bean;
@@ -82,11 +82,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @return
      */
     protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
+        //1.执行BeanPostProcessor的前置处理方法
         Object wrappedBean = this.applyBeanPostProcessorBeforeInitialization(bean, beanName);
-        //执行bean的初始化的方法
+        //2.执行bean的初始化的方法（核心）
         // todo 后续再实现
         this.invokeInitMethods(beanName, wrappedBean, beanDefinition);
-        //执行BeanPostProcessor的后置处理
+        //3.执行BeanPostProcessor的后置处理方法
         wrappedBean = this.applyBeanPostProcessorAfterInitialization(bean, beanName);
         return wrappedBean;
     }
@@ -100,7 +101,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     protected void invokeInitMethods(String beanName, Object wrappedBean, BeanDefinition beanDefinition) {
         //TODO 后面再实现
-        System.out.println("执行bean[" + beanName + "]的初始化方法");
+        System.out.println("执行bean[" + beanName + "]的初始化方法（后面再实现...）");
     }
 
     /**

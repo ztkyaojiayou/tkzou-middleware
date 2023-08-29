@@ -14,7 +14,7 @@ import com.tkzou.middleware.spring.test.ioc.bean.Car;
 public class CustomerBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        System.out.println("初始化之前先执行postProcessBeforeInitialization-----");
+        System.out.println("初始化之前先执行postProcessBeforeInitialization-----beanName："+beanName);
         //修改一下这个bean的属性
         if ("car".equals(beanName)) {
             ((Car) bean).setBrand("new-brand666");
@@ -25,7 +25,7 @@ public class CustomerBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        System.out.println("初始化之后再执行postProcessAfterInitialization-----");
+        System.out.println("初始化之后再执行postProcessAfterInitialization-----beanName："+beanName);
         return bean;
     }
 }

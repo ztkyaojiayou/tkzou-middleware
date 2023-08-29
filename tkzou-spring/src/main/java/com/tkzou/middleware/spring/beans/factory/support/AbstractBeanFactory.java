@@ -15,7 +15,7 @@ import java.util.List;
  * 1.具备获取bean对象
  * 1.1对于一般bean的获取，实现BeanFactory
  * 1.2对于单例bean的获取，继承DefaultSingletonBeanRegistry（它会实现SingletonBeanRegistry接口）
- * 2.同时需要注册bean对应的BeanDefinition，由于是抽象接口，因此这里先作第定义
+ * 2.同时需要注册bean对应的BeanDefinition，由于是抽象接口，因此这里先作定义
  *
  * @author zoutongkun
  * @description: TODO
@@ -39,7 +39,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * 这里获取单例bean对象
      * 逻辑：
      * 先从容器中获取，若没有则先将该bean注册进容器同时返回
-     *
+     * 说明：使用了单例模式呀！！！
      * @param beanName
      * @return
      * @throws BeansException
@@ -52,7 +52,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         if (ObjectUtils.isNotEmpty(singleton)) {
             return singleton;
         } else {
-            //通过反射生成对象，同时注册进容器
+            //2.若没有，则通过反射生成对象，同时注册进容器
             BeanDefinition beanDefinition = this.getBeanDefinition(beanName);
             return createBean(beanName, beanDefinition);
         }

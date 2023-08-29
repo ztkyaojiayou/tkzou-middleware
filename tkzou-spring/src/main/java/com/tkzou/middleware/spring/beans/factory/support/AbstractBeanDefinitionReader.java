@@ -112,7 +112,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
     @Override
     public void loadBeanDefinitions(String[] locations) throws BeansException {
-//该方法属于重载方法，单个locations调用其另一个重载方法
+        //该方法属于重载方法，单个locations调用其另一个重载方法
         for (String location : locations) {
             this.loadBeanDefinitions(location);
         }

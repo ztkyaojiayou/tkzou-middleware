@@ -66,7 +66,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     public void loadBeanDefinitions(String location) throws BeansException {
         ResourceLoader resourceLoader = this.getResourceLoader();
         Resource resource = resourceLoader.getResource(location);
-        //再调用下面这个重载方法，很常见的手手法，各种链式调用，习惯就好！
+        //再调用下面这个重载方法，很常见的手法，各种链式调用，习惯就好！
         this.loadBeanDefinitions(resource);
     }
 
