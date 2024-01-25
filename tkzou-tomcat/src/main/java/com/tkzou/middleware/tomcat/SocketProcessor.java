@@ -1,19 +1,27 @@
 package com.tkzou.middleware.tomcat;
 
+import com.tkzou.middleware.tomcat.context.Context;
+import com.tkzou.middleware.tomcat.request.MyRequest;
+import com.tkzou.middleware.tomcat.response.MyResponse;
+import com.tkzou.middleware.tomcat.servlettest.DefaultServlet;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
+/**
+ * @author zoutongkun
+ */
 public class SocketProcessor implements Runnable {
 
     private Socket socket;
-    private Tomcat tomcat;
+    private MyTomcat myTomcat;
 
-    public SocketProcessor(Socket socket, Tomcat tomcat) {
+    public SocketProcessor(Socket socket, MyTomcat myTomcat) {
         this.socket = socket;
-        this.tomcat = tomcat;
+        this.myTomcat = myTomcat;
     }
 
     @Override
@@ -23,7 +31,6 @@ public class SocketProcessor implements Runnable {
 
     private void processSocket(Socket socket) {
         // 处理Socket连接 读数据 写数据
-
         try {
             InputStream inputStream = socket.getInputStream();
 
@@ -34,7 +41,9 @@ public class SocketProcessor implements Runnable {
             int pos = 0;
             int begin = 0, end = 0;
             for (; pos < bytes.length; pos++, end++) {
-                if (bytes[pos] == ' ') break;
+                if (bytes[pos] == ' ') {
+                    break;
+                }
             }
 
             // 组合空格之前的字节流，转换成字符串就是请求方法
@@ -66,40 +75,35 @@ public class SocketProcessor implements Runnable {
                 protocl.append((char) bytes[begin]);
             }
 
-            Request request = new Request(method.toString(), url.toString(), protocl.toString(), socket);
-            Response response = new Response(request);
+            MyRequest myRequest = new MyRequest(method.toString(), url.toString(), protocl.toString(), socket);
+            MyResponse myResponse = new MyResponse(myRequest);
 
-            String requestUrl = request.getRequestURL().toString();
+            String requestUrl = myRequest.getRequestURL().toString();
             System.out.println(requestUrl);
             requestUrl = requestUrl.substring(1);
             String[] parts = requestUrl.split("/");
 
             String appName = parts[0];
-            Context context = tomcat.getContextMap().get(appName);
+            Context context = myTomcat.getContextMap().get(appName);
 
             if (parts.length > 1) {
                 Servlet servlet = context.getByUrlPattern(parts[1]);
 
                 if (servlet != null) {
-                    servlet.service(request, response);
+                    servlet.service(myRequest, myResponse);
                     // 发送响应
-                    response.complete();
+                    myResponse.complete();
                 } else {
                     DefaultServlet defaultServlet = new DefaultServlet();
-                    defaultServlet.service(request, response);
+                    defaultServlet.service(myRequest, myResponse);
                     // 发送响应
-                    response.complete();
+                    myResponse.complete();
                 }
             }
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ServletException e) {
+        } catch (IOException | ServletException e) {
             throw new RuntimeException(e);
         }
-
-
     }
-
 
 }

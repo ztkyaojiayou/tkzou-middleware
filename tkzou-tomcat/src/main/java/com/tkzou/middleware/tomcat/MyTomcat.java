@@ -1,6 +1,7 @@
 package com.tkzou.middleware.tomcat;
 
 import cn.hutool.core.thread.ThreadUtil;
+import com.tkzou.middleware.tomcat.context.Context;
 
 import javax.servlet.Servlet;
 import javax.servlet.annotation.WebServlet;
@@ -15,12 +16,29 @@ import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
+ * tomcat主类
+ *
  * @author zoutongkun
  */
-public class Tomcat {
+public class MyTomcat {
 
     private Map<String, Context> contextMap = new HashMap<>();
 
+    /**
+     * 部署服务
+     */
+    public void deployApps() {
+        //拼接出当前模块所在的路径
+        String curPath = System.getProperty("user.dir") + "/tkzou-tomcat";
+        File webapps = new File(curPath, "webapps");
+        for (String app : Objects.requireNonNull(webapps.list())) {
+            deployApp(webapps, app);
+        }
+    }
+
+    /**
+     * 启动tomcat
+     */
     public void start() {
         // Socket连接 TCP
         try {
@@ -36,30 +54,9 @@ public class Tomcat {
         }
     }
 
-    /**
-     * 启动类
-     *
-     * @param args
-     */
-    public static void main(String[] args) {
-        Tomcat tomcat = new Tomcat();
-        tomcat.deployApps();
-        tomcat.start();
-    }
-
-    private void deployApps() {
-        //获取所有的系统属性
-        Properties properties = System.getProperties();
-        String curPath = System.getProperty("user.dir") + "/tkzou-tomcat";
-        File webapps = new File(curPath, "webapps");
-        for (String app : Objects.requireNonNull(webapps.list())) {
-            deployApp(webapps, app);
-        }
-    }
-
     private void deployApp(File webapps, String appName) {
         // 有哪些Servlet
-
+        //保存所有的servlet，它就是用于实际处理请求的
         Context context = new Context(appName);
 
         File appDirectory = new File(webapps, appName);
@@ -76,13 +73,17 @@ public class Tomcat {
 
             try {
                 WebappClassLoader classLoader = new WebappClassLoader(new URL[]{classesDirectory.toURL()});
+                //加载class文件为Class对象
                 Class<?> servletClass = classLoader.loadClass(name);
                 if (HttpServlet.class.isAssignableFrom(servletClass)) {
+                    //判断这个类是否是一个servlet
                     if (servletClass.isAnnotationPresent(WebServlet.class)) {
                         WebServlet annotation = servletClass.getAnnotation(WebServlet.class);
                         String[] urlPatterns = annotation.urlPatterns();
 
                         for (String urlPattern : urlPatterns) {
+                            //把这个servlet所支持的url和对应的对象保存起来后续处理请求使用！
+                            //而这个对象就是使用反射创建的！！！
                             context.addUrlPatternMapping(urlPattern, (Servlet) servletClass.newInstance());
                         }
                     }

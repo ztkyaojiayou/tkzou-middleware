@@ -1,4 +1,4 @@
-package com.tkzou.middleware.tomcat;
+package com.tkzou.middleware.tomcat.response;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -9,6 +9,9 @@ import java.util.Collection;
 import java.util.Locale;
 
 /**
+ * HttpServletResponse的抽象或默认实现
+ * 同AbstractHttpServletRequest，但这里我们就先定义为普通类
+ *
  * @author zoutongkun
  */
 public class AbstractHttpServletResponse implements HttpServletResponse {

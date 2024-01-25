@@ -1,4 +1,4 @@
-package com.tkzou.middleware.tomcat;
+package com.tkzou.middleware.tomcat.request;
 
 
 import javax.servlet.*;
@@ -13,9 +13,15 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
+ * HttpServletRequest的抽象或默认实现
+ * 当目标接口的方法比较多，且我们只需要实现其中某几个时，我们就可以先使用一个中间类来做默认实现，
+ * 我们真正需要使用的类再继承该类并重写我们需要的方法即可！！！
+ * 要注意的是，这个类其实既可以定义为抽象的，也可以就定义为普通类，
+ * 但更推荐定义为抽象类，同时对需要重写的方法抽象出去！
+ *
  * @author zoutongkun
  */
-public class AbstractHttpServletRequest implements HttpServletRequest {
+public abstract class AbstractHttpServletRequest implements HttpServletRequest {
     @Override
     public String getAuthType() {
         return null;
@@ -51,10 +57,13 @@ public class AbstractHttpServletRequest implements HttpServletRequest {
         return 0;
     }
 
+    /**
+     * 获取请求类型
+     *
+     * @return
+     */
     @Override
-    public String getMethod() {
-        return null;
-    }
+    public abstract String getMethod();
 
     @Override
     public String getPathInfo() {
@@ -101,10 +110,13 @@ public class AbstractHttpServletRequest implements HttpServletRequest {
         return null;
     }
 
+    /**
+     * 获取请求路径
+     *
+     * @return
+     */
     @Override
-    public StringBuffer getRequestURL() {
-        return null;
-    }
+    public abstract StringBuffer getRequestURL();
 
     @Override
     public String getServletPath() {
@@ -221,10 +233,13 @@ public class AbstractHttpServletRequest implements HttpServletRequest {
         return null;
     }
 
+    /**
+     * 获取请求协议
+     *
+     * @return
+     */
     @Override
-    public String getProtocol() {
-        return null;
-    }
+    public abstract String getProtocol();
 
     @Override
     public String getScheme() {

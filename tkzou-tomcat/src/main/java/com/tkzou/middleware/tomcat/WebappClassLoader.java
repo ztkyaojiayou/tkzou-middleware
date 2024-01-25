@@ -4,6 +4,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 /**
+ * 自定义类加载器
+ *
  * @author zoutongkun
  */
 public class WebappClassLoader extends URLClassLoader {

@@ -1,4 +1,7 @@
-package com.tkzou.middleware.tomcat;
+package com.tkzou.middleware.tomcat.response;
+
+import com.tkzou.middleware.tomcat.ResponseServletOutputStream;
+import com.tkzou.middleware.tomcat.request.MyRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,7 +11,7 @@ import java.util.Map;
 /**
  * @author zoutongkun
  */
-public class Response extends AbstractHttpServletResponse {
+public class MyResponse extends AbstractHttpServletResponse {
 
     private int status = 200;
     private String message = "OK";
@@ -16,14 +19,14 @@ public class Response extends AbstractHttpServletResponse {
     private byte CR = '\r';
     private byte LF = '\n';
     private Map<String, String> headers = new HashMap<>();
-    private Request request;
+    private MyRequest myRequest;
     private OutputStream socketOutputStream;
     private ResponseServletOutputStream responseServletOutputStream = new ResponseServletOutputStream();
 
-    public Response(Request request) {
-        this.request = request;
+    public MyResponse(MyRequest myRequest) {
+        this.myRequest = myRequest;
         try {
-            this.socketOutputStream = request.getSocket().getOutputStream();
+            this.socketOutputStream = myRequest.getSocket().getOutputStream();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -90,7 +93,7 @@ public class Response extends AbstractHttpServletResponse {
     }
 
     private void sendResponseLine() throws IOException {
-        socketOutputStream.write(request.getProtocol().getBytes());
+        socketOutputStream.write(myRequest.getProtocol().getBytes());
         socketOutputStream.write(SP);
         socketOutputStream.write(status);
         socketOutputStream.write(SP);

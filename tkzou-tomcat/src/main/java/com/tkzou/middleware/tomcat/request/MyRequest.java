@@ -1,18 +1,18 @@
-package com.tkzou.middleware.tomcat;
+package com.tkzou.middleware.tomcat.request;
 
 import java.net.Socket;
 
 /**
  * @author zoutongkun
  */
-public class Request extends AbstractHttpServletRequest {
+public class MyRequest extends AbstractHttpServletRequest {
 
     private String method;
     private String url;
     private String protocol;
     private Socket socket;
 
-    public Request(String method, String url, String protocol, Socket socket) {
+    public MyRequest(String method, String url, String protocol, Socket socket) {
         this.method = method;
         this.url = url;
         this.protocol = protocol;
