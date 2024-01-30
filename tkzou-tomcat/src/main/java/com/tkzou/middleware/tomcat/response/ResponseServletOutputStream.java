@@ -1,4 +1,4 @@
-package com.tkzou.middleware.tomcat;
+package com.tkzou.middleware.tomcat.response;
 
 import javax.servlet.ServletOutputStream;
 import java.io.IOException;

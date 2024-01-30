@@ -1,6 +1,5 @@
 package com.tkzou.middleware.tomcat.response;
 
-import com.tkzou.middleware.tomcat.ResponseServletOutputStream;
 import com.tkzou.middleware.tomcat.request.MyRequest;
 
 import java.io.IOException;

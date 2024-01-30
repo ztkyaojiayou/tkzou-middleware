@@ -1,4 +1,4 @@
-package com.tkzou.middleware.tomcat;
+package com.tkzou.middleware.tomcat.core;
 
 import com.tkzou.middleware.tomcat.context.Context;
 import com.tkzou.middleware.tomcat.request.MyRequest;
