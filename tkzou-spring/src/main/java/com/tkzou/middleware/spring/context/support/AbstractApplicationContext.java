@@ -39,6 +39,32 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     /**
+     * 关闭上下文
+     */
+    @Override
+    public void close() {
+        //执行关闭上下文方法
+        doClose();
+    }
+
+    protected void doClose(){
+        //销毁所有bean
+        destroyBeans();
+    }
+
+    protected void destroyBeans(){
+        this.getBeanFactory().destroySingletons();
+    }
+
+    /**
+     * 向jvm中注册一个钩子方法，用于在jvm关闭之前执行以关闭容器等操作
+     */
+    @Override
+    public void registerShutdownHock() {
+
+    }
+
+    /**
      * 注册BeanPostProcessor
      *
      * @param beanFactory

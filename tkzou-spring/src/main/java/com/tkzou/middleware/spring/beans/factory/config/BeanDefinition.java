@@ -24,6 +24,12 @@ public class BeanDefinition {
     private PropertyValues propertyValues = new PropertyValues();
 
     /**
+     * 新增两个属性：在bean的属性初始化后会被执行的初始化方法的bean名称和在bean销毁前需要执行的销毁方法的bean名称
+     */
+    private String initMethodName;
+    private String destroyMethodName;
+
+    /**
      * 默认构造器（这不需要，我们就使用有参构造器即可）
      * 注意：当自定义了构造器之后，该无参默认构造器需要显示声明才可以继续使用
      */
@@ -70,5 +76,21 @@ public class BeanDefinition {
 
     public void setPropertyValues(PropertyValues propertyValues) {
         this.propertyValues = propertyValues;
+    }
+
+    public String getInitMethodName() {
+        return initMethodName;
+    }
+
+    public void setInitMethodName(String initMethodName) {
+        this.initMethodName = initMethodName;
+    }
+
+    public String getDestroyMethodName() {
+        return destroyMethodName;
+    }
+
+    public void setDestroyMethodName(String destroyMethodName) {
+        this.destroyMethodName = destroyMethodName;
     }
 }

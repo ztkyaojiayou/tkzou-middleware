@@ -11,7 +11,7 @@
 
     <artifactId>tkzou-spring</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <description>手写spring基础功能</description>
+    <description>手写spring核心功能</description>
 
     <dependencies>
         <dependency>

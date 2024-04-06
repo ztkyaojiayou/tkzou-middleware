@@ -3,11 +3,13 @@ package com.tkzou.middleware.spring.beans.factory.support;
 import cn.hutool.core.bean.BeanUtil;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
+import com.tkzou.middleware.spring.beans.factory.DisposableBean;
 import com.tkzou.middleware.spring.beans.factory.config.AutowireCapableBeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
 import com.tkzou.middleware.spring.beans.factory.config.BeanReference;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,7 +29,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * 经测试，这里使用新策略CglibSubclassingInstantiationStrategy也是ok的！！！
      */
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();
-
     /**
      * 根据beanName和对应的BeanDefinition（也即class对象）创建bean对象
      * 1.根据class对象，利用反射，生成bean对象
@@ -65,6 +66,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             throw new BeansException("bean:" + beanName + "实例化失败", e);
         }
 
+        //5.继续新增逻辑：注册有销毁方法的bean
+        this.registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
         //3.将该beanName和生成的bean对象绑定，并存入bean容器中！！！
         this.addSingleton(beanName, bean);
 
@@ -73,9 +76,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
+     * 注册有销毁方法的bean，也即继承自DisposableBean的bean或有自定义的销毁方法
+     *
+     *
+     * @param beanName
+     * @param bean
+     * @param beanDefinition
+     */
+    protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+        if (bean instanceof DisposableBean || StringUtils.isNotEmpty(beanDefinition.getDestroyMethodName())) {
+            this.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
+        }
+    }
+
+    /**
      * bean的初始化（核心）
      * 不是抽象方法
-     *
+     * 要注意的是：bean的初始化不是实例化，实例化先于初始化！！！
      * @param beanName
      * @param bean
      * @param beanDefinition
@@ -129,6 +146,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                     //先获取该bean（若没有，则会先实例化该bean）
                     value = super.getBean(beanReference.getBeanName());
                 }
+
                 //2.再通过反射设置属性
                 //todo 注意：而不是通过所谓的全参构造器来构造，因为该方法本质也是实例化
                 //  但我们的思路并不是通过全参构造器直接实例化该bean，

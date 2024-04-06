@@ -14,7 +14,18 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 
     /**
      * 最著名的方法：刷新容器！！！
+     *
      * @throws BeansException
      */
     void refresh() throws BeansException;
+
+    /**
+     * 关闭上下文
+     */
+    void close();
+
+    /**
+     * 向jvm中注册一个钩子方法，用于在jvm关闭之前执行以关闭容器等操作
+     */
+    void registerShutdownHock();
 }
