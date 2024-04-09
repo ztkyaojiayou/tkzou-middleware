@@ -1,8 +1,9 @@
-package com.tkzou.middleware.rpc.framework.protocol;
+package com.tkzou.middleware.rpc.framework;
 
-import com.tkzou.middleware.rpc.framework.MethodInvoker;
-import com.tkzou.middleware.rpc.framework.Protocol;
-import com.tkzou.middleware.rpc.framework.ServiceInstance;
+import com.tkzou.middleware.rpc.framework.protocol.HttpServer;
+import com.tkzou.middleware.rpc.framework.protocol.MethodInvoker;
+import com.tkzou.middleware.rpc.framework.protocol.RpcProtocol;
+import com.tkzou.middleware.rpc.framework.protocol.ServiceInstance;
 import com.tkzou.middleware.rpc.framework.register.LocalRegister;
 import com.tkzou.middleware.rpc.framework.register.RemoteServiceRegister;
 
@@ -11,16 +12,17 @@ import com.tkzou.middleware.rpc.framework.register.RemoteServiceRegister;
  *
  * @author zoutongkun
  */
-public class HttpProtocol implements Protocol {
+public class HttpProtocol implements RpcProtocol {
 
     @Override
     public void export(ServiceInstance serviceInstance) {
-        // 本地注册
+        //1.服务注册
+        //1.1本地注册
         LocalRegister.register(serviceInstance.getInterfaceName(), serviceInstance.getImplClass());
-        // 注册中心注册
+        //1.2注册中心注册
         RemoteServiceRegister.register(serviceInstance.getInterfaceName(), serviceInstance);
-        // 启动Tomcat
-        new HttpServer().start(serviceInstance.getHostname(), serviceInstance.getPort());
+        //2.启动Tomcat
+        HttpServer.start(serviceInstance.getHostname(), serviceInstance.getPort());
     }
 
     @Override

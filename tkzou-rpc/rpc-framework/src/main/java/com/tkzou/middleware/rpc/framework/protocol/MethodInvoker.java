@@ -1,7 +1,8 @@
-package com.tkzou.middleware.rpc.framework;
+package com.tkzou.middleware.rpc.framework.protocol;
 
 /**
  * 方法执行器
+ * 实现类中已包含服务提供者的url和端口
  *
  * @author zoutongkun
  */

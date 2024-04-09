@@ -1,10 +1,12 @@
-package com.tkzou.middleware.rpc.framework.protocol;
+package com.tkzou.middleware.rpc.framework;
 
-import com.tkzou.middleware.rpc.framework.MethodInvocation;
-import com.tkzou.middleware.rpc.framework.MethodInvoker;
-import com.tkzou.middleware.rpc.framework.ServiceInstance;
+import com.tkzou.middleware.rpc.framework.protocol.HttpClient;
+import com.tkzou.middleware.rpc.framework.protocol.MethodInvocation;
+import com.tkzou.middleware.rpc.framework.protocol.MethodInvoker;
+import com.tkzou.middleware.rpc.framework.protocol.ServiceInstance;
 
 /**
+ * 模拟单实例的服务提供者，主要就是封装ServiceInstance
  * 通过http发送请求
  * 以执行目标方法
  *

@@ -21,6 +21,7 @@
         <module>tkzou-tomcat</module>
         <module>tkzou-threadpool</module>
         <module>tkzou-springboot</module>
+        <module>tkzou-rpc</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
@@ -155,11 +156,6 @@
                 <version>${mybatis-plus-boot-starter.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
-                <version>${dynamic-datasource-boot-starter.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>
                 <version>${mybatis-boot-starter.version}</version>
@@ -171,17 +167,7 @@
                 <artifactId>pagehelper-spring-boot-starter</artifactId>
                 <version>${pagehelper-boot-starter.version}</version>
             </dependency>
-            <!-- 加入spring security spring security oauth2的处理 -->
-            <dependency>
-                <groupId>org.springframework.security.oauth</groupId>
-                <artifactId>spring-security-oauth2</artifactId>
-                <version>${security-oauth2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-jwt</artifactId>
-                <version>${security-jwt.version}</version>
-            </dependency>
+
             <!-- 在Redis基础上的一个Java实用工具包 -->
             <dependency>
                 <groupId>org.redisson</groupId>
@@ -200,11 +186,7 @@
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.aliyun.oss</groupId>
-                <artifactId>aliyun-sdk-oss</artifactId>
-                <version>${aliyun-sdk-oss.version}</version>
-            </dependency>
+
             <!-- 七牛依赖 -->
             <dependency>
                 <groupId>com.qiniu</groupId>
@@ -221,12 +203,7 @@
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi.version}</version>
             </dependency>
-            <!--   easypoi   -->
-            <dependency>
-                <groupId>cn.afterturn</groupId>
-                <artifactId>easypoi-base</artifactId>
-                <version>${easypoi.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>de.codecentric</groupId>
                 <artifactId>spring-boot-admin-starter-server</artifactId>
@@ -247,31 +224,7 @@
                 <artifactId>velocity-engine-core</artifactId>
                 <version>${velocity.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-configuration2</artifactId>
-                <version>${commons-configuration2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codingapi.txlcn</groupId>
-                <artifactId>txlcn-tm</artifactId>
-                <version>${txlcn.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codingapi.txlcn</groupId>
-                <artifactId>txlcn-tc</artifactId>
-                <version>${txlcn.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codingapi.txlcn</groupId>
-                <artifactId>txlcn-txmsg-netty</artifactId>
-                <version>${txlcn.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.shardingsphere</groupId>
-                <artifactId>sharding-jdbc-spring-boot-starter</artifactId>
-                <version>${sharding-sphere.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>com.github.tobato</groupId>
                 <artifactId>fastdfs-client</artifactId>
@@ -287,16 +240,7 @@
                 <artifactId>transmittable-thread-local</artifactId>
                 <version>${transmittable.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.nepxion</groupId>
-                <artifactId>banner</artifactId>
-                <version>${banner.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.social</groupId>
-                <artifactId>spring-social-security</artifactId>
-                <version>${spring-social-security.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
@@ -307,11 +251,7 @@
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${servlet-api.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-elasticsearch</artifactId>
-                <version>${spring-data-elasticsearch.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
                 <artifactId>elasticsearch-rest-high-level-client</artifactId>
@@ -327,26 +267,13 @@
                 <artifactId>elasticsearch</artifactId>
                 <version>${elasticsearch.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-spring-boot-starter</artifactId>
-                <version>${knife4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-micro-spring-boot-starter</artifactId>
-                <version>${knife4j.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate-validator.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-recipes</artifactId>
@@ -481,67 +408,6 @@
                 <version>${aliyun-java-sdk-core.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.sfauto.a5000</groupId>
-                <artifactId>a5000-db</artifactId>
-                <version>${a5000.db.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-core</artifactId>
-                <version>${cloud-common-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-api</artifactId>
-                <version>${cloud-common-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-datascope</artifactId>
-                <version>${cloud-common-datascope.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-datasource</artifactId>
-                <version>${cloud-common-datasource.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-log</artifactId>
-                <version>${cloud-common-log.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-message</artifactId>
-                <version>${cloud-common-message.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-mybatisplus</artifactId>
-                <version>${cloud-common-mybatisplus.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-redis</artifactId>
-                <version>${cloud-common-redis.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-security</artifactId>
-                <version>${cloud-common-security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>common-swagger</artifactId>
-                <version>${cloud-common-swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sfauto.cloud</groupId>
-                <artifactId>zk-slice-starter</artifactId>
-                <version>${zk-slice-starter.version}</version>
-            </dependency>
 
         </dependencies>
     </dependencyManagement>

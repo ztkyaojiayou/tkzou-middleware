@@ -1,12 +1,13 @@
 package com.tkzou.middleware.rpc.framework.register;
 
-import com.tkzou.middleware.rpc.framework.ServiceInstance;
+import cn.hutool.core.collection.CollectionUtil;
+import com.tkzou.middleware.rpc.framework.ProtocolFactory;
+import com.tkzou.middleware.rpc.framework.protocol.MethodInvoker;
+import com.tkzou.middleware.rpc.framework.protocol.RpcProtocol;
+import com.tkzou.middleware.rpc.framework.protocol.ServiceInstance;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 模拟服务注册中心
@@ -46,6 +47,27 @@ public class RemoteServiceRegister {
     public static List<ServiceInstance> get(String interfaceName) {
         SERVICE_REGISTER = getFile();
         return SERVICE_REGISTER.get(interfaceName);
+    }
+
+    /**
+     * 从注册中心获取所有的服务实例，最终封装为MethodInvoker
+     *
+     * @param interfaceClass
+     * @return
+     */
+    public static List<MethodInvoker> getCandidateMethodInvokers(Class interfaceClass) {
+        List<MethodInvoker> invokerList = new ArrayList<>();
+        List<ServiceInstance> serviceInstanceList = RemoteServiceRegister.get(interfaceClass.getName());
+        if (CollectionUtil.isEmpty(serviceInstanceList)) {
+            return Collections.emptyList();
+        }
+        //解析为MethodInvoker
+        serviceInstanceList.forEach(serviceInstance -> {
+            RpcProtocol rpcProtocol = ProtocolFactory.getRpcProtocol(serviceInstance.getProtocol());
+            MethodInvoker methodInvoker = rpcProtocol.refer(serviceInstance);
+            invokerList.add(methodInvoker);
+        });
+        return invokerList;
     }
 
     private static void saveFile() {

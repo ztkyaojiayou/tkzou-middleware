@@ -19,7 +19,7 @@ public class HttpServer {
      * @param hostname
      * @param port
      */
-    public void start(String hostname, Integer port) {
+    public static void start(String hostname, Integer port) {
 
         Tomcat tomcat = new Tomcat();
 
@@ -51,11 +51,10 @@ public class HttpServer {
 
         try {
             tomcat.start();
+            System.out.println("tomcat启动啦!端口:" + port);
             tomcat.getServer().await();
         } catch (LifecycleException e) {
             e.printStackTrace();
         }
-
-
     }
 }

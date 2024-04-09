@@ -1,4 +1,4 @@
-package com.tkzou.middleware.rpc.framework;
+package com.tkzou.middleware.rpc.framework.protocol;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +10,8 @@ import java.io.Serializable;
  * 服务提供者的接口的方法元信息（相当于方法签名信息），用于反射调用！
  * 即通过如下字段确定一个接口的某个方法
  * 易知，对于rpc调用就只差一个服务实例的url和端口啦！！！
+ * 因为是需要通过网络传递，因此需要能序列化和反序列化
+ * 我们这里就使用简单的jdk序列化机制实现，在实际的rpc框架中，可以定制高性能的序列化机制！
  *
  * @author zoutongkun
  */

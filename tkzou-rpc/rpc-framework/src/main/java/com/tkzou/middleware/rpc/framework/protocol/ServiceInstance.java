@@ -1,4 +1,4 @@
-package com.tkzou.middleware.rpc.framework;
+package com.tkzou.middleware.rpc.framework.protocol;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +8,7 @@ import java.io.Serializable;
 /**
  * 服务实例信息
  * 它是可以直接调用方法的！
+ * 需要能序列化
  *
  * @author zoutongkun
  */

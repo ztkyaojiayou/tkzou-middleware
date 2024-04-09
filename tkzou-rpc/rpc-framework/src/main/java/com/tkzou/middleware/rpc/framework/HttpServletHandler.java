@@ -1,7 +1,7 @@
-package com.tkzou.middleware.rpc.framework.protocol;
+package com.tkzou.middleware.rpc.framework;
 
-import com.tkzou.middleware.rpc.framework.MethodInvocation;
-import com.tkzou.middleware.rpc.framework.ServerHandler;
+import com.tkzou.middleware.rpc.framework.protocol.MethodInvocation;
+import com.tkzou.middleware.rpc.framework.protocol.ServletHandler;
 import com.tkzou.middleware.rpc.framework.register.LocalRegister;
 import org.apache.commons.io.IOUtils;
 
@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
  *
  * @author zoutongkun
  */
-public class HttpServerHandler implements ServerHandler {
+public class HttpServletHandler implements ServletHandler {
 
     @Override
     public void handler(HttpServletRequest req, HttpServletResponse resp) {
@@ -33,7 +33,7 @@ public class HttpServerHandler implements ServerHandler {
             Method method = implClass.getMethod(methodInvocation.getMethodName(), methodInvocation.getParamType());
             //3.2再调用该方法
             String result = (String) method.invoke(implClass.newInstance(), methodInvocation.getParams());
-            System.out.println("tomcat:" + result);
+            System.out.println("tomcat返回地方结果为:" + result);
             //4.最后返回该方法的返回值给服务消费者！
             IOUtils.write(result, resp.getOutputStream());
         } catch (Exception e) {

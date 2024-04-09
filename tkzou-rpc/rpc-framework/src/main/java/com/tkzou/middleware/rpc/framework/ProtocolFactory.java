@@ -1,6 +1,6 @@
 package com.tkzou.middleware.rpc.framework;
 
-import com.tkzou.middleware.rpc.framework.protocol.HttpProtocol;
+import com.tkzou.middleware.rpc.framework.protocol.RpcProtocol;
 
 /**
  * 发送远程请求的方式/协议
@@ -9,16 +9,13 @@ import com.tkzou.middleware.rpc.framework.protocol.HttpProtocol;
  * @author zoutongkun
  */
 public class ProtocolFactory {
-    public static Protocol getRpcProtocol(String name) {
-        switch (name) {
-            case "http":
-                return new HttpProtocol();
-            case "netty":
-                return null;
-            default:
-                break;
-        }
 
+    public static final String NETTY = "netty";
+
+    public static RpcProtocol getRpcProtocol(String name) {
+        if (NETTY.equals(name)) {
+            throw new RuntimeException("当前协议正在开发适配中，敬请期待。。。。");
+        }
         return new HttpProtocol();
     }
 }
