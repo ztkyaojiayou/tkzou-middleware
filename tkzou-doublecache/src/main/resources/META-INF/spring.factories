@@ -1,0 +1,3 @@
+#??spi????bean
+com.tkzou.middleware.doublecache.config=\
+com.tkzou.middleware.doublecache.config.DoubleCacheAutoConfiguration

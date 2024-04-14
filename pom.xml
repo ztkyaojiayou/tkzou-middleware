@@ -22,6 +22,7 @@
         <module>tkzou-threadpool</module>
         <module>tkzou-springboot</module>
         <module>tkzou-rpc</module>
+        <module>tkzou-doublecache</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
