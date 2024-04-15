@@ -9,6 +9,7 @@ import org.redisson.api.listener.MessageListener;
  * 缓存消息发布/订阅监听器
  * 使用的是redisson封装的监听机制
  * 主要就是用于删除本地缓存
+ * 也看参考redis的原生订阅方式：https://mp.weixin.qq.com/s/q1X2Q8YJRIuCVBIpBLqQiw
  *
  * @author zoutongkun
  */
