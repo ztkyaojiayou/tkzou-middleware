@@ -4,8 +4,11 @@ import java.util.Objects;
 
 /**
  * 方法执行上下文
- * Description:
- *
+ * 保存方法执行的状态
+ * 开始执行时：设置为ture
+ * 有值：正在执行
+ * 无值：已经执行完成
+ * <p>
  * Date: 2024-03-02
  *
  * @author zoutongkun

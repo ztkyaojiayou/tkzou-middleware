@@ -1,7 +1,7 @@
 package com.tkzou.middleware.localmsgretry.methodretry.job;
 
-import com.tkzou.middleware.localmsgretry.methodretry.mapper.LocalMsgRetryRecordDao;
 import com.tkzou.middleware.localmsgretry.methodretry.entity.MethodRetryRecord;
+import com.tkzou.middleware.localmsgretry.methodretry.mapper.LocalMsgRetryRecordDao;
 import com.tkzou.middleware.localmsgretry.methodretry.service.MethodRetryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

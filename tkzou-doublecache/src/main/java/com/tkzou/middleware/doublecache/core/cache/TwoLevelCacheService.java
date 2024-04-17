@@ -31,6 +31,8 @@ public class TwoLevelCacheService implements DoubleCacheService {
 
     /**
      * Caffeine内部缓存
+     * key：cacheName，理解为命名空间即可
+     * value：cache，即具体的缓存
      */
     private ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>();
 

@@ -26,6 +26,7 @@ import java.util.Date;
 public class MethodRetryRecord {
     public final static byte STATUS_WAIT = 1;
     public final static byte STATUS_FAIL = 2;
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
@@ -51,12 +52,20 @@ public class MethodRetryRecord {
     @TableField("retry_times")
     @Builder.Default
     private Integer retryTimes = 0;
+    /**
+     * 最大重试次数
+     */
     @TableField("max_retry_times")
     private Integer maxRetryTimes;
+    /**
+     * 失败原因
+     */
     @TableField("fail_reason")
     private String failReason;
+
     @TableField("create_time")
     private Date createTime;
+
     @TableField("update_time")
     private Date updateTime;
 

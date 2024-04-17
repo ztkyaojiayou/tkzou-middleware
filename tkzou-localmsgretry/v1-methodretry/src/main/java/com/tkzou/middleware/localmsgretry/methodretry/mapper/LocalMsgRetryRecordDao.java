@@ -4,7 +4,6 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tkzou.middleware.localmsgretry.methodretry.entity.MethodRetryRecord;
-import com.tkzou.middleware.localmsgretry.methodretry.mapper.LocalMsgRetryRecordMapper;
 import com.tkzou.middleware.localmsgretry.methodretry.service.MethodRetryService;
 import org.springframework.stereotype.Component;
 

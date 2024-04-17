@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tkzou-localmessageretry</artifactId>
+    <artifactId>tkzou-localmsgretry</artifactId>
     <description>基于本地消息表的重试方案</description>
     <packaging>pom</packaging>
     <modules>
