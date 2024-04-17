@@ -15,6 +15,8 @@
     <modules>
         <module>config-client</module>
         <module>config-server</module>
+        <module>config-demo</module>
+
     </modules>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

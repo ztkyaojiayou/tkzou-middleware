@@ -1,0 +1,6 @@
+spring:
+  cloud:
+    zoutongkun:
+      config:
+        server-addr: localhost:8099 #配置中心的地址
+        file-id: 00419b56-ca72-43b6-8dcb-a642676b42eb #配置文件的id，这里就使用一个进行测试
