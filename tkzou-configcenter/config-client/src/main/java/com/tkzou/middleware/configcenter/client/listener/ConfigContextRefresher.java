@@ -13,7 +13,7 @@ import org.springframework.context.ApplicationListener;
 import javax.annotation.Resource;
 
 /**
- * 自动刷新bean配置到ioc容器，此时ioc容器已经启动完毕了！
+ * 自动刷新bean配置到ioc容器，此时ioc容器已经启动完毕了，所有的bean都已经加载了！--步骤3
  * 此时就会为每一个从配置中心获取的配置文件添加一个配置文件更新的监听者，也即回调方法，也即ConfigFileChangedListener的一个实现，
  * <p>
  * 要注意的是，这个刷新是指当配置中心有修改时（由本地定时任务/job实现），后端服务会收到一个事件通知，
@@ -72,6 +72,8 @@ public class ConfigContextRefresher implements ApplicationListener<ApplicationRe
                 //发布RefreshEvent事件，该事件是一个刷新配置文件的事件，是spring-cloud提供的扩展点，
                 //当发布该事件后，springboot就会自动从配置中心拉取数据，修改Bean的属性
                 //触发时机：当配置文件有更新时！！！
+                //此时就会触发@RefreshScope注解的逻辑啦！
+                //要注意的是，这个事件已经和ioc容器的生命周期无关了，此时ioc容器已经初始化完毕，这个事件就是个普通的spring事件，是由spring-cloud提供的！！！
                 //参考：https://blog.csdn.net/JokerLJG/article/details/120254643
                 //https://blog.csdn.net/m0_71777195/article/details/126319418
                 applicationContext.publishEvent(new RefreshEvent(this, null, "Refresh zoutongkun config"));

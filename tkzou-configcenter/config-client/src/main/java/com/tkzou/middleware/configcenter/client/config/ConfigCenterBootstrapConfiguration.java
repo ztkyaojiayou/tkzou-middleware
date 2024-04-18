@@ -29,9 +29,4 @@ public class ConfigCenterBootstrapConfiguration {
         return new ConfigCenterConfig();
     }
 
-    @Bean
-    public ConfigService configService(ConfigCenterConfig configCenterConfig) {
-        return new ConfigService(configCenterConfig.getServerAddr());
-    }
-
 }

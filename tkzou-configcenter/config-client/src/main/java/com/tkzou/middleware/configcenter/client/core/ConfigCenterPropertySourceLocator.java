@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 核心接口
+ * 核心接口--步骤1
  * PropertySourceLocator就是起到在SpringCloud环境下从外部/远程如配置中心获取配置的作用（此时ioc容器正在初始化中，还并没有初始化完成！）。
  * PropertySourceLocator是一个接口，所以只要不同的配置中心实现这个接口，
  * 那么不同的配置中心就可以整合到了SpringCloud，从而实现从配置中心加载配置属性到Spring环境中了。

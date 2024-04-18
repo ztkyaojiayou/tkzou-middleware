@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 配置服务核心类
+ * 配置服务核心类--步骤2
  * <p>
  * 需要加载至ioc容器中，对于框架，一般不会单独在各个类上加@Component注解的，
  * 一般为了统一，会使用专门的配置类来统一添加！
@@ -23,6 +23,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date 2022/9/30 10:37
  */
 public class ConfigService {
+    /**
+     * 跟服务端交互的client
+     */
+    private final ConfigRpcClient configRpcClient;
+
     /**
      * 单线程的线程池，用于当时拉取配置中心的配置信息
      */
@@ -67,13 +72,8 @@ public class ConfigService {
     }
 
     /**
-     * 跟服务端交互的client
-     */
-    private final ConfigRpcClient configRpcClient;
-
-    /**
      * 构造器，此时配置中心的配置文件已经读取过一次了，只需要刷新即可！
-     *
+     * 易知当初始化该bean时，就启动了一个定时任务去扫描配置中心啦！
      * @param serverAddr
      */
     public ConfigService(String serverAddr) {
