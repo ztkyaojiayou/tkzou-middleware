@@ -43,7 +43,7 @@ public class LocalMsgRetryAspect {
     public Object around(ProceedingJoinPoint joinPoint, LocalMsgRetryable localMsgRetryable) throws Throwable {
         boolean async = localMsgRetryable.isAsync();
         boolean inTransaction = TransactionSynchronizationManager.isActualTransactionActive();
-        //非事务状态，直接执行，不做任何保证。
+        //非事务状态，直接执行，不做任何保证，也即失败了也不重试，当然，也是可以做的！！！
         if (MethodInvokeContextHolder.isInvoking() || !inTransaction) {
             return joinPoint.proceed();
         }

@@ -22,8 +22,8 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
- * Description: 安全执行处理器
- * <p>
+ * 方法重试服务
+ * 参考：https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247533040&idx=1&sn=cb5ea58167cefe8e73cf5a260b0b65cd&chksm=fdc2f120ad5fa53c29ae5affb55271454b6ac5d1541b84ab682ad5dac62d73ddc29ff2e6c0f5&scene=90&xtrack=1&sessionid=1713405355&subscene=93&clicktime=1713405360&enterid=1713405360&flutter_pos=0&biz_enter_id=4&ascene=56&devicetype=iOS15.4.1&version=18002a32&nettype=3G+&abtest_cookie=AAACAA%3D%3D&lang=zh_CN&countrycode=CN&fontScale=106&exportkey=n_ChQIAhIQfo5Lxa17c1QvJgm9BnzMnxLXAQIE97dBBAEAAAAAAEszBw7%2BlRAAAAAOpnltbLcz9gKNyK89dVj0rpIQvZdtB0%2F9oTcyo%2BhU6s7xHMbXftiR%2BMZ9Viuuob9ajBr4kAXZvGO1VrZowIcnP%2B7rxmgVGjw1HmLMiEhcjhAcb35wZIavo9SyJ2cV1yJTJXcoOU4RXr7D2eznne8yzu1e3tybKfXRPSoNqW9DpNCKyu0fz0EkDnDJs%2B7bVNvfFLTbKy8bVaEHngIg1kvWiUg9hJO%2B608uzjWPud1dd%2FxvRoGuAvhYkSFttCF%2Fr%2Bt6&pass_ticket=%2BdhHrOGvGgVSp1p5exANhRqBqH3MvBFIcraWLaHSbqyBUVZCgfl%2Bao0oyZbmhkIhlKHePnKwylzHnmMxQC2N%2Bw%3D%3D&wx_header=3
  * Date: 2024-03-20
  *
  * @author zoutongkun
@@ -45,22 +45,47 @@ public class MethodRetryService {
      * @param async
      */
     public void handle(MethodRetryRecord record, boolean async) {
+        // 判断当前是否存在事务
         boolean inTransaction = TransactionSynchronizationManager.isActualTransactionActive();
-        //非事务状态，前面已经执行。
+        //1.非事务状态，前面已经执行。
         if (!inTransaction) {
             return;
         }
+
         //保存执行数据
         saveRecord(record);
+        //2.有事务，则添加一个事务同步器，并重写afterCompletion方法（此方法在事务提交后会做回调）
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            /**
+             * 事务提交后会做的事情，该方法无法获取到当前事务的状态
+             */
             @SneakyThrows
             @Override
             public void afterCommit() {
-                //事务后执行
+                //事务提交完后回调该方法来执行，也即重试逻辑不能影响主事务，它不应该是事务中的一部分，
+                //因此需要在原事务提交之后再执行，防止因为该重试逻辑执行失败影响主事务的提交，这是不合适的！
+                //这也叫支持事务，即假设我们的重试方法是在事务方法内部调用的，那么我们需要保证事务提交后再执行这个重试方法。
                 if (async) {
                     doAsyncInvoke(record);
                 } else {
                     doInvoke(record);
+                }
+            }
+
+            /**
+             * 事务完成后要做的事情，此时事务肯定已经提交了，
+             * 此时可以获取到当前事务的状态，这是二者的主要区别，更推荐重写该方法
+             * 此时我们可以根据这个状态来做不同的事情，
+             * 比如：可以在事务提交时做自定义处理，也可以在事务回滚时做自定义处理等，非常灵活！！！
+             *
+             * @param status
+             */
+            @Override
+            public void afterCompletion(int status) {
+                //显示判断事务是否已经提交，更保险！
+                if (status == TransactionSynchronization.STATUS_COMMITTED) {
+                    //此时就可以执行我们的业务逻辑了
+                    //todo
                 }
             }
         });
@@ -86,7 +111,7 @@ public class MethodRetryService {
             Method method = ReflectUtil.getMethod(beanClass, retryMethodMetadata.getMethodName(),
                     parameterClasses.toArray(new Class[]{}));
             Object[] args = getMethodArgs(retryMethodMetadata, parameterClasses);
-            //执行方法
+            //执行方法（第一次或重试）
             method.invoke(bean, args);
             //执行成功删除该记录
             removeRecord(record.getId());

@@ -1,7 +1,7 @@
 package com.tkzou.middleware.configcenter.client.core;
 
-import com.tkzou.middleware.configcenter.client.client.listener.ConfigFileChangedListener;
 import com.tkzou.middleware.configcenter.client.client.domain.ConfigFile;
+import com.tkzou.middleware.configcenter.client.client.listener.ConfigFileChangedListener;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
@@ -41,6 +41,8 @@ public class ConfigService {
 
     /**
      * 配置文件id和对应监听器映射
+     * 在ioc容器初始化完成后，由ConfigContextRefresher
+     * 监听ApplicationReadyEvent事件来初始化该map
      */
     private final Map<String, ConfigFileChangedListener> configFileChangeListenerMap = new ConcurrentHashMap<>();
 
@@ -69,11 +71,19 @@ public class ConfigService {
      */
     private final ConfigRpcClient configRpcClient;
 
+    /**
+     * 构造器，此时配置中心的配置文件已经读取过一次了，只需要刷新即可！
+     *
+     * @param serverAddr
+     */
     public ConfigService(String serverAddr) {
-        //1.同时将configClient也实例化，就是使用的最原始的new的方式！！！
+        //1.将configClient也实例化，就是使用的最原始的new的方式！！！
         this.configRpcClient = new ConfigRpcClient(serverAddr);
         //2.同时启用一个定时任务，完成新配置的拉取，其实属于业务操作了！！！
-        initTask();
+        // 这里做两件事：
+        // 1.将最新配置拉取到本地保存
+        // 2.发布配置更新事件，springboot通过监听该事件来动态刷新ioc容器
+        startCheckAndUpdateConfigJob();
     }
 
     /**
@@ -94,13 +104,16 @@ public class ConfigService {
         return configRpcClient.getConfig(fileId);
     }
 
-    private void initTask() {
+    /**
+     * 检查并更新配置文件
+     */
+    private void startCheckAndUpdateConfigJob() {
         //每隔5s中从配置中心拉取（pull）文件，判断文件是不是有更新，如果有更新就回调对应的监听器
         THREAD_POOL_EXECUTOR.scheduleWithFixedDelay(this::notifyChangedConfigFile, 1, 5, TimeUnit.SECONDS);
     }
 
     private void notifyChangedConfigFile() {
-        //遍历每一个配置文件，更新！
+        //遍历每一个已经从配置中心获取到的配置文件，检查并更新！
         for (Map.Entry<String, ConfigFileChangedListener> entry : configFileChangeListenerMap.entrySet()) {
             String fileId = entry.getKey();
             //1.从服务端拉取的最新配置文件
@@ -112,11 +125,11 @@ public class ConfigService {
             if (!ObjectUtils.isEmpty(oldConfigFile) && !ObjectUtils.isEmpty(newConfigFile)) {
                 if (oldConfigFile.getLastUpdateTimestamp() < newConfigFile.getLastUpdateTimestamp()) {
                     //当发现缓存的数据更新的时间小于最新查询的文件的更新时间，说明配置文件有更新，然后回调对应的监听器
-                    //目的：通知spring-cloud进行动态刷新对应的bean属性！！！
+                    //目的：通知spring-cloud进行动态刷新对应的bean属性（具体而言，其实是删除旧bean，再重新生成新bean，但对外是通过一个代理bean来实现)！！！
                     entry.getValue().onFileChanged(newConfigFile);
                 }
             }
-            //3.更新配置文件至本地缓存
+            //3.同时更新配置文件至本地缓存
             configFileCache.put(fileId, newConfigFile);
         }
     }
