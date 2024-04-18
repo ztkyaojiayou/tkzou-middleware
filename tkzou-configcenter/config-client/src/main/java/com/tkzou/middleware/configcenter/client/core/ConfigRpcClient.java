@@ -1,6 +1,6 @@
 package com.tkzou.middleware.configcenter.client.core;
 
-import com.tkzou.middleware.configcenter.client.client.domain.ConfigFile;
+import com.tkzou.middleware.configcenter.client.domain.ConfigFile;
 import org.springframework.web.client.RestTemplate;
 
 /**

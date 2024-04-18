@@ -1,5 +1,5 @@
 import com.tkzou.middleware.configcenter.client.core.ConfigService;
-import com.tkzou.middleware.configcenter.client.client.domain.ConfigFile;
+import com.tkzou.middleware.configcenter.client.domain.ConfigFile;
 
 /**
  * 测试监听

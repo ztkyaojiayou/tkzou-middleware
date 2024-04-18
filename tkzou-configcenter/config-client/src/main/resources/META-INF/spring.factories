@@ -1,4 +1,4 @@
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-com.zoutongkun.configcenter.spring.ConfigCenterBootstrapConfiguration
+com.tkzou.middleware.configcenter.client.config.ConfigCenterBootstrapConfiguration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.zoutongkun.configcenter.spring.ConfigCenterAutoConfiguration
+com.tkzou.middleware.configcenter.client.config.ConfigCenterAutoConfiguration

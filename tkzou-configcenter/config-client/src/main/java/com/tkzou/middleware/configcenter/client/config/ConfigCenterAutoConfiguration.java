@@ -1,7 +1,7 @@
 package com.tkzou.middleware.configcenter.client.config;
 
 import com.tkzou.middleware.configcenter.client.core.ConfigService;
-import com.tkzou.middleware.configcenter.client.client.listener.ConfigContextRefresher;
+import com.tkzou.middleware.configcenter.client.listener.ConfigContextRefresher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

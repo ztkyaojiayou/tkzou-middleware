@@ -1,4 +1,4 @@
-package com.tkzou.middleware.configcenter.client.client.domain;
+package com.tkzou.middleware.configcenter.client.domain;
 
 import lombok.Getter;
 import lombok.Setter;

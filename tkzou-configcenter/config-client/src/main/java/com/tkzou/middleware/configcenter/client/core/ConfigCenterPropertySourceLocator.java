@@ -1,7 +1,7 @@
 package com.tkzou.middleware.configcenter.client.core;
 
-import com.tkzou.middleware.configcenter.client.client.domain.ConfigFile;
 import com.tkzou.middleware.configcenter.client.config.ConfigCenterConfig;
+import com.tkzou.middleware.configcenter.client.domain.ConfigFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.PropertySourceLoader;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;

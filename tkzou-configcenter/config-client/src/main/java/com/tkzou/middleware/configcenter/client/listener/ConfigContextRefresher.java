@@ -1,8 +1,8 @@
-package com.tkzou.middleware.configcenter.client.client.listener;
+package com.tkzou.middleware.configcenter.client.listener;
 
-import com.tkzou.middleware.configcenter.client.client.domain.ConfigFile;
 import com.tkzou.middleware.configcenter.client.config.ConfigCenterConfig;
 import com.tkzou.middleware.configcenter.client.core.ConfigService;
+import com.tkzou.middleware.configcenter.client.domain.ConfigFile;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.endpoint.event.RefreshEvent;

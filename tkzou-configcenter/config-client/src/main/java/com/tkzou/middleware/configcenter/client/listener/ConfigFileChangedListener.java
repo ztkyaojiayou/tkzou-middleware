@@ -1,6 +1,6 @@
-package com.tkzou.middleware.configcenter.client.client.listener;
+package com.tkzou.middleware.configcenter.client.listener;
 
-import com.tkzou.middleware.configcenter.client.client.domain.ConfigFile;
+import com.tkzou.middleware.configcenter.client.domain.ConfigFile;
 
 /**
  * 文件内容变化监听器，当文件内容有变动的话，就会回调

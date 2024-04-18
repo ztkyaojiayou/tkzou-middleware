@@ -1,7 +1,7 @@
 package com.tkzou.middleware.configcenter.client.core;
 
-import com.tkzou.middleware.configcenter.client.client.domain.ConfigFile;
-import com.tkzou.middleware.configcenter.client.client.listener.ConfigFileChangedListener;
+import com.tkzou.middleware.configcenter.client.domain.ConfigFile;
+import com.tkzou.middleware.configcenter.client.listener.ConfigFileChangedListener;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
