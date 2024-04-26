@@ -9,15 +9,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tkzou-configcenter</artifactId>
+    <artifactId>tkzou-binlog</artifactId>
     <packaging>pom</packaging>
-    <description>简易版配置中心实现</description>
     <modules>
-        <module>config-client</module>
-        <module>config-server</module>
-        <module>config-test</module>
-
+        <module>binlog-core</module>
+        <module>binlog-starter</module>
+        <module>binlog-test</module>
     </modules>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>

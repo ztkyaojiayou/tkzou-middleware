@@ -25,6 +25,7 @@
         <module>tkzou-doublecache</module>
         <module>tkzou-localmsgretry</module>
         <module>tkzou-configcenter</module>
+        <module>tkzou-binlog</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>

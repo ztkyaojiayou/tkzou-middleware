@@ -9,9 +9,9 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>config-demo</artifactId>
-    <name>config-demo</name>
-    <description>config-demo</description>
+    <artifactId>config-test</artifactId>
+    <name>config-test</name>
+    <description>config-test</description>
 
     <properties>
         <java.version>1.8</java.version>
