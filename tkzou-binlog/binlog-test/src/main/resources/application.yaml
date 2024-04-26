@@ -1,0 +1,18 @@
+spring:
+  binlog4j:
+    redis-config:
+      host: 127.0.0.1
+      port: 6379
+      password: root
+    client-configs:
+      master:
+        inaugural: false
+        mode: standalone
+        persistence: false
+        username: root
+        strict: true
+        password: root
+        host: 127.0.0.1
+        port: 3306
+        serverId: 1990
+        time-offset: 0
