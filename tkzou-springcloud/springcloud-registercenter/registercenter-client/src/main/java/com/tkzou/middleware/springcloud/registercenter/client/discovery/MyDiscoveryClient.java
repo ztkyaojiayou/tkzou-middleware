@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * 服务发现实现类
- * 即从注册中心找一个具体的服务实例
+ * 即从注册中心找到当前服务名称的所有实例
  * 本质就是发送一个http请求去调接口！！！
  * 该bean在MyDiscoveryAutoConfiguration类中集中加载到ioc容器！
  * 这其实也是推荐的方式，即尽量不要通过类似@component或@configuration等注解分散到各个角落，不易维护！！！
@@ -34,9 +34,10 @@ public class MyDiscoveryClient implements DiscoveryClient {
     }
 
     /**
-     * 获取一个实例
+     * 获取当前服务的所有实例
+     * 一个服务名对应多个具体的服务实例，后续再通过负载均衡先出一台具体的服务实例
      *
-     * @param serviceId
+     * @param serviceId 指定的服务名称
      * @return
      */
     @Override
