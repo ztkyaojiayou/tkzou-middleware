@@ -2,11 +2,9 @@ package com.tkzou.middleware.springcloud.loadbalancer.config;
 
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.*;
-import com.tkzou.middleware.springcloud.loadbalancer.core.MyServerList;
-import com.tkzou.middleware.springcloud.loadbalancer.core.RibbonLoadBalancerClient;
-import com.tkzou.middleware.springcloud.loadbalancer.core.SpringClientFactory;
 import com.tkzou.middleware.springcloud.loadbalancer.annotation.RibbonClients;
-import com.tkzou.middleware.springcloud.registercenter.client.config.MyDiscoveryProperties;
+import com.tkzou.middleware.springcloud.loadbalancer.core.LoadBalanceClientContextFactory;
+import com.tkzou.middleware.springcloud.loadbalancer.core.RibbonLoadBalancerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
@@ -36,8 +34,8 @@ public class RibbonAutoConfiguration {
      * @return
      */
     @Bean
-    public SpringClientFactory springClientFactory() {
-        SpringClientFactory factory = new SpringClientFactory();
+    public LoadBalanceClientContextFactory springClientFactory() {
+        LoadBalanceClientContextFactory factory = new LoadBalanceClientContextFactory();
         factory.setConfigurations(this.configurations);
         return factory;
     }

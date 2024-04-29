@@ -1,7 +1,7 @@
 package com.tkzou.middleware.springcloud.loadbalancer.core;
 
-import com.tkzou.middleware.springcloud.loadbalancer.config.RibbonClientSpecification;
 import com.tkzou.middleware.springcloud.loadbalancer.config.RibbonClientConfiguration;
+import com.tkzou.middleware.springcloud.loadbalancer.config.RibbonClientSpecification;
 import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -13,11 +13,11 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @author zoutongkun
  * @date 2024/4/28
  */
-public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecification> {
+public class LoadBalanceClientContextFactory extends NamedContextFactory<RibbonClientSpecification> {
 
     private static final String NAMESPACE = "ribbon";
 
-    public SpringClientFactory() {
+    public LoadBalanceClientContextFactory() {
         super(RibbonClientConfiguration.class, NAMESPACE, "ribbon.client.name");
     }
 

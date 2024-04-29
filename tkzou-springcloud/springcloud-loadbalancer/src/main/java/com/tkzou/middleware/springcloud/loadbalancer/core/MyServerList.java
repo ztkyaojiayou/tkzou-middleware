@@ -19,6 +19,11 @@ import java.util.stream.Collectors;
  * 查询服务实例列表
  * 从远程注册中心获取
  * 通过http发送请求
+ * <p>
+ * 查的是当前serviceName对应的所有服务实例信息
+ * 这理论上是由注册中心去适配的，
+ * 但这里因为没有专门的注册中心，因此这里就直接实现了，
+ * 本质就是去获取所有的服务信息
  *
  * @author zoutongkun
  * @date 2024/4/28

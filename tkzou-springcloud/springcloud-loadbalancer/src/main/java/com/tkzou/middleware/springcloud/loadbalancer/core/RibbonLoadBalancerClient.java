@@ -23,9 +23,9 @@ import java.net.URISyntaxException;
  */
 public class RibbonLoadBalancerClient implements LoadBalancerClient {
 
-    private SpringClientFactory clientFactory;
+    private LoadBalanceClientContextFactory clientFactory;
 
-    public RibbonLoadBalancerClient(SpringClientFactory clientFactory) {
+    public RibbonLoadBalancerClient(LoadBalanceClientContextFactory clientFactory) {
         this.clientFactory = clientFactory;
     }
 
