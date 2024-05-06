@@ -27,6 +27,7 @@
         <module>tkzou-configcenter</module>
         <module>tkzou-binlog</module>
         <module>tkzou-springcloud</module>
+        <module>tkzou-dbpool</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
