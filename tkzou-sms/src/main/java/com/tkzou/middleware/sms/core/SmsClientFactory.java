@@ -47,7 +47,7 @@ public abstract class SmsClientFactory {
      * @param provider 供应商标识
      * @return 返回短信服务对象。如果未找到则返回null
      */
-    public static SmsClient getClientByType(ProviderTypeEnum provider) {
+    public static SmsClient getByType(ProviderTypeEnum provider) {
         if (ObjectUtil.isEmpty(provider)) {
             throw new SmsException("供应商标识不能为空");
         }
