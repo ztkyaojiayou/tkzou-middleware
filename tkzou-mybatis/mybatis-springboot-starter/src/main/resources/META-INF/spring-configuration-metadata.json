@@ -1,0 +1,18 @@
+{
+  "groups": [
+    {
+      "name": "mybatis-tkzou",
+      "type": "com.tkzou.middleware.mybatis.springboot.starter.MyBatisConfigProperty",
+      "sourceType": "com.tkzou.middleware.mybatis.springboot.starter.MyBatisConfigProperty"
+    }
+  ],
+  "properties": [
+    {
+      "name": "mybatis-tkzou.mapper",
+      "type": "java.lang.String",
+      "description": "mapper包扫描路径",
+      "sourceType": "com.tkzou.middleware.mybatis.springboot.starter.MyBatisConfigProperty"
+    }
+  ],
+  "hints": []
+}
