@@ -448,11 +448,18 @@
     </build>
 
     <dependencies>
-        <!-- 测试 -->
+        <!-- 单元测试 -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- mockito单元测试 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.5.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

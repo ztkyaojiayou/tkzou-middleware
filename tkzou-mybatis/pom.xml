@@ -10,10 +10,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>tkzou-mybatis</artifactId>
+    <packaging>pom</packaging>
+    <description>手写mybatis</description>
+    <modules>
+        <module>mybatis-core</module>
+        <module>mybatis-spring</module>
+        <module>mybatis-springboot-starter</module>
+        <module>mybatis-springboot-starter-test</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
+
 
 </project>
