@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>tkzou-mybatis</artifactId>
+        <groupId>com.tkzou.middleware</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mybatis-spring</artifactId>
+    <description>mybatis整合spring</description>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+    <dependencies>
+        <!-- mybatis-core -->
+        <dependency>
+            <groupId>com.tkzou.middleware</groupId>
+            <artifactId>mybatis-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <!--            &lt;!&ndash;使用当前项目中指定的jar包，解决读取不到本地仓库jar包的问题&ndash;&gt;-->
+            <!--            <scope>system</scope>-->
+            <!--            <systemPath>${pom.basedir}/../mybatis-core/target/mybatis-core-0.0.1-SNAPSHOT.jar</systemPath>-->
+        </dependency>
+        <!-- spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.3.15</version>
+        </dependency>
+        <!-- 事务 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>5.3.15</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>5.3.15</version>
+        </dependency>
+        <!-- Druid数据源 -->
+        <!-- https://github.com/alibaba/druid -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.2.22</version>
+        </dependency>
+        <!-- 日志：需要同时引入日志规范和一种具体的实现 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+    </dependencies>
+</project>
