@@ -22,8 +22,9 @@ import javax.sql.DataSource;
  * @date 2024/5/5 04:07
  */
 @EnableTransactionManagement // 开启事务
-@ComponentScan("com.tkzou.middleware.mybatis.spring.test")
+//单独测试mybatis-spring时使用，当使用springboot-starter版时则不应该在这里是该注解了，而应该在springboot的启动类上添加！
 @MapperScan("com.tkzou.middleware.mybatis.spring.test.mapper")
+@ComponentScan("com.tkzou.middleware.mybatis.spring.test")
 public class MyBatisConfig {
 
     @Bean
