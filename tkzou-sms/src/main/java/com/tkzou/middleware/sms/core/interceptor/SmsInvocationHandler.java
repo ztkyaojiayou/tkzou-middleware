@@ -39,7 +39,6 @@ public class SmsInvocationHandler implements InvocationHandler {
         smsSendInterceptor = defaultSmsSendInterceptor;
     }
 
-
     /**
      * 构造者
      *
