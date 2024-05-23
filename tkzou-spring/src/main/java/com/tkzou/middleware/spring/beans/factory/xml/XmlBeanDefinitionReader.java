@@ -100,6 +100,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * 2.再注册BeanDefinition至beanDefinitionMap
      * 其中：获取beanName的逻辑为先id再name，最后再使用类名的第一个字母转为小写的名称
      * 另外，beanName在map中不能重复
+     * todo 可以使用成熟的工具类来解析xml文件，比如dom4j，但这不是重点，先不管！
      *
      * @param inputStream
      */

@@ -5,6 +5,7 @@ import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
+import com.tkzou.middleware.spring.beans.factory.BeanFactoryAware;
 import com.tkzou.middleware.spring.beans.factory.DisposableBean;
 import com.tkzou.middleware.spring.beans.factory.InitializingBean;
 import com.tkzou.middleware.spring.beans.factory.config.AutowireCapableBeanFactory;
@@ -106,6 +107,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @return
      */
     protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
+        //1.处理实现了aware接口的bean，将当前类对象赋值到目标类中！
+        if (bean instanceof BeanFactoryAware){
+            ((BeanFactoryAware) bean).setBeanFactory(this);
+        }
+
         //1.执行BeanPostProcessor的前置处理方法
         Object wrappedBean = this.applyBeanPostProcessorBeforeInitialization(bean, beanName);
         //2.执行bean的初始化的方法（核心）
