@@ -12,6 +12,10 @@ import org.apache.commons.lang3.ObjectUtils;
  * @date 2023/8/9 13:38
  */
 public class BeanDefinition {
+    public static String SCOPE_SINGLETON = "singleton";
+
+    public static String SCOPE_PROTOTYPE = "prototype";
+
     /**
      * bean的class对象
      */
@@ -31,6 +35,12 @@ public class BeanDefinition {
      * 新在bean销毁前需要执行的销毁方法的名称
      */
     private String destroyMethodName;
+
+    private String scope = SCOPE_SINGLETON;
+
+    private boolean singleton = true;
+
+    private boolean prototype = false;
 
     /**
      * 默认构造器（这不需要，我们就使用有参构造器即可）
@@ -58,6 +68,25 @@ public class BeanDefinition {
         this.beanClass = beanClass;
         //加个判空处理
         this.propertyValues = ObjectUtils.isNotEmpty(propertyValues) ? propertyValues : new PropertyValues();
+    }
+
+    /**
+     * 设置bean的类型
+     *
+     * @param scope
+     */
+    public void setScope(String scope) {
+        this.scope = scope;
+        this.singleton = SCOPE_SINGLETON.equals(scope);
+        this.prototype = SCOPE_PROTOTYPE.equals(scope);
+    }
+
+    public boolean isSingleton() {
+        return this.singleton;
+    }
+
+    public boolean isPrototype() {
+        return this.prototype;
     }
 
     /**

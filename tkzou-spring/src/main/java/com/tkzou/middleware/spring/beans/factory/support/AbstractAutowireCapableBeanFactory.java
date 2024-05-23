@@ -74,9 +74,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         //5.继续新增逻辑：注册有销毁方法的bean
         this.registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
-        //3.将该beanName和生成的bean对象绑定，并存入bean容器中！！！
-        this.addSingleton(beanName, bean);
-
+        //区分是否为原型bean，只有单例bean才注册到ioc容器！
+        if (beanDefinition.isSingleton()) {
+            //3.将该beanName和生成的bean对象绑定，并存入bean容器中！！！
+            this.addSingleton(beanName, bean);
+        }
         //4.同时返回该生成的bean对象
         return bean;
     }
@@ -89,10 +91,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @param beanDefinition
      */
     protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
-        //需要实现DisposableBean接口
-        if (bean instanceof DisposableBean || StringUtils.isNotEmpty(beanDefinition.getDestroyMethodName())) {
-            //包装一下,变成DisposableBeanAdapter
-            this.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
+        //需要区分bean类型，只有单例bean才需要执行销毁方法!
+        if (beanDefinition.isSingleton()) {
+            //需要实现DisposableBean接口
+            if (bean instanceof DisposableBean || StringUtils.isNotEmpty(beanDefinition.getDestroyMethodName())) {
+                //包装一下,变成DisposableBeanAdapter
+                this.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
+            }
         }
     }
 
@@ -108,7 +113,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
         //1.处理实现了aware接口的bean，将当前类对象赋值到目标类中！
-        if (bean instanceof BeanFactoryAware){
+        if (bean instanceof BeanFactoryAware) {
             ((BeanFactoryAware) bean).setBeanFactory(this);
         }
 
