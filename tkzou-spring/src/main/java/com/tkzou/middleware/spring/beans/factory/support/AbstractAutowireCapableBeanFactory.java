@@ -1,9 +1,12 @@
 package com.tkzou.middleware.spring.beans.factory.support;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.StrUtil;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
 import com.tkzou.middleware.spring.beans.factory.DisposableBean;
+import com.tkzou.middleware.spring.beans.factory.InitializingBean;
 import com.tkzou.middleware.spring.beans.factory.config.AutowireCapableBeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
@@ -24,11 +27,13 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
+    public static final String AFTER_PROPERTIES_SET = "afterPropertiesSet";
     /**
      * 默认使用无参构造函数实例化对象
      * 经测试，这里使用新策略CglibSubclassingInstantiationStrategy也是ok的！！！
      */
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();
+
     /**
      * 根据beanName和对应的BeanDefinition（也即class对象）创建bean对象
      * 1.根据class对象，利用反射，生成bean对象
@@ -78,13 +83,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     /**
      * 注册有销毁方法的bean，也即继承自DisposableBean的bean或有自定义的销毁方法
      *
-     *
      * @param beanName
      * @param bean
      * @param beanDefinition
      */
     protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+        //需要实现DisposableBean接口
         if (bean instanceof DisposableBean || StringUtils.isNotEmpty(beanDefinition.getDestroyMethodName())) {
+            //包装一下,变成DisposableBeanAdapter
             this.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
         }
     }
@@ -93,12 +99,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * bean的初始化（核心）
      * 不是抽象方法
      * 要注意的是：bean的初始化不是实例化，实例化先于初始化！！！
+     *
      * @param beanName
      * @param bean
      * @param beanDefinition
      * @return
      */
-    protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
+    protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
         //1.执行BeanPostProcessor的前置处理方法
         Object wrappedBean = this.applyBeanPostProcessorBeforeInitialization(bean, beanName);
         //2.执行bean的初始化的方法（核心）
@@ -116,9 +123,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @param wrappedBean
      * @param beanDefinition
      */
-    protected void invokeInitMethods(String beanName, Object wrappedBean, BeanDefinition beanDefinition) {
+    protected void invokeInitMethods(String beanName, Object wrappedBean, BeanDefinition beanDefinition) throws Exception {
         //TODO 后面再实现
-        System.out.println("执行bean[" + beanName + "]的初始化方法（后面再实现...）");
+        if (wrappedBean instanceof InitializingBean) {
+            ((InitializingBean) wrappedBean).afterPropertiesSet();
+        }
+        String initMethodName = beanDefinition.getInitMethodName();
+        //去当前bean的类中查找该afterPropertiesSet/初始化方法
+        if (StrUtil.isNotEmpty(initMethodName) && !(wrappedBean instanceof InitializingBean && AFTER_PROPERTIES_SET.equals(initMethodName))) {
+            //使用反射获取方法对象
+            Method initMethod = ClassUtil.getPublicMethod(beanDefinition.getBeanClass(), initMethodName);
+            if (initMethod == null) {
+                throw new BeansException("Could not find an init method named '" + initMethodName + "' on bean with " +
+                        "name '" + beanName + "'");
+            }
+            initMethod.invoke(wrappedBean);
+        }
     }
 
     /**

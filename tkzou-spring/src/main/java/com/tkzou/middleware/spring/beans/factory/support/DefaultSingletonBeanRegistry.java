@@ -25,7 +25,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     /**
      * 用于保存拥有销毁⽅法的bean
-     * key为对应的beanName，value为对应的bean
+     * key为对应的beanName，value为对应的bean，是DisposableBeanAdapter类型，适配器模式！
      */
     private final Map<String, DisposableBean> disposableBeans = new HashMap<>();
 

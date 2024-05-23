@@ -26,6 +26,9 @@ public class DisposableBeanAdapter implements DisposableBean {
     public static final String DESTROY = "destroy";
     private final Object bean;
     private final String beanName;
+    /**
+     * 销毁方法的方法名
+     */
     private final String destroyMethodName;
 
     /**
@@ -49,7 +52,7 @@ public class DisposableBeanAdapter implements DisposableBean {
 
     @Override
     public void destroy() throws Exception {
-        //只处理DisposableBean类型的bean
+        //1.先处理直接实现了DisposableBean接口的bean
         //instanceof方法常用
         if (bean instanceof DisposableBean) {
             //强转
@@ -59,9 +62,10 @@ public class DisposableBeanAdapter implements DisposableBean {
             bean.destroy();
         }
 
+        //2.若当前bean没有实现DisposableBean接口，则从该bean中也找出名称为destroy的方法作为销毁方法执行！
         //判断，避免同时继承自DisposableBean，且自定义方法与DisposableBean方法同名，销毁方法执行两次的情况
         if (StringUtils.isNotEmpty(this.destroyMethodName) && !(bean instanceof DisposableBean && DESTROY.equals(this.destroyMethodName))) {
-            //执行自定义方法
+            //执行自定义方法，参考afterPropertiesSet/初始化方法
             Method destroyMethod = ClassUtil.getPublicMethod(bean.getClass(), destroyMethodName);
             if (ObjectUtils.isEmpty(destroyMethod)) {
                 throw new BeansException("' 在bean'" + beanName + "中找不到销毁方法 '" + destroyMethodName);

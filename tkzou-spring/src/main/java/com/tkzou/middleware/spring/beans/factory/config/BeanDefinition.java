@@ -27,6 +27,9 @@ public class BeanDefinition {
      * 新增两个属性：在bean的属性初始化后会被执行的初始化方法的bean名称和在bean销毁前需要执行的销毁方法的bean名称
      */
     private String initMethodName;
+    /**
+     * 新在bean销毁前需要执行的销毁方法的名称
+     */
     private String destroyMethodName;
 
     /**

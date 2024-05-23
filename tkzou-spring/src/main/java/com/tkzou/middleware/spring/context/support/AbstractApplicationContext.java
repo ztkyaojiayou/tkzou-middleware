@@ -47,21 +47,26 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         doClose();
     }
 
-    protected void doClose(){
+    protected void doClose() {
         //销毁所有bean
         destroyBeans();
     }
 
-    protected void destroyBeans(){
+    protected void destroyBeans() {
         this.getBeanFactory().destroySingletons();
     }
 
     /**
      * 向jvm中注册一个钩子方法，用于在jvm关闭之前执行以关闭容器等操作
+     * 参考：https://my.oschina.net/huangcongmin12/blog/357538
      */
     @Override
     public void registerShutdownHock() {
-
+        //1.定义钩子方法的逻辑
+        //就是调用spring的close方法！
+        Thread shutdownHookThread = new Thread(this::doClose);
+        //2.再注册进jvm
+        Runtime.getRuntime().addShutdownHook(shutdownHookThread);
     }
 
     /**
