@@ -1,13 +1,16 @@
 package com.tkzou.middleware.spring.beans.factory.support;
 
 import com.tkzou.middleware.spring.beans.BeansException;
+import com.tkzou.middleware.spring.beans.factory.FactoryBean;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
 import com.tkzou.middleware.spring.beans.factory.config.ConfigurableBeanFactory;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * bean抽象工厂
@@ -27,7 +30,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * 增加后置处理器属性，用于在bean的初始化前后进行拓展
      */
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
-
+    /**
+     * 用于保存factoryBean，也可以理解为存储factoryBean这种bean的容器
+     */
+    private final Map<String, Object> factoryBeanObjectCache = new HashMap<>();
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
@@ -40,6 +46,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * 逻辑：
      * 先从容器中获取，若没有则先将该bean注册进容器同时返回
      * 说明：使用了单例模式呀！！！
+     *
      * @param beanName
      * @return
      * @throws BeansException
@@ -48,15 +55,57 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     public Object getBean(String beanName) throws BeansException {
         //1.先直接去bean工厂/容器中获取该bean对象
         //这里我们默认获取的是单例对象
-        Object singleton = super.getSingleton(beanName);
-        if (ObjectUtils.isNotEmpty(singleton)) {
-            return singleton;
-        } else {
-            //2.若没有，则通过反射生成对象，同时注册进容器
-            BeanDefinition beanDefinition = this.getBeanDefinition(beanName);
-            return createBean(beanName, beanDefinition);
+        Object sharedInstance = getSingleton(beanName);
+        if (ObjectUtils.isNotEmpty(sharedInstance)) {
+            //此时可能是FactoryBean，也可能是普通的bean，对于前者，单独处理
+            return getObjectForBeanInstance(sharedInstance, beanName);
         }
+
+        //2.若没有，则通过反射生成对象，同时注册进容器
+        BeanDefinition beanDefinition = this.getBeanDefinition(beanName);
+        Object bean = createBean(beanName, beanDefinition);
+        //也需要判断是否是FactoryBean
+        return getObjectForBeanInstance(bean, beanName);
     }
+
+    /**
+     * 从创建的bean中获取真正的bean
+     * 主要是有可能是FactoryBean这种bean，
+     * 此时就需要从FactoryBean#getObject中获取/创建bean
+     *
+     * @param beanInstance 原始bean，也即刚创建出来的bean，这个bean不一定是我们想要的！
+     * @param beanName
+     * @return
+     */
+    protected Object getObjectForBeanInstance(Object beanInstance, String beanName) {
+        //目标bean
+        Object object = beanInstance;
+        //1.对于FactoryBean
+        if (beanInstance instanceof FactoryBean) {
+            FactoryBean factoryBean = (FactoryBean) beanInstance;
+            try {
+                //1.1若为单例bean
+                if (factoryBean.isSingleton()) {
+                    //1.1.1singleton作用域bean，先从缓存中获取
+                    object = this.factoryBeanObjectCache.get(beanName);
+                    if (object == null) {
+                        //1.1.2若没有，则再通过getObject方法创建！
+                        object = factoryBean.getObject();
+                        //再加入缓存
+                        this.factoryBeanObjectCache.put(beanName, object);
+                    }
+                } else {
+                    //1.2prototype作用域bean，在直接新建一个bean，且不缓存！
+                    object = factoryBean.getObject();
+                }
+            } catch (Exception ex) {
+                throw new BeansException("FactoryBean threw exception on object[" + beanName + "] creation", ex);
+            }
+        }
+
+        return object;
+    }
+
 
     /**
      * 根据beanName和BeanDefinition生成对象
