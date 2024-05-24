@@ -9,7 +9,8 @@ import java.lang.reflect.Proxy;
 
 /**
  * JDK动态代理
- * 属于增强逻辑！
+ * 该类属于代理对象工厂+代理增强逻辑二合一！
+ * 一般而言，可以单独定义一个代理对象工厂来创建代理对象，参考mybatis。
  *
  * @author derekyi
  * @date 2020/12/5
@@ -52,7 +53,8 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
             //代理方法
             MethodInterceptor methodInterceptor = advised.getMethodInterceptor();
             //执行方法，包括原方法的执行和自定义的增强逻辑的执行，里面就可能包括类似于前置通知或后置通知的逻辑！！！
-            return methodInterceptor.invoke(new ReflectiveMethodInvocation(advised.getTargetSource().getTarget(), method, args));
+            return methodInterceptor.invoke(new ReflectiveMethodInvocation(advised.getTargetSource().getTarget(),
+                    method, args));
         }
         //2.不符合切入点表达式的，不需要增强，直接执行原方法
         return method.invoke(advised.getTargetSource().getTarget(), args);

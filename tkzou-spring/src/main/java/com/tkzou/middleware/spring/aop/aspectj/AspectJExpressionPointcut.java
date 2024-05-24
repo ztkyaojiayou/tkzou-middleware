@@ -32,16 +32,22 @@ public class AspectJExpressionPointcut implements Pointcut, ClassFilter, MethodM
 
     /**
      * 解析后的切入点表达式信息
+     * 是通过解析传入的切入点表达式得到的！
      * 实现类为PointcutExpressionImpl
      */
     private final PointcutExpression pointcutExpression;
 
     /**
+     * 构造器，但在这里同时完成了对切入点表达式的解析！！！
+     * 也即这个构造器相当于就是一个执行业务逻辑的方法啦！
+     * 这种思想务必掌握，很多框架都这么干！
+     *
      * @param expression 目标切入点表达式
      */
     public AspectJExpressionPointcut(String expression) {
         //获取切入点表达式解析器
-        PointcutParser pointcutParser = PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(SUPPORTED_PRIMITIVES, this.getClass().getClassLoader());
+        PointcutParser pointcutParser =
+                PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(SUPPORTED_PRIMITIVES, this.getClass().getClassLoader());
         //解析传入的切入点表达式
         pointcutExpression = pointcutParser.parsePointcutExpression(expression);
     }

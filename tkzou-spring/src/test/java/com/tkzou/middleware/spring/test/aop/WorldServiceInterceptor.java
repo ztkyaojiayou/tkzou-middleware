@@ -9,13 +9,19 @@ import org.aopalliance.intercept.MethodInvocation;
  * @author zoutongkun
  */
 public class WorldServiceInterceptor implements MethodInterceptor {
+    /**
+     * 执行方法，包含目标方法和增强逻辑
+     *
+     * @param invocation 目标方法快照信息
+     * @return
+     */
     @Override
     public Object invoke(MethodInvocation invocation) {
         //在目标方法执行前执行的逻辑，可以理解为前置通知！
         before("前置通知执行了-----------------------");
-        //执行目标方法
         Object result = null;
         try {
+            //执行目标方法，在此前后都添加了增强逻辑！
             result = invocation.proceed();
         } catch (Throwable e) {
             afterThrowing("异常通知执行了-----------------------" + e.getMessage());
@@ -35,7 +41,7 @@ public class WorldServiceInterceptor implements MethodInterceptor {
     }
 
     /**
-     * 前置通知
+     * 后置通知
      *
      * @param s
      */
@@ -44,7 +50,7 @@ public class WorldServiceInterceptor implements MethodInterceptor {
     }
 
     /**
-     * 后置通知
+     * 前置通知
      *
      * @param s
      */

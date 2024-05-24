@@ -16,15 +16,15 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
     /**
      * 目标对象
      */
-    private final Object target;
+    public final Object target;
     /**
      * 目标方法
      */
-    private final Method method;
+    public final Method method;
     /**
      * 当前方法执行时的参数
      */
-    private final Object[] arguments;
+    public final Object[] arguments;
 
     public ReflectiveMethodInvocation(Object target, Method method, Object[] arguments) {
         this.target = target;
