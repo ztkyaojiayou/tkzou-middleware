@@ -46,7 +46,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
     public ClassPathXmlApplicationContext(String[] configLocations) throws BeansException {
         this.configLocations = configLocations;
         //创建/刷新上下文！！！类似于初始化，这一步无比重要！！！
-        this.refresh();
+        super.refresh();
     }
 
     /**

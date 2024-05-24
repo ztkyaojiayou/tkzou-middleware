@@ -63,6 +63,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
         //2.若没有，则通过反射生成对象，同时注册进容器
         BeanDefinition beanDefinition = this.getBeanDefinition(beanName);
+        //创建这个bean！！！
         Object bean = createBean(beanName, beanDefinition);
         //也需要判断是否是FactoryBean
         return getObjectForBeanInstance(bean, beanName);

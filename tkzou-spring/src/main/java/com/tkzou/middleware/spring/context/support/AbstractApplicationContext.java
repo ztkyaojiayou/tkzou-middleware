@@ -4,7 +4,13 @@ import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.factory.ConfigurableListableBeanFactory;
 import com.tkzou.middleware.spring.beans.factory.config.BeanFactoryPostProcessor;
 import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
+import com.tkzou.middleware.spring.context.ApplicationEvent;
+import com.tkzou.middleware.spring.context.ApplicationListener;
 import com.tkzou.middleware.spring.context.ConfigurableApplicationContext;
+import com.tkzou.middleware.spring.context.event.ApplicationEventMulticaster;
+import com.tkzou.middleware.spring.context.event.ContextClosedEvent;
+import com.tkzou.middleware.spring.context.event.ContextRefreshedEvent;
+import com.tkzou.middleware.spring.context.event.SimpleApplicationEventMulticaster;
 import com.tkzou.middleware.spring.core.io.DefaultResourceLoader;
 
 import java.util.Map;
@@ -19,6 +25,12 @@ import java.util.Map;
  * @modyified By:
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader implements ConfigurableApplicationContext {
+    public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+    /**
+     * 事件广播器
+     */
+    private ApplicationEventMulticaster applicationEventMulticaster;
+
     /**
      * 最著名的方法：刷新容器！！！
      * 务必掌握！！！
@@ -39,9 +51,47 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         invokeBeanFactoryPostProcessor(beanFactory);
         //3.再在bean实例化之前注册BeanPostProcessor，也即用于执行对应的那两个方法
         registerBeanPostProcessor(beanFactory);
-        //4.最后提前实例化所有的单例bean
+
+        //5.初始化事件发布者，此时会把创建的事件发布者对象直接添加到ioc容器中
+        initApplicationEventMulticaster();
+        //6.注册事件监听器，此时也会触发getBean，只是是针对单个bean而已！
+        registerListeners();
+
+        //4.最后提前实例化所有的单例bean，此时就是扫描所有bean并将其添加到ioc容器中
         beanFactory.preInstantiateSingletons();
+
+        //7.发布容器刷新完成事件
+        finishRefresh();
     }
+
+    protected void finishRefresh() {
+        publishEvent(new ContextRefreshedEvent(this));
+    }
+
+    /**
+     * 注册所有的事件监听者
+     * 也即实现了ApplicationListener接口的bean
+     * 也即前提是ioc容器已经初始化完毕
+     */
+    protected void registerListeners() {
+        //直接从ioc容器中获取所有实现了ApplicationListener接口的bean，
+        // 若没有则也会触发创建bean的逻辑，因此无脑get即可！
+        getBeansOfType(ApplicationListener.class).values()
+                .forEach(applicationListener -> applicationEventMulticaster.addApplicationListener(applicationListener));
+    }
+
+    /**
+     * 初始化事件发布者并将其直接添加到ioc容器中
+     * 使用的就是默认的SimpleApplicationEventMulticaster对象
+     */
+    protected void initApplicationEventMulticaster() {
+        //得到的就是DefaultListableBeanFactory，具体是在子类中完成初始化的
+        ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+        applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
+        //手动将这个对象注册到ioc中
+        beanFactory.addSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, applicationEventMulticaster);
+    }
+
 
     /**
      * 关闭上下文
@@ -53,6 +103,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     protected void doClose() {
+        //发布一下容器关闭事件
+        publishEvent(new ContextClosedEvent(this));
+
         //销毁所有bean
         destroyBeans();
     }
@@ -167,5 +220,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Override
     public String[] getBeanDefinitionNames() {
         return getBeanFactory().getBeanDefinitionNames();
+    }
+
+    /**
+     * 发布当前事件
+     *
+     * @param event
+     */
+    @Override
+    public void publishEvent(ApplicationEvent event) {
+        applicationEventMulticaster.multicastEvent(event);
     }
 }

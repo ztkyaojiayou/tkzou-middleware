@@ -22,7 +22,7 @@ public class ApplicationContextTest {
                 ":spring.xml");
         Person person = applicationContext.getBean("person", Person.class);
         System.out.println(person);
-
+//因此此时取getBean时，因为ioc容器已经初始化了，因此会直接从ioc容器中获取bean！！！
         Car car = applicationContext.getBean("car", Car.class);
         System.out.println(car);
     }
