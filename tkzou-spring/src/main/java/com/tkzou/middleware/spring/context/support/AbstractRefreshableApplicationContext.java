@@ -41,7 +41,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
     /**
      * 加载BeanDefinition
      * 抽象方法，由具体子类实现
-     * todo 为什么？直接实现不行吗?
+     * todo 为什么？直接实现不行吗? 因为可以有多种方式来解析获取，比如xml或注解的方式！
      *
      * @param beanFactory
      * @throws BeansException
