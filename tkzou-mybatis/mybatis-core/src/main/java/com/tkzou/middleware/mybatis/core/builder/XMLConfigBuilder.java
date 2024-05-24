@@ -52,7 +52,7 @@ public class XMLConfigBuilder {
     public Configuration parse() {
         Configuration configuration = new Configuration();
         // 解析mapper
-        this.parseMapper(configuration, "com.zhengqing.demo.mapper");
+        this.parseMapper(configuration, "com.tkzou.middleware.mybatis.core.mapper");
         this.parseMapperXml(configuration);
         return configuration;
     }
@@ -163,7 +163,7 @@ public class XMLConfigBuilder {
             }
         });  // 跳过 xml DTD 验证 -- 解决解析慢的问题
 
-        String xmlPath = System.getProperty("user.dir") + "/src/main/java/com/zhengqing/demo/mapper/UserMapper.xml";
+        String xmlPath = System.getProperty("user.dir") + "/src/main/java/com/tkzou.middleware.mybatis.core/demo/mapper/UserMapper.xml";
 
         if (!FileUtil.exist(xmlPath)) {
             return;

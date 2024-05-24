@@ -36,7 +36,7 @@ import java.util.Set;
  * 即解析mapper接口方法上的注解中的sql
  * 务必掌握！
  *
- * @author zhengqingya
+ * @author tkzou.middleware.mybatis.coreya
  * @description
  * @date 2024/4/22 18:10
  */
@@ -47,7 +47,7 @@ public class MapperAnnotationBuilder {
     public Configuration parse() {
         Configuration configuration = new Configuration();
         // 解析mapper
-        this.parseMapper(configuration, "com.zhengqing.demo.mapper");
+        this.parseMapper(configuration, "com.tkzou.middleware.mybatis.core.mapper");
         //解析xml中的动态sql
         this.parseMapperXml(configuration);
         return configuration;
@@ -140,7 +140,7 @@ public class MapperAnnotationBuilder {
             }
         });  // 跳过 xml DTD 验证 -- 解决解析慢的问题
 
-        String xmlPath = System.getProperty("user.dir") + "/src/main/java/com/zhengqing/demo/mapper/UserMapper.xml";
+        String xmlPath = System.getProperty("user.dir") + "/src/main/java/com/tkzou.middleware.mybatis.core/demo/mapper/UserMapper.xml";
 
         if (!FileUtil.exist(xmlPath)) {
             return;

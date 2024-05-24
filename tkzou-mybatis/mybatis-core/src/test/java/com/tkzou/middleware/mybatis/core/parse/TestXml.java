@@ -37,7 +37,7 @@ public class TestXml {
                 return new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
             }
         });  // 跳过 xml DTD 验证 -- 解决解析慢的问题
-        BufferedInputStream inputStream = FileUtil.getInputStream("/Users/zoutongkun/zoutongkun/code/workspace-me/mybatis-tkzou/src/main/java/com/zhengqing/demo/mapper/UserMapper.xml");
+        BufferedInputStream inputStream = FileUtil.getInputStream("/Users/zoutongkun/zoutongkun/code/workspace-me/mybatis-tkzou/src/main/java/com/tkzou.middleware.mybatis.core/demo/mapper/UserMapper.xml");
         Document document = saxReader.read(inputStream);
         Element rootElement = document.getRootElement();
         List<Element> list = rootElement.selectNodes("//select"); // insert update delete select

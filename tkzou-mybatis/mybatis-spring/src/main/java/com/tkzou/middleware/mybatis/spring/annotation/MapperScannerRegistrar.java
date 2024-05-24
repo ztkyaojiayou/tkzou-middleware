@@ -23,7 +23,7 @@ public class MapperScannerRegistrar implements ImportBeanDefinitionRegistrar {
 //        beanDefinition.setBeanClass(MapperFactoryBean.class);
 //        beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(UserMapper.class);
 //        registry.registerBeanDefinition("userMapper", beanDefinition);
-
+//获取MapperScan注解中的属性value值，必须使用这种方式传入注解名称，而不能直接传maperScan！！！
         Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(MapperScan.class.getName());
         String packageName = (String) annotationAttributes.get("value");
 

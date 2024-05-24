@@ -1,6 +1,8 @@
 package com.tkzou.middleware.mybatis.core;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
+import com.tkzou.middleware.mybatis.core.entity.User;
 import com.tkzou.middleware.mybatis.core.mapper.UserMapper;
 import com.tkzou.middleware.mybatis.core.session.SqlSession;
 import com.tkzou.middleware.mybatis.core.session.SqlSessionFactory;
@@ -24,19 +26,18 @@ public class TestAppStarter {
         SqlSession sqlSession = sqlSessionFactory.openSession(false);
         UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
         System.out.println(JSONUtil.toJsonStr(userMapper.findOne(1)));
-//        System.out.println(JSONUtil.toJsonStr(userMapper.selectList(1, "tkzou")));
-//        System.out.println(JSONUtil.toJsonStr(userMapper.selectList(1, "tkzou")));
+        System.out.println(JSONUtil.toJsonStr(userMapper.selectList(1, "tkzou")));
 
-//        UserMapper userMapper2 = sqlSessionFactory.openSession().getMapper(UserMapper.class);
-//        System.out.println(JSONUtil.toJsonStr(userMapper2.selectList(1, "tkzou")));
-//        System.out.println(JSONUtil.toJsonStr(userMapper2.selectList(2, "xx")));
+        UserMapper userMapper2 = sqlSessionFactory.openSession().getMapper(UserMapper.class);
+        System.out.println(JSONUtil.toJsonStr(userMapper2.selectList(1, "tkzou")));
+        System.out.println(JSONUtil.toJsonStr(userMapper2.selectList(2, "xx")));
 
-//        System.out.println(userMapper.selectOne(1));
-//        System.out.println(userMapper.insert(User.builder().name(RandomUtil.randomString(5)).age(RandomUtil
-//        .randomInt(1, 100)).build()));
-//        System.out.println(userMapper.delete(5));
-//        System.out.println(userMapper.update(2, "xxx"));
-//        System.out.println(JSONUtil.toJsonStr(userMapper.selectList(1, "tkzou")));
+        System.out.println(userMapper.selectOne(1));
+        System.out.println(userMapper.insert(User.builder().name(RandomUtil.randomString(5)).age(RandomUtil
+                .randomInt(1, 100)).build()));
+        System.out.println(userMapper.delete(5));
+        System.out.println(userMapper.update(2, "xxx"));
+        System.out.println(JSONUtil.toJsonStr(userMapper.selectList(1, "tkzou")));
         sqlSession.commit();
         sqlSession.close();
     }

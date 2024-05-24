@@ -29,7 +29,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class MappedStatement {
     /**
-     * mapper中一个方法的唯一标识 eg: com.zhengqing.demo.mapper.UserMapper.selectList
+     * mapper中一个方法的唯一标识 eg: com.tkzou.middleware.mybatis.core.mapper.UserMapper.selectList
      * 定位到具体哪个mapper下的哪个方法
      */
     private String id;

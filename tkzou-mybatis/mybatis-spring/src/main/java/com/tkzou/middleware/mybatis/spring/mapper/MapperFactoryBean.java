@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * <p> mapper工厂bean </p>
  *
- * @author zhengqingya
+ * @author tkzou.middleware.mybatis.coreya
  * @description 用于自定义创建bean
  * @date 2024/5/5 05:04
  */

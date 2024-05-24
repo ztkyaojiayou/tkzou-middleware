@@ -29,7 +29,7 @@ public class MyBatisConfig {
 
     @Bean
     public SqlSession sqlSession(DataSource dataSource) {
-        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(dataSource, new SpringManagedTransaction(dataSource), "com.zhengqing.mybatis.demo.mapper");
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(dataSource, new SpringManagedTransaction(dataSource), "com.tkzou.middleware.mybatis.core.mybatis.demo.mapper");
         SqlSession sqlSession = sqlSessionFactory.openSession();
         return sqlSession;
     }

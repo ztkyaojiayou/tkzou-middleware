@@ -46,7 +46,7 @@ public class Configuration {
      * 之后就可以直接get了，而无需每次都在执行sql时都单独解析一遍！
      * 没有区分单个mapper了，因为也没什么必要呀，反正id唯一！！！
      * key：mapper接口的全类名+具体方法名
-     * eg: com.zhengqing.demo.mapper.UserMapper.selectList --> mapper配置信息
+     * eg: com.tkzou.middleware.mybatis.core.mapper.UserMapper.selectList --> mapper配置信息
      */
     private Map<String, MappedStatement> mappedStatements = new HashMap<>();
     /**

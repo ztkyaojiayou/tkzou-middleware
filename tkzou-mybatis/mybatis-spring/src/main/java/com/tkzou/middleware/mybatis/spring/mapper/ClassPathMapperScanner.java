@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * <p> 自定义扫描器 </p>
  *
- * @author zhengqingya
+ * @author tkzou.middleware.mybatis.coreya
  * @description 扫描指定包，发现并注册bean
  * @date 2024/5/5 05:46
  */
