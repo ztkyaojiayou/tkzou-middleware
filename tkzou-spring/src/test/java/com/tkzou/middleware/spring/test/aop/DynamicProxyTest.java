@@ -6,6 +6,7 @@ import com.tkzou.middleware.spring.aop.TargetSource;
 import com.tkzou.middleware.spring.aop.aspectj.AspectJExpressionPointcut;
 import com.tkzou.middleware.spring.aop.framework.CglibAopProxy;
 import com.tkzou.middleware.spring.aop.framework.JdkDynamicAopProxy;
+import com.tkzou.middleware.spring.aop.framework.ProxyFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,4 +55,21 @@ public class DynamicProxyTest {
         WorldService proxy = (WorldService) new CglibAopProxy(advisedSupport).getProxy();
         proxy.explode();
     }
+
+    /**
+     * 通过proxyTargetClass字段来选择何种动态代理
+     */
+    @Test
+    public void testProxyFactory() {
+        // 使用JDK动态代理
+        advisedSupport.setProxyTargetClass(false);
+        WorldService proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
+        proxy.explode();
+
+        // 使用CGLIB动态代理
+        advisedSupport.setProxyTargetClass(true);
+        proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
+        proxy.explode();
+    }
 }
+

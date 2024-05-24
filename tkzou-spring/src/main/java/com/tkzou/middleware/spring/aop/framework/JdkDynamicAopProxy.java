@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**
- * JDK动态代理
+ * JDK动态代理工厂
  * 该类属于代理对象工厂+代理增强逻辑二合一！
  * 一般而言，可以单独定义一个代理对象工厂来创建代理对象，参考mybatis。
  *

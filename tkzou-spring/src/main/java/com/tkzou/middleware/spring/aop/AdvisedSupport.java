@@ -10,6 +10,12 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 public class AdvisedSupport {
     /**
+     * 是否使用cglib代理，用于区分使用哪种代理方式！
+     * 这里为false，易知默认是使用jdk动态代理的！
+     */
+    private boolean proxyTargetClass = false;
+
+    /**
      * 目标对象
      */
     private TargetSource targetSource;
@@ -29,6 +35,14 @@ public class AdvisedSupport {
      * 只有符合该匹配规则的方法才会被拦截，这是最大的前提！
      */
     private MethodMatcher methodMatcher;
+
+    public boolean isProxyTargetClass() {
+        return proxyTargetClass;
+    }
+
+    public void setProxyTargetClass(boolean proxyTargetClass) {
+        this.proxyTargetClass = proxyTargetClass;
+    }
 
     public TargetSource getTargetSource() {
         return targetSource;

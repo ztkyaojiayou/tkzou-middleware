@@ -9,6 +9,9 @@ import net.sf.cglib.proxy.MethodProxy;
 import java.lang.reflect.Method;
 
 /**
+ * Cglib动态代理工厂
+ * 该类也属于代理对象工厂+代理增强逻辑二合一！
+ *
  * @author :zoutongkun
  * @date :2024/5/24 9:58 下午
  * @description :
