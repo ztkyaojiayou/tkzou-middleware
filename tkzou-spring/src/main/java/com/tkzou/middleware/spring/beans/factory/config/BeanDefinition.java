@@ -3,6 +3,8 @@ package com.tkzou.middleware.spring.beans.factory.config;
 import com.tkzou.middleware.spring.beans.PropertyValues;
 import org.apache.commons.lang3.ObjectUtils;
 
+import java.util.Objects;
+
 /**
  * BeanDefinition实例保存bean的信息，包括class类型、方法构造参数、是否为单例等，
  * 此处简化，只包含class类型和bean属性
@@ -124,5 +126,22 @@ public class BeanDefinition {
 
     public void setDestroyMethodName(String destroyMethodName) {
         this.destroyMethodName = destroyMethodName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        BeanDefinition that = (BeanDefinition) o;
+        return beanClass.equals(that.beanClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(beanClass);
     }
 }

@@ -1,21 +1,23 @@
 package com.tkzou.middleware.spring.beans.factory.xml;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.XmlUtil;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.config.BeanReference;
 import com.tkzou.middleware.spring.beans.factory.support.AbstractBeanDefinitionReader;
 import com.tkzou.middleware.spring.beans.factory.support.BeanDefinitionRegistry;
+import com.tkzou.middleware.spring.context.annotation.ClassPathBeanDefinitionScanner;
 import com.tkzou.middleware.spring.core.io.Resource;
 import com.tkzou.middleware.spring.core.io.ResourceLoader;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * 具体实现类--用于读取xml文件中的bean定义信息
@@ -47,9 +49,19 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     public static final String INIT_METHOD_ATTRIBUTE = "init-method";
     public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
     public static final String SCOPE_ATTRIBUTE = "scope";
+    /**
+     * bean包扫描--核心
+     * 比如：<context:base-package="com.tkzou.middleware.spring.service"/>
+     */
+    public static final String BASE_PACKAGE_ATTRIBUTE = "base-package";
+    /**
+     * 比如：<context:component-scan="com.tkzou.middleware.spring.service"/>
+     */
+    public static final String COMPONENT_SCAN_ELEMENT = "component-scan";
 
     /**
-     * 两个构造器，都调用父类现有的
+     * 两个构造器，都需要显式调用父类的构造器
+     * 因为父类没有默认的构造器了！
      *
      * @param registry
      * @param resourceLoader
@@ -91,7 +103,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                 //切记要关闭流
                 inputStream.close();
             }
-        } catch (IOException e) {
+        } catch (IOException | DocumentException e) {
             throw new BeansException("xml文件解析出错，路径为：" + resource, e);
         }
     }
@@ -103,84 +115,98 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * 2.再注册BeanDefinition至beanDefinitionMap
      * 其中：获取beanName的逻辑为先id再name，最后再使用类名的第一个字母转为小写的名称
      * 另外，beanName在map中不能重复
-     * todo 可以使用成熟的工具类来解析xml文件，比如dom4j，但这不是重点，先不管！
+     * todo 使用的是成熟的工具类dom4j来解析xml文件，但这不是重点，能解析就行！
      *
      * @param inputStream
      */
-    private void doLoadBeanDefinitions(InputStream inputStream) {
-        Document document = XmlUtil.readXML(inputStream);
-        Element root = document.getDocumentElement();
-        NodeList childNodes = root.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            if (childNodes.item(i) instanceof Element) {
-                if (BEAN_ELEMENT.equals(((Element) childNodes.item(i)).getNodeName())) {
-                    //1.解析bean标签
-                    Element bean = (Element) childNodes.item(i);
-                    String id = bean.getAttribute(ID_ATTRIBUTE);
-                    String name = bean.getAttribute(NAME_ATTRIBUTE);
-                    String className = bean.getAttribute(CLASS_ATTRIBUTE);
-                    String initMethodName = bean.getAttribute(INIT_METHOD_ATTRIBUTE);
-                    String destroyMethodName = bean.getAttribute(DESTROY_METHOD_ATTRIBUTE);
-                    String beanScope = bean.getAttribute(SCOPE_ATTRIBUTE);
+    protected void doLoadBeanDefinitions(InputStream inputStream) throws DocumentException {
+        SAXReader reader = new SAXReader();
+        Document document = reader.read(inputStream);
 
-                    Class<?> clazz = null;
-                    try {
-                        //1.1使用反射得到class对象
-                        clazz = Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        throw new BeansException("Cannot find class [" + className + "]");
-                    }
-                    //beanName的定义策略
-                    // id优先于name
-                    String beanName = StrUtil.isNotEmpty(id) ? id : name;
-                    if (StrUtil.isEmpty(beanName)) {
-                        //如果id和name都为空，将类名的第一个字母转为小写后作为bean的名称
-                        beanName = StrUtil.lowerFirst(clazz.getSimpleName());
-                    }
+        Element root = document.getRootElement();
 
-                    //2.生成beanDefinition对象
-                    BeanDefinition beanDefinition = new BeanDefinition(clazz);
-                    //设置其他属性
-                    beanDefinition.setInitMethodName(initMethodName);
-                    beanDefinition.setDestroyMethodName(destroyMethodName);
-                    //bean类型，就单例还是原型bean
-                    if (StrUtil.isNotEmpty(beanScope)) {
-                        beanDefinition.setScope(beanScope);
-                    }
-
-                    for (int j = 0; j < bean.getChildNodes().getLength(); j++) {
-                        if (bean.getChildNodes().item(j) instanceof Element) {
-                            if (PROPERTY_ELEMENT.equals(((Element) bean.getChildNodes().item(j)).getNodeName())) {
-                                //1.2解析property标签
-                                Element property = (Element) bean.getChildNodes().item(j);
-                                String nameAttribute = property.getAttribute(NAME_ATTRIBUTE);
-                                String valueAttribute = property.getAttribute(VALUE_ATTRIBUTE);
-                                String refAttribute = property.getAttribute(REF_ATTRIBUTE);
-
-                                if (StrUtil.isEmpty(nameAttribute)) {
-                                    throw new BeansException("The name attribute cannot be null or empty");
-                                }
-
-                                Object value = valueAttribute;
-                                if (StrUtil.isNotEmpty(refAttribute)) {
-                                    value = new BeanReference(refAttribute);
-                                }
-                                PropertyValue propertyValue = new PropertyValue(nameAttribute, value);
-                                //设置属性
-                                beanDefinition.getPropertyValues().addPropertyValue(propertyValue);
-                            }
-                        }
-                    }
-
-                    //beanName不能重名
-                    if (this.getRegistry().containsBeanDefinition(beanName)) {
-                        throw new BeansException("Duplicate beanName[" + beanName + "] is not allowed");
-                    }
-                    //3.注册BeanDefinition，之后就可以通过getBean方法获取该bean了！
-                    this.getRegistry().registerBeanDefinition(beanName, beanDefinition);
-                }
+        //解析context:component-scan标签并扫描指定包中的类，提取类信息，组装成BeanDefinition
+        Element componentScan = root.element(COMPONENT_SCAN_ELEMENT);
+        if (componentScan != null) {
+            //如"com.tkzou.middleware.spring"
+            String scanPath = componentScan.attributeValue(BASE_PACKAGE_ATTRIBUTE);
+            if (StrUtil.isEmpty(scanPath)) {
+                throw new BeansException("The value of base-package attribute can not be empty or null");
             }
+            //扫描包--核心方法，也即把带有@Component注解的类信息组装成BeanDefinition对象
+            scanPackage(scanPath);
         }
 
+        List<Element> beanList = root.elements(BEAN_ELEMENT);
+        for (Element bean : beanList) {
+            //1.解析bean标签
+            String beanId = bean.attributeValue(ID_ATTRIBUTE);
+            String beanName = bean.attributeValue(NAME_ATTRIBUTE);
+            String className = bean.attributeValue(CLASS_ATTRIBUTE);
+            String initMethodName = bean.attributeValue(INIT_METHOD_ATTRIBUTE);
+            String destroyMethodName = bean.attributeValue(DESTROY_METHOD_ATTRIBUTE);
+            String beanScope = bean.attributeValue(SCOPE_ATTRIBUTE);
+
+            Class<?> clazz;
+            try {
+                //1.1使用反射得到class对象
+                clazz = Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                throw new BeansException("Cannot find class [" + className + "]");
+            }
+            //beanName的定义策略
+            //id优先于name
+            beanName = StrUtil.isNotEmpty(beanId) ? beanId : beanName;
+            if (StrUtil.isEmpty(beanName)) {
+                //如果id和name都为空，将类名的第一个字母转为小写后作为bean的名称
+                beanName = StrUtil.lowerFirst(clazz.getSimpleName());
+            }
+
+            //2.生成beanDefinition对象
+            BeanDefinition beanDefinition = new BeanDefinition(clazz);
+            //设置其他属性
+            beanDefinition.setInitMethodName(initMethodName);
+            beanDefinition.setDestroyMethodName(destroyMethodName);
+            //bean类型，就单例还是原型bean
+            if (StrUtil.isNotEmpty(beanScope)) {
+                beanDefinition.setScope(beanScope);
+            }
+
+            List<Element> propertyList = bean.elements(PROPERTY_ELEMENT);
+            for (Element property : propertyList) {
+                String propertyNameAttribute = property.attributeValue(NAME_ATTRIBUTE);
+                String propertyValueAttribute = property.attributeValue(VALUE_ATTRIBUTE);
+                String propertyRefAttribute = property.attributeValue(REF_ATTRIBUTE);
+
+                if (StrUtil.isEmpty(propertyNameAttribute)) {
+                    throw new BeansException("The name attribute cannot be null or empty");
+                }
+
+                Object value = propertyValueAttribute;
+                if (StrUtil.isNotEmpty(propertyRefAttribute)) {
+                    value = new BeanReference(propertyRefAttribute);
+                }
+                PropertyValue propertyValue = new PropertyValue(propertyNameAttribute, value);
+                beanDefinition.getPropertyValues().addPropertyValue(propertyValue);
+            }
+            if (getRegistry().containsBeanDefinition(beanName)) {
+                //beanName不能重名
+                throw new BeansException("Duplicate beanName[" + beanName + "] is not allowed");
+            }
+            //3.注册BeanDefinition，之后就可以通过getBean方法获取该bean了！
+            getRegistry().registerBeanDefinition(beanName, beanDefinition);
+        }
     }
+
+    /**
+     * 扫描注解Component的类，提取信息，组装成BeanDefinition
+     *
+     * @param scanPath
+     */
+    private void scanPackage(String scanPath) {
+        String[] basePackages = StrUtil.splitToArray(scanPath, ',');
+        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(getRegistry());
+        scanner.doScan(basePackages);
+    }
+
 }
