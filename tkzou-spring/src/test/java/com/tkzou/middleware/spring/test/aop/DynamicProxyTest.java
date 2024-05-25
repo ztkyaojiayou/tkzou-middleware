@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
+ * aop动态代理测试
+ *
  * @author zoutongkun
  */
 public class DynamicProxyTest {
@@ -78,10 +80,9 @@ public class DynamicProxyTest {
     /**
      * 测试切面
      *
-     * @throws Exception
      */
     @Test
-    public void testAdvisor() throws Exception {
+    public void testAdvisor() {
         //目标对象，也即需要被代理的对象，
         WorldService worldService = new WorldServiceImpl();
 

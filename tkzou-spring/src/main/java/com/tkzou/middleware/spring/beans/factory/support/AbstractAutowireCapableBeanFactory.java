@@ -2,16 +2,14 @@ package com.tkzou.middleware.spring.beans.factory.support;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
 import com.tkzou.middleware.spring.beans.factory.BeanFactoryAware;
 import com.tkzou.middleware.spring.beans.factory.DisposableBean;
 import com.tkzou.middleware.spring.beans.factory.InitializingBean;
-import com.tkzou.middleware.spring.beans.factory.config.AutowireCapableBeanFactory;
-import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
-import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
-import com.tkzou.middleware.spring.beans.factory.config.BeanReference;
+import com.tkzou.middleware.spring.beans.factory.config.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,7 +45,64 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     @Override
     protected Object createBean(String beanName, BeanDefinition beanDefinition) {
+        //添加bean代理逻辑
+        //1.如果当前bean需要代理，则直接返回代理对象，不再走bean的生命周期，
+        //也即代理对象不加入ioc容器，因此每次调用时都是new一个新的代理对象！！！
+        Object bean = resolveBeforeInstantiation(beanName, beanDefinition);
+        if (ObjectUtil.isNotEmpty(bean)) {
+            return bean;
+        }
+        //2.否则才走正常的bean生命周期，这些bean会加入到ioc容器中！
         return doCreateBean(beanName, beanDefinition);
+    }
+
+    /**
+     * 执行InstantiationAwareBeanPostProcessor的方法，
+     * 如果bean需要代理，直接返回代理对象
+     *
+     * @param beanName
+     * @param beanDefinition
+     * @return
+     */
+    protected Object resolveBeforeInstantiation(String beanName, BeanDefinition beanDefinition) {
+        //执行InstantiationAwareBeanPostProcessor的方法，创建代理对象
+        //此时也相当于初始化完成了!
+        Object bean = applyBeanPostProcessorsBeforeInstantiation(beanDefinition.getBeanClass(), beanName);
+        if (bean != null) {
+            //因为创建完了代理对象，也就相当于初始化完成了，
+            // 于是执行一下所有后置处理器中的该方法，也即执行bean初始化之后的逻辑
+            bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+        }
+        return bean;
+    }
+
+    /**
+     * 执行InstantiationAwareBeanPostProcessor的方法，创建代理对象
+     * 在bean实例化前就只执行啦！
+     *
+     * @param beanClass
+     * @param beanName
+     * @return
+     */
+    protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName) {
+        //遍历出所有的InstantiationAwareBeanPostProcessor，为当前bean创建代理对象！
+        //通常也就spirng自己默认的那一个，也即DefaultAdvisorAutoProxyCreator
+        //因为重点是遍历自定义的多个切面，而非处理切面的这个处理器本身！
+        //todo 可以算是适配器模式！
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+                //执行该接口的方法，创建代理对象，
+                // 但只要找到了一个合适的就行，也即创建了一个代理对象就返回，其他的就不再执行了！
+                Object result =
+                        ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessBeforeInstantiation(beanClass, beanName);
+
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
     }
 
     protected Object doCreateBean(String beanName, BeanDefinition beanDefinition) {
@@ -118,12 +173,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
 
         //1.执行BeanPostProcessor的前置处理方法
-        Object wrappedBean = this.applyBeanPostProcessorBeforeInitialization(bean, beanName);
+        Object wrappedBean = this.applyBeanPostProcessorsBeforeInitialization(bean, beanName);
         //2.执行bean的初始化的方法（核心）
         // todo 后续再实现
         this.invokeInitMethods(beanName, wrappedBean, beanDefinition);
         //3.执行BeanPostProcessor的后置处理方法
-        wrappedBean = this.applyBeanPostProcessorAfterInitialization(bean, beanName);
+        wrappedBean = this.applyBeanPostProcessorsAfterInitialization(bean, beanName);
         return wrappedBean;
     }
 
@@ -269,7 +324,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     @Override
-    public Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) {
+    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
         Object result = existingBean;
         //易知，从这里就开始获取所有的BeanPostProcessor，
         //也即此时我们自定义的实现类都会被扫描到并依次执行里面的这个postProcessBeforeInitialization方法！！！
@@ -287,7 +342,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     @Override
-    public Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) {
+    public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
         //同理
         Object result = existingBean;
         //同上，从这里就开始获取所有的BeanPostProcessor，

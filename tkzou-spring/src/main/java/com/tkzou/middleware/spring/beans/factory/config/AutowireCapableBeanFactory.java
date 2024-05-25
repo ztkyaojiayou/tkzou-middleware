@@ -20,7 +20,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
      * @param beanName
      * @return
      */
-    Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName);
+    Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName);
 
     /**
      * 执行BeanPostProcessors的postProcessAfterInitialization方法
@@ -29,5 +29,5 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
      * @param beanName
      * @return
      */
-    Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName);
+    Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName);
 }

@@ -9,6 +9,9 @@ import org.aopalliance.aop.Advice;
  * 切入点+通知的具体实现，该类就可以理解为一个切面了！
  * 切面 = 既有切入点，又有通知逻辑
  * 比如@Aspect注解所定义的类，就是一个切面！
+ * 在源码中，它也是一个最终的实现类，
+ * 但定义了一些相关的抽象类来进一步封装、细化和解耦，
+ * 本质相同，理解即可。
  *
  * @author :zoutongkun
  * @date :2024/5/25 1:11 下午
@@ -38,20 +41,17 @@ public class AspectJExpressionPointcutAdvisor implements PointcutAdvisor {
 
     /**
      * 构造器
+     *
      * @param expression
      * @param advice
      */
     public AspectJExpressionPointcutAdvisor(String expression, Advice advice) {
         this.expression = expression;
         this.advice = advice;
-        //同时解析传入的切入点表达式备用！
-        this.pointcut = new AspectJExpressionPointcut(expression);
     }
 
     public AspectJExpressionPointcutAdvisor(String expression) {
         this.expression = expression;
-        //同时解析传入的切入点表达式备用！
-        this.pointcut = new AspectJExpressionPointcut(expression);
     }
 
     public void setAdvice(Advice advice) {
@@ -60,8 +60,6 @@ public class AspectJExpressionPointcutAdvisor implements PointcutAdvisor {
 
     public void setExpression(String expression) {
         this.expression = expression;
-        //同时解析传入的切入点表达式备用！
-        this.pointcut = new AspectJExpressionPointcut(expression);
     }
 
     @Override
@@ -71,6 +69,10 @@ public class AspectJExpressionPointcutAdvisor implements PointcutAdvisor {
 
     @Override
     public Pointcut getPointcut() {
+        if (pointcut == null) {
+            //解析传入的切入点表达式备用！
+            pointcut = new AspectJExpressionPointcut(expression);
+        }
         return pointcut;
     }
 }

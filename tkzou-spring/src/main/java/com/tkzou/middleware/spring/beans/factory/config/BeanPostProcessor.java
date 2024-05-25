@@ -4,7 +4,7 @@ import com.tkzou.middleware.spring.beans.BeansException;
 
 /**
  * 用于修改实例化后的bean的修改扩展点
- * todo 那么初始化方法是哪个?
+ * todo 那么初始化方法是哪个? invokeInitMethods
  *
  * @author zoutongkun
  * @description: TODO
@@ -14,7 +14,7 @@ public interface BeanPostProcessor {
 
     /**
      * 在bean执行初始化方法之前执行该方法
-     * 问：初始化方法是哪个？
+     * 此时bean已经完成了实例化！
      *
      * @param bean
      * @param beanName
@@ -25,7 +25,7 @@ public interface BeanPostProcessor {
 
     /**
      * 在bean执行初始化方法之后执行该方法
-     *
+     * 此时bean已经完成了实例化！
      * @param bean
      * @param beanName
      * @return
