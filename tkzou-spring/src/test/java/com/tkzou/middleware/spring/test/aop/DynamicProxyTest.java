@@ -1,12 +1,15 @@
 package com.tkzou.middleware.spring.test.aop;
 
-import com.tkzou.middleware.spring.aop.AdvisedSupport;
-import com.tkzou.middleware.spring.aop.MethodMatcher;
-import com.tkzou.middleware.spring.aop.TargetSource;
+import com.tkzou.middleware.spring.aop.*;
 import com.tkzou.middleware.spring.aop.aspectj.AspectJExpressionPointcut;
+import com.tkzou.middleware.spring.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import com.tkzou.middleware.spring.aop.framework.CglibAopProxy;
 import com.tkzou.middleware.spring.aop.framework.JdkDynamicAopProxy;
 import com.tkzou.middleware.spring.aop.framework.ProxyFactory;
+import com.tkzou.middleware.spring.aop.framework.adapter.MethodBeforeAdviceInterceptor;
+import com.tkzou.middleware.spring.test.common.WorldServiceBeforeAdvice;
+import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -70,6 +73,41 @@ public class DynamicProxyTest {
         advisedSupport.setProxyTargetClass(true);
         proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
         proxy.explode();
+    }
+
+    /**
+     * 测试切面
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testAdvisor() throws Exception {
+        //目标对象，也即需要被代理的对象，
+        WorldService worldService = new WorldServiceImpl();
+
+        //切入点表达式
+        //Advisor是Pointcut和Advice的组合
+        String expression = "execution(* org.springframework.test.service.WorldService.explode(..))";
+        Advice advice =
+                new MethodBeforeAdviceInterceptor(new WorldServiceBeforeAdvice());
+        //构建切面（切入点+通知）
+        PointcutAdvisor pointcutAdvisor = new AspectJExpressionPointcutAdvisor(expression, advice);
+        ClassFilter classFilter = pointcutAdvisor.getPointcut().getClassFilter();
+        //判断目标类是否匹配，也即是否被切中，切中才创建代理对象，并执行通知逻辑！
+        if (classFilter.matches(worldService.getClass())) {
+            //封装aop的核心逻辑--AdvisedSupport
+            AdvisedSupport advisedSupport = new AdvisedSupport();
+            //封装目标对象
+            TargetSource targetSource = new TargetSource(worldService);
+            advisedSupport.setTargetSource(targetSource);
+            advisedSupport.setMethodInterceptor((MethodInterceptor) pointcutAdvisor.getAdvice());
+            advisedSupport.setMethodMatcher(pointcutAdvisor.getPointcut().getMethodMatcher());
+//			advisedSupport.setProxyTargetClass(true);   //JDK or CGLIB
+            //创建代理对象--根据advisedSupport创建
+            WorldService proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
+            //执行目标方法，此时就会执行通知逻辑！
+            proxy.explode();
+        }
     }
 }
 

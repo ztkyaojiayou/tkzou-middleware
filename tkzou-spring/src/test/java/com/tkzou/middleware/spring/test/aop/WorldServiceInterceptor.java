@@ -4,7 +4,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * 相当于就是一个切面！
+ * 相当于就是一个环绕通知，在aop中通知就是Advice！！！
+ * 还可以细化为某个具体的通知，事实上，spring中的各种通知就是这么实现的！
  *
  * @author zoutongkun
  */
