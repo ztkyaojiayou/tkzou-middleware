@@ -18,7 +18,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @description :
  * @modyified By:
  */
-public class AppStarter {
+public class SpringApplicationStarter {
     public static void main(String[] args) {
         // Logback运行时动态更改日志级别
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();

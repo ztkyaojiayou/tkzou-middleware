@@ -28,6 +28,7 @@ class MybatisSpringbootStarterTestApplicationTests {
      */
     private static Class<?> deduceMainApplicationClass(String methodName) {
         try {
+            //人为制造一个异常，再通过解析这个异常栈信息来获取！！！
             StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
             for (StackTraceElement stackTraceElement : stackTrace) {
                 if (methodName.equals(stackTraceElement.getMethodName())) {
