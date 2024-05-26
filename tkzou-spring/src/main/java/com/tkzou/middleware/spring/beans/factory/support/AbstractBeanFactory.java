@@ -44,6 +44,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
         //又是链式调用
+        //todo 待完善，因为这里requiredType参数都丢了。。。
+        // 且在源码中，该方法的逻辑挺复杂的！
         return ((T) this.getBean(name));
     }
 

@@ -5,9 +5,7 @@ import com.tkzou.middleware.spring.beans.factory.ConfigurableListableBeanFactory
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * beanDefinitionMap容器
@@ -92,6 +90,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         });
 
         return res;
+    }
+
+    @Override
+    public <T> T getBean(Class<T> requiredType) throws BeansException {
+        List<String> beanNames = new ArrayList<>();
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
+            Class beanClass = entry.getValue().getBeanClass();
+            //找出使用符合目标类型的beanName
+            if (requiredType.isAssignableFrom(beanClass)) {
+                beanNames.add(entry.getKey());
+            }
+        }
+        //只取一个，若不止一个，则报错！
+        if (beanNames.size() == 1) {
+            //从ioc容器中取
+            return getBean(beanNames.get(0), requiredType);
+        }
+
+        throw new BeansException(requiredType + "expected single bean but found " +
+                beanNames.size() + ": " + beanNames);
     }
 
     @Override

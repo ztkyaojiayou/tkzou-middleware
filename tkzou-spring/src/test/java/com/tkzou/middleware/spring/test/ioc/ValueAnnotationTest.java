@@ -6,6 +6,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 /**
+ * 测试@Value注解
+ *
  * @author zoutongkun
  * @description: TODO
  * @date 2024/5/26 12:27

@@ -47,7 +47,7 @@ public class ClassPathScanningCandidateComponentProvider {
         //todo 可能扫描不到它的衍生注解，若不行，则可以先扫描出所有class，再筛选！
         Set<Class<?>> componentClasses = ClassUtil.scanPackageByAnnotation(basePackage, Component.class);
         //扫描出所有目标bean，兼容一下
-        Set<Class<?>> allClass = ClassUtil.scanPackage(basePackage, aClass -> candidateComponentTypes.contains(aClass));
+        Set<Class<?>> allClass = ClassUtil.scanPackage(basePackage, candidateComponentTypes::contains);
         componentClasses.addAll(allClass);
         for (Class<?> clazz : componentClasses) {
             //组装成BeanDefinition
