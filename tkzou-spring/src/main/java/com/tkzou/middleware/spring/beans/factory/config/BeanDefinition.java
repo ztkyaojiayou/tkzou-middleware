@@ -52,7 +52,7 @@ public class BeanDefinition {
     }
 
     /**
-     * 构造器
+     * 构造器，常用
      *
      * @param beanClass
      */

@@ -1,5 +1,6 @@
 package com.tkzou.middleware.spring.beans.factory;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
 import com.tkzou.middleware.spring.beans.PropertyValues;
@@ -7,6 +8,7 @@ import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.config.BeanFactoryPostProcessor;
 import com.tkzou.middleware.spring.core.io.DefaultResourceLoader;
 import com.tkzou.middleware.spring.core.io.Resource;
+import com.tkzou.middleware.spring.util.StringValueResolver;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -23,7 +25,9 @@ public class PropertyPlaceholderConfigurer implements BeanFactoryPostProcessor {
     public static final String PLACEHOLDER_PREFIX = "${";
 
     public static final String PLACEHOLDER_SUFFIX = "}";
-
+    /**
+     * todo 目前还不知道有什么作用
+     */
     private String location;
 
     /**
@@ -40,6 +44,12 @@ public class PropertyPlaceholderConfigurer implements BeanFactoryPostProcessor {
 
         //2.再通过properties中的属性值替换xml中的占位符
         processProperties(beanFactory, properties);
+
+        //3.最后注册占位符解析器，供解析@Value注解使用
+        PlaceholderResolvingStringValueResolver valueResolver =
+                new PlaceholderResolvingStringValueResolver(properties);
+        beanFactory.addEmbeddedValueResolver(valueResolver);
+
     }
 
     /**
@@ -85,27 +95,67 @@ public class PropertyPlaceholderConfigurer implements BeanFactoryPostProcessor {
         for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
             Object value = propertyValue.getValue();
             if (value instanceof String) {
-                //TODO 仅简单支持一个占位符的格式
-                //该属性值来自xml配置文件中，此时有占位符，如${brand}，
-                //需要从properties配置文件进行替换
-                String strVal = (String) value;
-                StringBuffer buf = new StringBuffer(strVal);
-                int startIndex = strVal.indexOf(PLACEHOLDER_PREFIX);
-                int endIndex = strVal.indexOf(PLACEHOLDER_SUFFIX);
-                if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
-                    //取出占位符中的字段名称，如band
-                    String propKey = strVal.substring(startIndex + 2, endIndex);
-                    //从properties配置文件中获取对应的属性值
-                    String propVal = properties.getProperty(propKey);
-                    //再替换即可
-                    buf.replace(startIndex, endIndex + 1, propVal);
-                    propertyValues.addPropertyValue(new PropertyValue(propertyValue.getName(), buf.toString()));
-                }
+                //解析占位符
+                value = resolvePlaceholder((String) value, properties);
+                //赋值
+                propertyValues.addPropertyValue(new PropertyValue(propertyValue.getName(), value));
             }
         }
     }
 
+    /**
+     * 解析单个占位符
+     *
+     * @param value      占位符，如${brand}
+     * @param properties properties配置文件中的所有属性值
+     * @return
+     */
+    private String resolvePlaceholder(String value, Properties properties) {
+        //TODO 仅简单支持一个占位符的格式
+        //该属性值来自xml配置文件中，此时有占位符，如${brand}，
+        //需要从properties配置文件进行替换
+        String strVal = value;
+        StringBuffer buf = new StringBuffer(strVal);
+        int startIndex = strVal.indexOf(PLACEHOLDER_PREFIX);
+        int endIndex = strVal.indexOf(PLACEHOLDER_SUFFIX);
+        if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+            //取出占位符中的字段名称，如band
+            String propKey = strVal.substring(startIndex + 2, endIndex);
+            String propVal = properties.getProperty(propKey);
+            //再替换即可
+            buf.replace(startIndex, endIndex + 1, propVal);
+        }
+        return buf.toString();
+    }
+
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    /**
+     * 内部类
+     * 专门用于解析@Value注解中定义的属性值
+     * 如：
+     */
+    private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
+        /**
+         * properties配置文件中的所有属性值
+         */
+        private Properties properties;
+
+        public PlaceholderResolvingStringValueResolver(Properties properties) {
+            this.properties = properties;
+        }
+
+        /**
+         * 解析@Value注解中占位符的属性值
+         *
+         * @param strVal 如${brand}
+         * @return
+         */
+        @Override
+        public String resolveStringValue(String strVal) {
+            return PropertyPlaceholderConfigurer.this.resolvePlaceholder(strVal, properties);
+        }
     }
 }

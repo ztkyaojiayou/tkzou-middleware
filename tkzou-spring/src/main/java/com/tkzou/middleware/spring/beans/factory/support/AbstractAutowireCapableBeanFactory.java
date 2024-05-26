@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.tkzou.middleware.spring.beans.BeansException;
 import com.tkzou.middleware.spring.beans.PropertyValue;
+import com.tkzou.middleware.spring.beans.PropertyValues;
 import com.tkzou.middleware.spring.beans.factory.BeanFactoryAware;
 import com.tkzou.middleware.spring.beans.factory.DisposableBean;
 import com.tkzou.middleware.spring.beans.factory.InitializingBean;
@@ -116,6 +117,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 //            bean = beanClass.newInstance();
             //更新：因为新增了专门的接口，有两个实现类，这里做兼容
             bean = createBeanInstance(beanDefinition);
+
+            //todo 在spring 5.x中，与属性填充相关的逻辑被抽成了一个叫populateBean的方法，后续可以跟上。
+            //3.在设置bean属性之前，允许BeanPostProcessor修改属性值
+            applyBeanPostprocessorsBeforeApplyingPropertyValues(beanName, bean, beanDefinition);
+
             //2.1再为该bean填充属性（多个，且可能是对象实例）
             //todo 若在这里直接注入属性，则对于有属性的类是正常注入的，
             //     但是对于没有属性的对象则会报NPE错，比如之前的HelloSpringService类，
@@ -136,6 +142,32 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
         //4.同时返回该生成的bean对象
         return bean;
+    }
+
+    /**
+     * 在设置bean属性之前，允许BeanPostProcessor修改属性值
+     *
+     * @param beanName
+     * @param bean
+     * @param beanDefinition
+     */
+    protected void applyBeanPostprocessorsBeforeApplyingPropertyValues(String beanName, Object bean,
+                                                                       BeanDefinition beanDefinition) {
+        //同样是遍历所有的后置处理器，找出所有的InstantiationAwareBeanPostProcessor后置处理器
+        //如AutowiredAnnotationBeanPostProcessor，用于处理@Value和@Autowired注解
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+                //先解析出具体的属性值
+                PropertyValues pvs =
+                        ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessPropertyValues(beanDefinition.getPropertyValues(), bean, beanName);
+                if (pvs != null) {
+                    //再添加到beanDefinition中
+                    for (PropertyValue propertyValue : pvs.getPropertyValues()) {
+                        beanDefinition.getPropertyValues().addPropertyValue(propertyValue);
+                    }
+                }
+            }
+        }
     }
 
     /**

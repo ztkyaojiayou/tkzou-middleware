@@ -17,7 +17,8 @@ import java.util.Set;
  */
 public abstract class AbstractApplicationEventMulticaster implements ApplicationEventMulticaster, BeanFactoryAware {
     /**
-     * 保存所有的事件监听器，虽然是在父类中注册，但子类可以直接使用，因为这里使用了protected！
+     * 保存所有的事件监听器，虽然是在父类中注册，
+     * 但子类可以直接使用，因为这里使用了protected！
      * 相当于事件监听器注册中心
      */
     protected final Set<ApplicationListener<ApplicationEvent>> applicationListeners = new HashSet<>();

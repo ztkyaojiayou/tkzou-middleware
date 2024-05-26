@@ -1,6 +1,7 @@
 package com.tkzou.middleware.spring.context.annotation;
 
 import cn.hutool.core.util.StrUtil;
+import com.tkzou.middleware.spring.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.support.BeanDefinitionRegistry;
 import com.tkzou.middleware.spring.stereotype.Component;
@@ -16,6 +17,9 @@ import java.util.Set;
  * @modyified By:
  */
 public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider {
+    public static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME = "org.springframework.context.annotation" +
+            ".internalAutowiredAnnotationProcessor";
+
     private BeanDefinitionRegistry registry;
 
     public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
@@ -31,6 +35,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
      * @param basePackages
      */
     public void doScan(String... basePackages) {
+        //1.扫描指定包路径下带@Component注解的类，
+        // 生成对应的BeanDefinition注册到beanDefinitionMap中
         for (String basePackage : basePackages) {
             Set<BeanDefinition> candidateBeanDefinitions = findCandidateComponents(basePackage);
             for (BeanDefinition candidate : candidateBeanDefinitions) {
@@ -45,6 +51,13 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
                 registry.registerBeanDefinition(beanName, candidate);
             }
         }
+
+        //2.注册处理@Autowired和@Value注解的BeanPostProcessor，
+        //也即AutowiredAnnotationBeanPostProcessor
+        //也即用于初始化该bean，这个bean名称直接写死，这种手法在spring中常用！
+        // 因为有特点含义，且是spring自己的bean。
+        registry.registerBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
+                new BeanDefinition(AutowiredAnnotationBeanPostProcessor.class));
     }
 
     /**

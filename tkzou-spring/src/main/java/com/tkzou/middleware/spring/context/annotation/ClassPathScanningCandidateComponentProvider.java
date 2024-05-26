@@ -14,7 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * bean组件扫描器
+ * bean组件扫描器，是个父类，核心子类是ClassPathBeanDefinitionScanner
  * 用于扫描指定包下的所有带有@Component注解的类，
  * 并将其封装为BeanDefinition
  *

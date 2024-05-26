@@ -4,6 +4,7 @@ import com.tkzou.middleware.spring.aop.*;
 import com.tkzou.middleware.spring.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import com.tkzou.middleware.spring.aop.framework.ProxyFactory;
 import com.tkzou.middleware.spring.beans.BeansException;
+import com.tkzou.middleware.spring.beans.PropertyValues;
 import com.tkzou.middleware.spring.beans.factory.BeanFactory;
 import com.tkzou.middleware.spring.beans.factory.BeanFactoryAware;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
@@ -86,6 +87,12 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
         }
 
         return null;
+    }
+
+    @Override
+    public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) throws BeansException {
+        //对应代理对象，属性不做处理，直接就是返回代理对象即可
+        return pvs;
     }
 
     /**

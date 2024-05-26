@@ -5,6 +5,7 @@ import com.tkzou.middleware.spring.beans.factory.FactoryBean;
 import com.tkzou.middleware.spring.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.spring.beans.factory.config.BeanPostProcessor;
 import com.tkzou.middleware.spring.beans.factory.config.ConfigurableBeanFactory;
+import com.tkzou.middleware.spring.util.StringValueResolver;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
@@ -34,6 +35,11 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * 用于保存factoryBean，也可以理解为存储factoryBean这种bean的容器
      */
     private final Map<String, Object> factoryBeanObjectCache = new HashMap<>();
+    /**
+     * 用于解析占位符的处理器
+     * 通常就一个，这里为PlaceholderResolvingStringValueResolver
+     */
+    private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<>();
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
@@ -135,6 +141,21 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         }
         //再注册/添加
         this.beanPostProcessors.add(beanPostProcessor);
+    }
+
+    @Override
+    public void addEmbeddedValueResolver(StringValueResolver valueResolver) {
+        this.embeddedValueResolvers.add(valueResolver);
+    }
+
+    @Override
+    public String resolveEmbeddedValue(String value) {
+        String result = value;
+        //遍历所有解析器，解析value
+        for (StringValueResolver resolver : this.embeddedValueResolvers) {
+            result = resolver.resolveStringValue(result);
+        }
+        return result;
     }
 
     public List<BeanPostProcessor> getBeanPostProcessors() {
