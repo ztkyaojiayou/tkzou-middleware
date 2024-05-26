@@ -46,6 +46,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     @Override
     protected Object createBean(String beanName, BeanDefinition beanDefinition) {
+        //逻辑后移，否则无法为代理对象设置beanType
+        //移动至DefaultAdvisorAutoProxyCreator#postProcessBeforeInstantiation方法中了
         //添加bean代理逻辑
         //1.如果当前bean需要代理，则直接返回代理对象，不再走bean的生命周期，
         //也即代理对象不加入ioc容器，因此每次调用时都是new一个新的代理对象！！！
@@ -78,8 +80,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
-     * 执行InstantiationAwareBeanPostProcessor的方法，创建代理对象
-     * 在bean实例化前就只执行啦！
+     * 执行InstantiationAwareBeanPostProcessor的方法，
+     * 比如创建代理对象，但这里不创建了，逻辑后移
+     * 该方法在bean实例化前就执行！
      *
      * @param beanClass
      * @param beanName
@@ -94,8 +97,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
                 //执行该接口的方法，创建代理对象，
                 // 但只要找到了一个合适的就行，也即创建了一个代理对象就返回，其他的就不再执行了！
+                //todo 但这里并没有创建代理对象，逻辑后移了！
                 Object result =
-                        ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessBeforeInstantiation(beanClass, beanName);
+                        ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessBeforeInstantiation
+                                (beanClass, beanName);
 
                 if (result != null) {
                     return result;
@@ -207,10 +212,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         //1.执行BeanPostProcessor的前置处理方法
         Object wrappedBean = this.applyBeanPostProcessorsBeforeInitialization(bean, beanName);
         //2.执行bean的初始化的方法（核心）
-        // todo 后续再实现
         this.invokeInitMethods(beanName, wrappedBean, beanDefinition);
         //3.执行BeanPostProcessor的后置处理方法
-        wrappedBean = this.applyBeanPostProcessorsAfterInitialization(bean, beanName);
+        wrappedBean = this.applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
         return wrappedBean;
     }
 
@@ -366,7 +370,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             Object current = processor.postProcessBeforeInitialization(result, beanName);
             //判空一下，为空时返回原始bean对象
             if (ObjectUtils.isEmpty(current)) {
-                return result;
+                continue;
             }
             result = current;
         }
@@ -375,17 +379,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     @Override
     public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
-        //同理
+        //最终返回的bean
         Object result = existingBean;
         //同上，从这里就开始获取所有的BeanPostProcessor，
         //也即此时我们自定义的实现类都会被扫描到并依次执行里面的这个postProcessAfterInitialization方法！！！
         //这个思路很重要，这也是我们自定义扩展点能生效的原因！！！
         for (BeanPostProcessor processor : getBeanPostProcessors()) {
-            //执行初始化后的方法
+            //执行初始化后的方法，这里就包含了生成代理对象的处理器！
             Object current = processor.postProcessAfterInitialization(result, beanName);
             //判空一下，为空时返回原始bean对象
             if (ObjectUtils.isEmpty(current)) {
-                return result;
+                continue;
             }
             result = current;
         }
