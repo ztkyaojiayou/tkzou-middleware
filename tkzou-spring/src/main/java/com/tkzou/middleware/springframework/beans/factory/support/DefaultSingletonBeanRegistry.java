@@ -1,5 +1,6 @@
 package com.tkzou.middleware.springframework.beans.factory.support;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.tkzou.middleware.springframework.beans.BeansException;
 import com.tkzou.middleware.springframework.beans.factory.DisposableBean;
 import com.tkzou.middleware.springframework.beans.factory.config.SingletonBeanRegistry;
@@ -18,10 +19,16 @@ import java.util.Map;
  */
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     /**
-     * 使用map存放单例对象
+     * 使用map存放单例对象，也即平时说的ioc容器！！！
      * 因此易知，需要先将所有的单例bean对象存入
+     * 也叫一级缓存
      */
     private Map<String, Object> singletonObjects = new HashMap<>();
+
+    /**
+     * 二级缓存
+     */
+    protected Map<String, Object> earlySingletonObjects = new HashMap<>();
 
     /**
      * 用于保存拥有销毁⽅法的bean
@@ -43,13 +50,18 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     /**
      * 从map中获取单例对象
+     * 先从一级缓存取，若没有，再从二级缓存取
      *
      * @param beanName
      * @return
      */
     @Override
     public Object getSingleton(String beanName) {
-        return singletonObjects.get(beanName);
+        Object bean = singletonObjects.get(beanName);
+        if (ObjectUtil.isEmpty(bean)) {
+            bean = earlySingletonObjects.get(beanName);
+        }
+        return bean;
     }
 
     /**

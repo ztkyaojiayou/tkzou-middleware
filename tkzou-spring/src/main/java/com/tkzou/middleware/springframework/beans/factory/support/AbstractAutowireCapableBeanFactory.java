@@ -125,6 +125,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             //更新：因为新增了专门的接口，有两个实现类，这里做兼容
             bean = createBeanInstance(beanDefinition);
 
+            //为解决循环依赖问题，将实例化后的bean放进缓存中提前暴露
+            //解决该问题的关键在于何时将实例化后的bean放进容器中，设置属性前还是设置属性后。现
+            //有的执⾏流程，bean实例化后并且设置属性后会被放进singletonObjects单例缓存中。如果
+            //我们调整⼀下顺序，当bean实例化后就放进singletonObjects单例缓存中，提前暴露引⽤，
+            //然后再设置属性，就能解决上⾯的循环依赖问题！！！
+            //但这样还只能解决非代理的bean的循环依赖问题，原因是放进⼆级缓存
+            //earlySingletonObjects中的bean是实例化后的bean，⽽放进⼀级缓存singletonObjects中
+            //的bean是代理对象（代理对象在BeanPostProcessor#postProcessAfterInitialization中
+            //返回），两个缓存中的bean不⼀致。⽐如上⾯的例⼦，如果A被代理，那么B拿到的a是实例
+            //化后的A，⽽a是被代理后的对象，即b.getA() != a。
+            if (beanDefinition.isSingleton()) {
+                earlySingletonObjects.put(beanName, bean);
+            }
+
+            //实例化bean之后执行，返回false，则直接返回bean了，不再往下执行
+            boolean continueWithPropertyPopulation = applyBeanPostProcessorsAfterInstantiation(beanName, bean);
+            if (!continueWithPropertyPopulation) {
+                return bean;
+            }
+
             //todo 在spring 5.x中，与属性填充相关的逻辑被抽成了一个叫populateBean的方法，后续可以跟上。
             //3.在设置bean属性之前，允许BeanPostProcessor修改属性值
             applyBeanPostprocessorsBeforeApplyingPropertyValues(beanName, bean, beanDefinition);
@@ -149,6 +169,30 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
         //4.同时返回该生成的bean对象
         return bean;
+    }
+
+    /**
+     * bean实例化后执行，如果返回false，不执行后续设置属性的逻辑
+     *
+     * @param beanName
+     * @param bean
+     * @return
+     */
+    private boolean applyBeanPostProcessorsAfterInstantiation(String beanName, Object bean) {
+        boolean continueWithPropertyPopulation = true;
+        //也是扫描所有的后置处理器
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+            //找出所有的InstantiationAwareBeanPostProcessor后置处理器
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+                //在实例化bean之后执行所有的InstantiationAwareBeanPostProcessor中的postProcessAfterInstantiation方法
+                //如果返回false，就不再执行后续的设置属性的逻辑
+                if (!((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessAfterInstantiation(bean, beanName)) {
+                    continueWithPropertyPopulation = false;
+                    break;
+                }
+            }
+        }
+        return continueWithPropertyPopulation;
     }
 
     /**

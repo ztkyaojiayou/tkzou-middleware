@@ -12,8 +12,9 @@ public class AdvisedSupport {
     /**
      * 是否使用cglib代理，用于区分使用哪种代理方式！
      * 这里为false，易知默认是使用jdk动态代理的！
+     * 更新：改为了true
      */
-    private boolean proxyTargetClass = false;
+    private boolean proxyTargetClass = true;
 
     /**
      * 目标对象
