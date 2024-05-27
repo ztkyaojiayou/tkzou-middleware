@@ -35,6 +35,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * 经测试，这里使用新策略CglibSubclassingInstantiationStrategy也是ok的！！！
      */
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();
+    /**
+     * 是否允许循环依赖
+     * 默认是true，也即是允许的，也即当出现了循环依赖时spring自己需要解决！
+     */
+    private boolean allowCircularReferences = true;
 
     /**
      * 根据beanName和对应的BeanDefinition（也即class对象）创建bean对象
@@ -113,6 +118,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return null;
     }
 
+    /**
+     * 创建bean的核心逻辑
+     *
+     * @param beanName
+     * @param beanDefinition
+     * @return
+     */
     protected Object doCreateBean(String beanName, BeanDefinition beanDefinition) {
         //1.获取class对象
 //        Class beanClass = beanDefinition.getBeanClass();
@@ -135,8 +147,32 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             //的bean是代理对象（代理对象在BeanPostProcessor#postProcessAfterInitialization中
             //返回），两个缓存中的bean不⼀致。⽐如上⾯的例⼦，如果A被代理，那么B拿到的a是实例
             //化后的A，⽽a是被代理后的对象，即b.getA() != a。
-            if (beanDefinition.isSingleton()) {
-                earlySingletonObjects.put(beanName, bean);
+            //更新：解决代理对象的循环依赖问题，使用三级缓存！
+
+            //判断是否是单例，是否产生了循环依赖，是否需要解决循环依赖
+            boolean earlySingletonExposure = (beanDefinition.isSingleton() && this.allowCircularReferences &&
+                    isSingletonCurrentlyInCreation(beanName));
+            if (earlySingletonExposure) {
+                Object finalBean = bean;
+                //提前暴露/保存三级缓存，即把创建对象的工厂先保存起来--核心！！！
+                //具体是在getSingleton()方法中调用这个lambda表达式来创建对象！！！
+                //这里并不创建对象！！！
+                //另外，getEarlyBeanReference方法中的这三个参数其实是具体的值，就是从当前上下文取的！
+                addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, beanDefinition, finalBean));
+                //原始写法
+//                addSingletonFactory(beanName, new ObjectFactory<Object>() {
+//                    //这是实现了ObjectFactory接口的一个实现类的一个具体对象，
+//                    // 这个方法就是这个实现类中的具体实现，
+//                    //可以看到，这个方法本身没有参数，那怎么又可以使用下面这三个参数呢？
+//                    //答：这三个并不是参数，而是这个实现类中定义的三个字段，且已经被赋值了，也即值已经写死了！
+//                    //值从哪里来？就是从当前这个上下文中取的！！！
+//                    //至于为什么可以这么取就先不深究了！
+//                    @Override
+//                    public Object getObject() throws BeansException {
+//                        //这三个参数其实是具体的值，就是从当前上下文取的！
+//                        return getEarlyBeanReference(beanName, beanDefinition, finalBean);
+//                    }
+//                });
             }
 
             //实例化bean之后执行，返回false，则直接返回bean了，不再往下执行
@@ -162,13 +198,46 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         //5.继续新增逻辑：注册有销毁方法的bean
         this.registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
-        //区分是否为原型bean，只有单例bean才注册到ioc容器！
+
+        //解决代理bean的循环依赖问题，使用三级缓存！
+        //这个bean已经既有可能是原始bean，也有可能是代理bean啦！！！
+        Object exposedObject = bean;
+        //区分是否为原型bean，只有单例bean才走三级缓存逻辑，才注册到ioc容器！
+        //todo 那原型的代理bean怎么办？
+        //  在initializeBean方法中创建了！！！
         if (beanDefinition.isSingleton()) {
+            //从三大缓存中获取bean
+            exposedObject = getSingleton(beanName);
             //3.将该beanName和生成的bean对象绑定，并存入bean容器中！！！
-            this.addSingleton(beanName, bean);
+            this.addSingleton(beanName, exposedObject);
         }
         //4.同时返回该生成的bean对象
-        return bean;
+        return exposedObject;
+    }
+
+    /**
+     * 获取提前暴露的bean的核心逻辑
+     * 就是执行所有的InstantiationAwareBeanPostProcessor后置处理器
+     * 中的getEarlyBeanReference方法来获取bean
+     * （可能是代理对象，也可能就是原对象，与切面有关，但这不重要！）
+     *
+     * @param beanName
+     * @param beanDefinition
+     * @param bean
+     * @return
+     */
+    protected Object getEarlyBeanReference(String beanName, BeanDefinition beanDefinition, Object bean) {
+        Object exposedObject = bean;
+        //扫描所有的后置处理器
+        for (BeanPostProcessor bp : getBeanPostProcessors()) {
+            //只执行所有的InstantiationAwareBeanPostProcessor后置处理器的getEarlyBeanReference方法
+            //一般也就一个，这里就是DefaultAdvisorAutoProxyCreator
+            if (bp instanceof InstantiationAwareBeanPostProcessor) {
+                //执行它的getEarlyBeanReference方法来最终获取需要提前暴露的bean
+                exposedObject = ((InstantiationAwareBeanPostProcessor) bp).getEarlyBeanReference(exposedObject, beanName);
+            }
+        }
+        return exposedObject;
     }
 
     /**
@@ -233,7 +302,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         if (beanDefinition.isSingleton()) {
             //需要实现DisposableBean接口
             if (bean instanceof DisposableBean || StringUtils.isNotEmpty(beanDefinition.getDestroyMethodName())) {
-                //包装一下,变成DisposableBeanAdapter
+                //包装一下,变成DisposableBeanAdapter，即把我们自定义的实现了DisposableBean接口的bean统一都包装成DisposableBeanAdapter
                 this.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
             }
         }
@@ -260,6 +329,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         //2.执行bean的初始化的方法（核心）
         this.invokeInitMethods(beanName, wrappedBean, beanDefinition);
         //3.执行BeanPostProcessor的后置处理方法
+        //这里也会创建代理对象！！！
         wrappedBean = this.applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
         return wrappedBean;
     }

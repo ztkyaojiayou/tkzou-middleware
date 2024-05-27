@@ -13,6 +13,8 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 用于在当前bean未进行实例化时就根据配置的切面生成代理对象
@@ -33,6 +35,11 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      * 因为单独执行getBean方法就可以创建bean并将其注入到ioc容器中！
      */
     private DefaultListableBeanFactory beanFactory;
+    /**
+     * 保存需要提前暴露的bean名称
+     * 暴露的可能是代理对象，也可能是原始对象，和切面配置有关！
+     */
+    private Set<Object> earlyProxyReferences = new HashSet<>();
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -87,7 +94,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
 
     /**
      * 根据切面规则为已经初始化完成了的bean创建代理对象
-     * （也可能不需要代理，此就返回原bean即可！）
+     * （也可能不需要代理，此时就返回原bean即可！）
      * 参考DynamicProxyTest#testAdvisor
      *
      * @param bean
@@ -97,6 +104,37 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (!earlyProxyReferences.contains(beanName)) {
+            return wrapIfNecessary(bean, beanName);
+        }
+        return bean;
+    }
+
+    /**
+     * 提前暴露bean
+     * 可能是代理对象，也可能就是原对象
+     *
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
+    @Override
+    public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
+        //标记一下当前bean已经提前暴露了
+        earlyProxyReferences.add(beanName);
+        //真正创建需要提前暴露的对象
+        return wrapIfNecessary(bean, beanName);
+    }
+
+    /**
+     * 根据切面配置来决定是否生成代理对象
+     *
+     * @param bean
+     * @param beanName
+     * @return
+     */
+    protected Object wrapIfNecessary(Object bean, String beanName) {
         //此时普通的bean已经实例化和初始化完成
         //但对于代理类型的bean，则还未开始，在这里根据切面规则来进行代理！
         //目标对象就是传入的已经完成了实例化、依赖注入和初始化的bean！！！
@@ -137,5 +175,6 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
         //2.3若不需要代理，则就返回原bean！！！
         return bean;
     }
+
 
 }

@@ -10,11 +10,16 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Method;
 
 /**
- * DisposableBeanAdapter对象是一个适配器，用于在销毁 bean 时执行必要的处理。它会将DisposableBean接口或@PreDestroy注解的方法转换为一个回调方法，以便在 bean
- * 销毁时执行。这种适配器模式允许非标准的 bean 销毁方法与 Spring 框架协同工作。
+ * DisposableBeanAdapter对象是一个适配器，用于在销毁bean时执行必要的处理。
+ * 它会将DisposableBean接口或@PreDestroy注解的方法转换为一个回调方法，
+ * 以便在 bean销毁时执行。
+ * 这种适配器模式允许非标准的 bean 销毁方法与 Spring 框架协同工作。
  * <p>
- * 在将DisposableBeanAdapter对象添加到一个DisposableBeanRegistry对象中时，Spring 会将该对象添加到一个 bean 销毁的注册表中。当需要销毁所有 bean 时，Spring
- * 就会从该注册表中获取所有需要销毁的 bean，并按照正确的顺序执行销毁任务。这样就可以确保应用程序的正确关闭。
+ * 在将DisposableBeanAdapter对象添加到一个DisposableBeanRegistry对象中时，
+ * Spring 会将该对象添加到一个 bean 销毁的注册表中。当需要销毁所有 bean 时，、
+ * Spring就会从该注册表中获取所有需要销毁的 bean，并按照正确的顺序执行销毁任务。
+ * 这样就可以确保应用程序的正确关闭。
+ * 使用了适配器模式！
  *
  * @author :zoutongkun
  * @date :2023/8/31 11:33 下午
