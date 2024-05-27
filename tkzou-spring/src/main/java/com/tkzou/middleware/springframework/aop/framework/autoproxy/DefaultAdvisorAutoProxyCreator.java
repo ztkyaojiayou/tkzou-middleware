@@ -96,6 +96,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      * 根据切面规则为已经初始化完成了的bean创建代理对象
      * （也可能不需要代理，此时就返回原bean即可！）
      * 参考DynamicProxyTest#testAdvisor
+     * 但这里是只负责在非循环依赖时才创建bean，但这也是最常见的情况。
      *
      * @param bean
      * @param beanName
@@ -104,7 +105,12 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        //即只负责非循环依赖时的情况，这也是最常见的情况
+        //只有不产生循环依赖时才在在这里创建bean！！！
+        //对于循环依赖的情况，就不在这里创建了，而在三级缓存中创建，
+        //此时也需要先提前暴露三级缓存！
         if (!earlyProxyReferences.contains(beanName)) {
+            //生成代理对象，但与切面配置有关，可能还是原对象！
             return wrapIfNecessary(bean, beanName);
         }
         return bean;
