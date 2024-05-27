@@ -2,12 +2,14 @@ package com.tkzou.middleware.springframework.beans.factory.annotation;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.TypeUtil;
 import com.tkzou.middleware.springframework.beans.BeansException;
 import com.tkzou.middleware.springframework.beans.PropertyValues;
 import com.tkzou.middleware.springframework.beans.factory.BeanFactory;
 import com.tkzou.middleware.springframework.beans.factory.BeanFactoryAware;
 import com.tkzou.middleware.springframework.beans.factory.ConfigurableListableBeanFactory;
 import com.tkzou.middleware.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import com.tkzou.middleware.springframework.core.convert.ConversionService;
 
 import java.lang.reflect.Field;
 
@@ -47,12 +49,24 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
         Field[] declaredFields = aClass.getDeclaredFields();
         //遍历处理每一个字段，寻找带有@Value注解的字段
         for (Field field : declaredFields) {
-            Value annotation = field.getAnnotation(Value.class);
-            if (ObjectUtil.isNotEmpty(annotation)) {
+            Value valueAnnotation = field.getAnnotation(Value.class);
+            if (ObjectUtil.isNotEmpty(valueAnnotation)) {
                 //此时为：${tkzou.name}"，需要解析对应的值
-                String value = annotation.value();
+                Object value = valueAnnotation.value();
                 //解析
-                value = beanFactory.resolveEmbeddedValue(value);
+                value = beanFactory.resolveEmbeddedValue((String) value);
+
+                //因为加了类型转换器，因此，对于非引用类型的字段，需要考虑类型转换
+                //即根据用户配置的类型转换器来判断是否需要转换类型！
+                Class<?> sourceType = value.getClass();
+                Class<?> targetType = (Class<?>) TypeUtil.getType(field);
+                ConversionService conversionService = beanFactory.getConversionService();
+                if (conversionService != null) {
+                    if (conversionService.canConvert(sourceType, targetType)) {
+                        value = conversionService.convert(value, targetType);
+                    }
+                }
+
                 //再赋值到这个bean中，完成依赖/属性注入！！！
                 BeanUtil.setFieldValue(bean, field.getName(), value);
             }

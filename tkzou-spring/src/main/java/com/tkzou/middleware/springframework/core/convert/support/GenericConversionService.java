@@ -1,9 +1,10 @@
 package com.tkzou.middleware.springframework.core.convert.support;
 
+import cn.hutool.core.convert.BasicType;
+import com.tkzou.middleware.springframework.core.convert.ConversionService;
 import com.tkzou.middleware.springframework.core.convert.converter.Converter;
 import com.tkzou.middleware.springframework.core.convert.converter.ConverterFactory;
 import com.tkzou.middleware.springframework.core.convert.converter.ConverterRegistry;
-import com.tkzou.middleware.springframework.core.convert.ConversionService;
 import com.tkzou.middleware.springframework.core.convert.converter.GenericConverter;
 
 import java.lang.reflect.ParameterizedType;
@@ -77,6 +78,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
      */
     private List<Class<?>> getClassHierarchy(Class<?> clazz) {
         List<Class<?>> hierarchy = new ArrayList<>();
+        //兼容一下基本类型
+        clazz = BasicType.wrap(clazz);
         //循环获取该类的所有父类
         while (clazz != null) {
             hierarchy.add(clazz);
@@ -98,6 +101,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
     public <T> T convert(Object source, Class<T> targetType) {
         //源类型
         Class<?> sourceType = source.getClass();
+        //兼容一下基本类型
+        targetType = (Class<T>) BasicType.wrap(targetType);
         boolean canConvert = canConvert(sourceType, targetType);
         if (canConvert) {
             //获取支持当前转换对的转换器

@@ -1,6 +1,7 @@
 package com.tkzou.middleware.springframework.beans.factory.config;
 
 import com.tkzou.middleware.springframework.beans.factory.HierarchicalBeanFactory;
+import com.tkzou.middleware.springframework.core.convert.ConversionService;
 import com.tkzou.middleware.springframework.util.StringValueResolver;
 
 /**
@@ -34,9 +35,24 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 
     /**
      * 解析占位符，如@Value("${some.property.key}")中的${some.property.key}
+     *
      * @param value
      * @return
      */
     String resolveEmbeddedValue(String value);
+
+    /**
+     * 设置类型转换器服务
+     *
+     * @param conversionService
+     */
+    void setConversionService(ConversionService conversionService);
+
+    /**
+     * 获取类型转换器服务
+     *
+     * @return
+     */
+    ConversionService getConversionService();
 
 }

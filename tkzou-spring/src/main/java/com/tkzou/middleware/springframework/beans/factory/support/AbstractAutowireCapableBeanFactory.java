@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.TypeUtil;
 import com.tkzou.middleware.springframework.beans.BeansException;
 import com.tkzou.middleware.springframework.beans.PropertyValue;
 import com.tkzou.middleware.springframework.beans.PropertyValues;
@@ -11,6 +12,7 @@ import com.tkzou.middleware.springframework.beans.factory.BeanFactoryAware;
 import com.tkzou.middleware.springframework.beans.factory.DisposableBean;
 import com.tkzou.middleware.springframework.beans.factory.InitializingBean;
 import com.tkzou.middleware.springframework.beans.factory.config.*;
+import com.tkzou.middleware.springframework.core.convert.ConversionService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -246,6 +248,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     /**
      * 为bean填充属性
      * 使用反射+set方法设置
+     * 这里就会注入在配置文件中配置的类型转换器，也即就把类型转换器初始化啦！！！
+     * 但不处理带@Autowired注解的字段，
+     * 它是使用专门的后置处理器处理的，它已经在前面处理完啦！！！
      *
      * @param beanName
      * @param bean
@@ -253,20 +258,35 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
         try {
-            //循环设置各属性的值
+            //循环设置各属性的值，包括类型转换器！
             for (PropertyValue propertyValue : beanDefinition.getPropertyValues().getPropertyValues()) {
                 //1.获取属性
                 //1.1属性名称
                 String name = propertyValue.getName();
-                //1.2属性值
+                //1.2属性值，分为引用类型和非引用类型，其中后者需要考虑是否需要进行类型转换！
+                //理解为我们设想的是全局类型转换器
                 Object value = propertyValue.getValue();
-                //1.2.1新增校验，判断该属性值是否也为bean
+                //1.2.1判断该属性值是否也为bean，类型转换器和对象类型的属性就会在这个分支中注入！
+                //todo 但要注意的是，这里处理的对象类型的属性是在xml中配置的，
+                // 而非使用@Autowired注解的字段，它是使用专门的后置处理器处理的，它已经在前面处理完啦！！！
+                // 详见：applyBeanPostprocessorsBeforeApplyingPropertyValues方法
                 if (value instanceof BeanReference) {
                     //若是，则表示当前bean依赖该bean，则先实例化该bean
                     //todo 注意：由于不想增加代码的复杂度和理解难度，暂时不⽀持循环依赖，后续再议！
                     BeanReference beanReference = (BeanReference) value;
-                    //先获取该bean（若没有，则会先实例化该bean）
+                    //先获取该bean（若没有，则会先单独创建该bean）
                     value = super.getBean(beanReference.getBeanName());
+                } else {
+                    //1.2.2否则，对于非引用类型，再判断是否需要进行类型转换
+                    Class<?> sourceType = value.getClass();
+                    Class<?> targetType = (Class<?>) TypeUtil.getFieldType(bean.getClass(), name);
+                    ConversionService conversionService = getConversionService();
+                    if (conversionService != null) {
+                        //类型转换
+                        if (conversionService.canConvert(sourceType, targetType)) {
+                            value = conversionService.convert(value, targetType);
+                        }
+                    }
                 }
 
                 //2.再通过反射设置属性
@@ -322,6 +342,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     /**
      * 通过反射设置属性
+     * todo 目前已经改为使用hutool中的工具类来实现了
      *
      * @param bean
      * @param name
@@ -331,7 +352,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         Class beanClass = beanDefinition.getBeanClass();
         try {
             //1.根据属性的set方法设置属性
-            //1.1根据name获得类中属性对象，此时返回的是该属性的全类名！！！
+            //1.1根据name获得类中属性对象，此时返回的是该属性的全类名！
             //如：private com.tkzou.middleware.spring.beans.factory.config.BeanDefinition.beanClass
             Field field = beanClass.getDeclaredField(name);
             //1.2再获取对应的类型，如BeanDefinition

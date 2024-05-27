@@ -11,6 +11,7 @@ import com.tkzou.middleware.springframework.context.event.ApplicationEventMultic
 import com.tkzou.middleware.springframework.context.event.ContextClosedEvent;
 import com.tkzou.middleware.springframework.context.event.ContextRefreshedEvent;
 import com.tkzou.middleware.springframework.context.event.SimpleApplicationEventMulticaster;
+import com.tkzou.middleware.springframework.core.convert.ConversionService;
 import com.tkzou.middleware.springframework.core.io.DefaultResourceLoader;
 
 import java.util.Map;
@@ -25,7 +26,12 @@ import java.util.Map;
  * @modyified By:
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader implements ConfigurableApplicationContext {
+    /**
+     * 一些写死的bean名称，因此我们在自定义bean时id必须与之相同，
+     * 否则设置的就是另一个bean了，那么就不生效了！
+     */
     public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+    public static final String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
     /**
      * 事件广播器
      */
@@ -57,11 +63,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         //6.注册事件监听器，此时也会触发getBean，只是是针对单个bean而已！
         registerListeners();
 
+        //7.注册类型转换器和提前实例化单例bean
+        finishBeanFactoryInitialization(beanFactory);
+
+        //8.发布容器刷新完成事件
+        finishRefresh();
+    }
+
+    protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+        //设置类型转换器，也即初始化类型转换器
+        if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
+            Object conversionService = beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME);
+            if (conversionService instanceof ConversionService) {
+                beanFactory.setConversionService((ConversionService) conversionService);
+            }
+        }
+
         //4.最后提前实例化所有的单例bean，此时就是扫描所有bean并将其添加到ioc容器中
         beanFactory.preInstantiateSingletons();
+    }
 
-        //7.发布容器刷新完成事件
-        finishRefresh();
+    @Override
+    public boolean containsBean(String name) {
+        return getBeanFactory().containsBean(name);
     }
 
     protected void finishRefresh() {

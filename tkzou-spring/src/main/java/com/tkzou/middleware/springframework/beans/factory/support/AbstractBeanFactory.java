@@ -5,6 +5,7 @@ import com.tkzou.middleware.springframework.beans.factory.FactoryBean;
 import com.tkzou.middleware.springframework.beans.factory.config.BeanDefinition;
 import com.tkzou.middleware.springframework.beans.factory.config.BeanPostProcessor;
 import com.tkzou.middleware.springframework.beans.factory.config.ConfigurableBeanFactory;
+import com.tkzou.middleware.springframework.core.convert.ConversionService;
 import com.tkzou.middleware.springframework.util.StringValueResolver;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -40,6 +41,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * 通常就一个，这里为PlaceholderResolvingStringValueResolver
      */
     private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<>();
+    /**
+     * 类型转换器服务
+     */
+    private ConversionService conversionService;
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
@@ -76,6 +81,13 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         //也需要判断是否是FactoryBean
         return getObjectForBeanInstance(bean, beanName);
     }
+
+    @Override
+    public boolean containsBean(String name) {
+        return containsBeanDefinition(name);
+    }
+
+    protected abstract boolean containsBeanDefinition(String beanName);
 
     /**
      * 从创建的bean中获取真正的bean
@@ -115,6 +127,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return object;
     }
 
+    @Override
+    public void setConversionService(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
+    @Override
+    public ConversionService getConversionService() {
+        return conversionService;
+    }
 
     /**
      * 根据beanName和BeanDefinition生成对象
