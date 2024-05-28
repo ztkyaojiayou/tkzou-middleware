@@ -34,7 +34,7 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Au
     BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
     /**
-     * 提前实例化所有单例实例
+     * 提前实例化所有单例实例--ioc容器初始化/refresh方法的核心！！！
      * 也即使用beanDefinitionMap进行实例化
      *
      * @throws BeansException

@@ -84,6 +84,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     /**
      * 支持循环依赖的getSingleton方法
+     * 当产生循环依赖且允许循环依赖（默认允许）时，
+     * 就会从三级缓存中获取，且一定有值，因为之前已经提前暴露啦！
+     * 否则就只从一级缓存中获取，此时可能为空！
      *
      * @param beanName
      * @param allowEarlyReference
@@ -107,8 +110,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
                 ObjectFactory<?> singletonFactory = singletonFactories.get(beanName);
                 if (ObjectUtil.isNotEmpty(singletonFactory)) {
                     //获取代理对象，此时就是执行getEarlyBeanReference方法，
-                    // 且beanName, beanDefinition, finalBean这个参数也是有值的，
-                    // 因为在添加时就已经被保存起来啦！！！
+                    //且beanName, beanDefinition, finalBean这个参数也是有值的，
+                    //因为在添加时就已经被保存起来啦！！！
+                    //且这个finalBean就是原始的bean！
                     singletonObject = singletonFactory.getObject();
                     //5.将代理对象放入二级缓存
                     earlySingletonObjects.put(beanName, singletonObject);

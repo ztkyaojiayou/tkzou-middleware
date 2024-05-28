@@ -29,7 +29,10 @@ import java.util.Map;
 public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
 
     /**
-     * 增加后置处理器属性，用于在bean的初始化前后进行拓展
+     * 单独保存一下所有的后置处理器，以便随时获取使用
+     * 比如有些后置处理器是用于在bean的初始化前后进行拓展，
+     * 此时就是遍历一下所有的这些后置处理器，再找出需要的类型，执行一下对应的方法即可！
+     * 这些bean在创建时也会加入到ioc容器中！
      */
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
     /**
@@ -70,7 +73,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         //这里我们默认获取的是单例对象
         Object sharedInstance = getSingleton(beanName);
         if (ObjectUtils.isNotEmpty(sharedInstance)) {
-            //此时可能是FactoryBean，也可能是普通的bean，对于前者，单独处理
+            //此时可能是FactoryBean，也可能是普通的bean，对于前者，单独处理，
+            //这里就没支持获取这个FactoryBean本身了，因为意义也不大，
+            //但源码中是支持的，实现上很简单，就是对beanName做个区分即可！
+            //且对于这类bean，会把真正的bean存入一个单独的缓存中，也即factoryBeanObjectCache
             return getObjectForBeanInstance(sharedInstance, beanName);
         }
 
@@ -103,7 +109,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         Object object = beanInstance;
         //1.对于FactoryBean
         if (beanInstance instanceof FactoryBean) {
-            FactoryBean factoryBean = (FactoryBean) beanInstance;
+            FactoryBean<?> factoryBean = (FactoryBean<?>) beanInstance;
             try {
                 //1.1若为单例bean
                 if (factoryBean.isSingleton()) {
@@ -112,7 +118,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                     if (object == null) {
                         //1.1.2若没有，则再通过getObject方法创建！
                         object = factoryBean.getObject();
-                        //再加入缓存
+                        //再加入缓存，这里beanName没有和原FactoryBean做区分，因为分别存在了两个缓存中
+                        //todo 但其实在源码中是做了区分的，即对于FactoryBean，它在beanName前面加了一个&字符后再存入单例池中的，
+                        //  也即允许用户来获取FactoryBean这个bean本身，但其实在实际项目中我们更关心的还是由它所所产的真正的bean，
+                        //  因此这里就不做区分了。
                         this.factoryBeanObjectCache.put(beanName, object);
                     }
                 } else {

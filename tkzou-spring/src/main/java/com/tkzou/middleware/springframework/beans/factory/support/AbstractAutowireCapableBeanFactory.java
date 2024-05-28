@@ -43,9 +43,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     private boolean allowCircularReferences = true;
 
     /**
-     * 根据beanName和对应的BeanDefinition（也即class对象）创建bean对象
-     * 1.根据class对象，利用反射，生成bean对象
-     * 2.将该对象与beanName绑定，并存入bean容器中！！！
+     * 创建bean
+     * 也即根据beanName和对应的BeanDefinition（也即class对象）创建bean对象
+     * 1.先执行实例化前的方法，走用户自定义的实例化逻辑，
+     * 1.1若用户自定义了，则直接使用该bean，不再走spring自己的生命周期了（这种情况很少）
+     * 1.2否则，就走spring的生命周期来创建bean，
+     * 具体就是根据class对象，利用反射，生成bean对象
+     * 2.将该beanName和bean绑定，并存入bean容器中！
      * 3.同时，返回该bean对象
      *
      * @param beanName
@@ -60,7 +64,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         if (ObjectUtil.isNotEmpty(bean)) {
             return bean;
         }
-        //2.否则才走正常的bean生命周期，这些bean会加入到ioc容器中！
+        //2.否则才走正常的bean生命周期，对于单例bean，会将其加入到ioc容器中（包括代理对象）！
         return doCreateBean(beanName, beanDefinition);
     }
 
@@ -200,16 +204,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         //就是判断当前bean实现DisposableBean接口
         this.registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
 
-        //解决代理bean的循环依赖问题，使用三级缓存！
+        //6.解决代理bean的循环依赖问题，使用三级缓存！
         //这个bean已经既有可能是原始bean，也有可能是代理bean啦！！！
         Object exposedObject = bean;
         //区分是否为原型bean，只有单例bean才走三级缓存逻辑，才注册到ioc容器！
         //todo 那原型的代理bean怎么办？
         //  在initializeBean方法中创建了！！！
         if (beanDefinition.isSingleton()) {
-            //从三大缓存中获取bean
+            //7.从三大缓存中重新获取bean，
+            //此时返回的要么是原bean，要么就是一个代理对象！
             exposedObject = getSingleton(beanName);
-            //3.将该beanName和生成的bean对象绑定，并存入bean容器中！！！
+            //3.再将该beanName和最终生成的bean对象绑定，并存入bean容器中！
             this.addSingleton(beanName, exposedObject);
         }
         //4.同时返回该生成的bean对象
@@ -388,6 +393,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                     //todo 注意：由于不想增加代码的复杂度和理解难度，暂时不⽀持循环依赖，后续再议！
                     BeanReference beanReference = (BeanReference) value;
                     //先获取该bean（若没有，则会先单独创建该bean）
+                    //此时就可能产生循环依赖！
                     value = super.getBean(beanReference.getBeanName());
                 } else {
                     //1.2.2否则，对于非引用类型，再判断是否需要进行类型转换

@@ -36,7 +36,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      */
     private DefaultListableBeanFactory beanFactory;
     /**
-     * 保存需要提前暴露的bean名称
+     * 保存需要或者已经提前暴露的bean名称
      * 暴露的可能是代理对象，也可能是原始对象，和切面配置有关！
      */
     private Set<Object> earlyProxyReferences = new HashSet<>();

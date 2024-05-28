@@ -18,6 +18,11 @@ public interface ListableBeanFactory extends BeanFactory {
 
     /**
      * 获取指定类型的所有bean实例
+     * 若ioc容器中还没有时，会自动创建并加入到ioc容器中！
+     * 通常是spring框架在还未集中初始化bean前调用才会触发创建流程，
+     * 比如注册一些spring自己的组件，如后置处理器！
+     * 对于我们使用者，在使用该方法时，ioc容器肯定已经初始化完毕，
+     * 因此直接就可以从ioc容器中获取到bean实例啦！！！
      *
      * @param type
      * @param <T>

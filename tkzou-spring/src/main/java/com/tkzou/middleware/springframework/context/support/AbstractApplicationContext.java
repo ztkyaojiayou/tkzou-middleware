@@ -54,8 +54,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 
         //2.在bean实例化之前，先执行BeanFactoryPostProcessor
+        //
         invokeBeanFactoryPostProcessor(beanFactory);
         //3.再在bean实例化之前注册BeanPostProcessor，也即用于执行对应的那两个方法
+        // 此时可以修改beanDefinition的属性值，如对属性中占位符的处理！
         registerBeanPostProcessor(beanFactory);
 
         //5.初始化事件发布者，此时会把创建的事件发布者对象直接添加到ioc容器中
@@ -63,7 +65,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         //6.注册事件监听器，此时也会触发getBean，只是是针对单个bean而已！
         registerListeners();
 
-        //7.注册类型转换器和提前实例化单例bean
+        //7.注册类型转换器和提前实例化单例bean--核心
         finishBeanFactoryInitialization(beanFactory);
 
         //8.发布容器刷新完成事件
@@ -79,7 +81,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
             }
         }
 
-        //4.最后提前实例化所有的单例bean，此时就是扫描所有bean并将其添加到ioc容器中
+        //4.最后提前实例化所有的单例bean--核心
+        //此时就是扫描所有bean并将其添加到ioc容器中
         beanFactory.preInstantiateSingletons();
     }
 
@@ -157,8 +160,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
      * @param beanFactory
      */
     protected void registerBeanPostProcessor(ConfigurableListableBeanFactory beanFactory) {
-        //1.先获取所有的BeanPostProcessor型的bean
-        //问：为什么此时就有这些bean？在refreshBeanFactory方法中会完成！
+        //1.先创建所有的BeanPostProcessor型的bean
+        //此时因为还没有集中进行bean初始化，因此在get时会单独触发对应的create方法，
+        //并将创建完成的bean加入到ioc容器中！！！
         Map<String, BeanPostProcessor> beanPostProcessorMap = beanFactory.getBeansOfType(BeanPostProcessor.class);
         //2.再依次注册
         for (BeanPostProcessor beanPostProcessor : beanPostProcessorMap.values()) {
@@ -172,10 +176,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
      * @param beanFactory
      */
     protected void invokeBeanFactoryPostProcessor(ConfigurableListableBeanFactory beanFactory) {
-        //1.先获取所有的BeanFactoryPostProcessor型的bean
+        //1.先创建所有的BeanFactoryPostProcessor型的bean
+        //此时就会直接创建这些bean并将其加入到ioc容器中！
         Map<String, BeanFactoryPostProcessor> beanFactoryPostProcessorMap =
                 beanFactory.getBeansOfType(BeanFactoryPostProcessor.class);
-        //2.再依次执行
+        //2.再依次执行，可以修改beanDefinition的属性值，如对属性中占位符的处理！
         for (BeanFactoryPostProcessor beanFactoryPostProcessor : beanFactoryPostProcessorMap.values()) {
             beanFactoryPostProcessor.postProcessBeanFactory(beanFactory);
         }
