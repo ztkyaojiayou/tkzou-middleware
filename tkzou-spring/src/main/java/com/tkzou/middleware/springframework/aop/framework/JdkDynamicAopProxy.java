@@ -1,11 +1,14 @@
 package com.tkzou.middleware.springframework.aop.framework;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.tkzou.middleware.springframework.aop.AdvisedSupport;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 /**
  * JDK动态代理工厂
@@ -47,16 +50,36 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        //先需要判断当前方法是否需要拦截，也即是否需要增强，判断方式就是切入点表达式！！！
-        //1.符合切入点表达式的，需要增强
-        if (advised.getMethodMatcher().matches(method, advised.getTargetSource().getTarget().getClass())) {
-            //代理方法
-            MethodInterceptor methodInterceptor = advised.getMethodInterceptor();
-            //执行方法，包括原方法的执行和自定义的增强逻辑的执行，里面就可能包括类似于前置通知或后置通知的逻辑！！！
-            return methodInterceptor.invoke(new ReflectiveMethodInvocation(advised.getTargetSource().getTarget(),
-                    method, args));
+        Object target = advised.getTargetSource().getTarget();
+        Class<?> targetClass = target.getClass();
+        Object retVal = null;
+        //1.获取符合当前方法的拦截器链，也即各个aop通知
+        List<Object> interceptorChain =
+                advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
+      //1.1若没有，则直接执行目标方法
+        if (CollectionUtil.isEmpty(interceptorChain)) {
+            return method.invoke(target, args);
+        } else {
+            //1.2否则，先依次执行完所有的拦截器链后再执行目标方法
+            // 1）将拦截器统一封装成ReflectiveMethodInvocation
+            MethodInvocation invocation =
+                    new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, interceptorChain);
+            // Proceed to the joinpoint through the interceptor chain.
+            // 2）执行拦截器链
+            retVal = invocation.proceed();
         }
-        //2.不符合切入点表达式的，不需要增强，直接执行原方法
-        return method.invoke(advised.getTargetSource().getTarget(), args);
+        return retVal;
+//
+//        //先需要判断当前方法是否需要拦截，也即是否需要增强，判断方式就是切入点表达式！！！
+//        //1.符合切入点表达式的，需要增强
+//        if (advised.getMethodMatcher().matches(method, advised.getTargetSource().getTarget().getClass())) {
+//            //代理方法
+//            MethodInterceptor methodInterceptor = advised.getMethodInterceptor();
+//            //执行方法，包括原方法的执行和自定义的增强逻辑的执行，里面就可能包括类似于前置通知或后置通知的逻辑！！！
+//            return methodInterceptor.invoke(new ReflectiveMethodInvocation(advised.getTargetSource().getTarget(),
+//                    method, args));
+//        }
+//        //2.不符合切入点表达式的，不需要增强，直接执行原方法
+//        return method.invoke(advised.getTargetSource().getTarget(), args);
     }
 }

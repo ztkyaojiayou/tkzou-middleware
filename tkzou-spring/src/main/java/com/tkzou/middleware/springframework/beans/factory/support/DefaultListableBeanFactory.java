@@ -48,7 +48,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         //需要区分是否为单例bean
         this.beanDefinitionMap.forEach((beanName, beanDefinition) -> {
             //这里只创建单例bean，对于原型bean，则都是临时创建并使用的！
-            //支持懒加载
+            //支持懒加载，此时只有在直接使用getBean方法时才创建！
             if (beanDefinition.isSingleton() && !beanDefinition.isLazyInit()) {
                 this.getBean(beanName);
             }

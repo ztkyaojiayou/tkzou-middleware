@@ -8,11 +8,9 @@ import com.tkzou.middleware.springframework.aop.AdvisedSupport;
  * @description :
  * @modyified By:
  */
-public class ProxyFactory {
-    private AdvisedSupport advisedSupport;
+public class ProxyFactory extends AdvisedSupport {
 
-    public ProxyFactory(AdvisedSupport advisedSupport) {
-        this.advisedSupport = advisedSupport;
+    public ProxyFactory() {
     }
 
     /**
@@ -26,11 +24,10 @@ public class ProxyFactory {
 
     private AopProxy createAopProxy() {
         // 根据代理类型判断使用哪种代理方式
-        if (advisedSupport.isProxyTargetClass()) {
-            return new CglibAopProxy(advisedSupport);
+        if (this.isProxyTargetClass() || this.getTargetSource().getTargetClass().length == 0) {
+            return new CglibAopProxy(this);
         }
-
-        return new JdkDynamicAopProxy(advisedSupport);
+        return new JdkDynamicAopProxy(this);
     }
 
 }

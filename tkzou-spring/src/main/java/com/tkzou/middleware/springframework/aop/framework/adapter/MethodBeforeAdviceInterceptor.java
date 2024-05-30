@@ -1,6 +1,7 @@
 package com.tkzou.middleware.springframework.aop.framework.adapter;
 
 
+import com.tkzou.middleware.springframework.aop.BeforeAdvice;
 import com.tkzou.middleware.springframework.aop.MethodBeforeAdvice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -16,7 +17,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * @description :
  * @modyified By:
  */
-public class MethodBeforeAdviceInterceptor implements MethodInterceptor {
+public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeAdvice {
     /**
      * 前置通知逻辑类
      */
@@ -29,15 +30,15 @@ public class MethodBeforeAdviceInterceptor implements MethodInterceptor {
     /**
      * 执行目标方法+前置通知逻辑
      *
-     * @param methodInvocation
+     * @param mi
      * @return
      * @throws Throwable
      */
     @Override
-    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+    public Object invoke(MethodInvocation mi) throws Throwable {
         //先执行前置通知逻辑
-        this.advice.before(methodInvocation.getMethod(), methodInvocation.getArguments(), methodInvocation.getThis());
+        this.advice.before(mi.getMethod(), mi.getArguments(), mi.getThis());
         //再执行目标方法
-        return methodInvocation.proceed();
+        return mi.proceed();
     }
 }

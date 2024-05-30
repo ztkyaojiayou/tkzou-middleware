@@ -6,6 +6,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * Cglib动态代理工厂
@@ -52,25 +53,43 @@ public class CglibAopProxy implements AopProxy {
         /**
          * 增强逻辑方法
          *
-         * @param o
+         * @param proxy
          * @param method
-         * @param objects
+         * @param args
          * @param methodProxy 用于执行目标方法，这是cglib自己封装的方法，比反射执行的效率更高
          * @return
          * @throws Throwable
          */
         @Override
-        public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
-            //封装CglibMethodInvocation，本质就是个ReflectiveMethodInvocation，也即目标方法的快照
-            CglibMethodInvocation methodInvocation = new CglibMethodInvocation(advised.getTargetSource().getTarget(),
-                    method, objects, methodProxy);
-            //同jdk的实现逻辑，先判断一下切入点表达式，看是否需要执行增强逻辑！
-            if (advised.getMethodMatcher().matches(method, advised.getTargetSource().getTarget().getClass())) {
-                //1.执行带有增强逻辑和原方法的方法
-                return advised.getMethodInterceptor().invoke(methodInvocation);
+        public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+            //参考jdk的实现逻辑--JdkDynamicAopProxy
+            // 获取目标对象
+            Object target = advised.getTargetSource().getTarget();
+            Class<?> targetClass = target.getClass();
+            Object retVal = null;
+            List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
+            CglibMethodInvocation methodInvocation = new CglibMethodInvocation(proxy, target, method, args,
+                    targetClass, chain, methodProxy);
+            if (chain == null || chain.isEmpty()) {
+                retVal = methodProxy.invoke(target, args);
+            } else {
+                retVal = methodInvocation.proceed();
             }
-            //2.执行原方法
-            return methodInvocation.proceed();
+            return retVal;
+
+
+            //移至了ReflectiveMethodInvocation中
+//
+//            //封装CglibMethodInvocation，本质就是个ReflectiveMethodInvocation，也即目标方法的快照
+//            CglibMethodInvocation methodInvocation = new CglibMethodInvocation(advised.getTargetSource().getTarget(),
+//                    method, objects, methodProxy);
+//            //同jdk的实现逻辑，先判断一下切入点表达式，看是否需要执行增强逻辑！
+//            if (advised.getMethodMatcher().matches(method, advised.getTargetSource().getTarget().getClass())) {
+//                //1.执行带有增强逻辑和原方法的方法
+//                return advised.getMethodInterceptor().invoke(methodInvocation);
+//            }
+//            //2.执行原方法
+//            return methodInvocation.proceed();
         }
 
         /**
@@ -80,8 +99,11 @@ public class CglibAopProxy implements AopProxy {
         private static class CglibMethodInvocation extends ReflectiveMethodInvocation {
             private MethodProxy methodProxy;
 
-            public CglibMethodInvocation(Object target, Method method, Object[] objects, MethodProxy methodProxy) {
-                super(target, method, objects);
+            // 构造器
+            public CglibMethodInvocation(Object proxy, Object target, Method method,
+                                         Object[] arguments, Class<?> targetClass,
+                                         List<Object> interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
+                super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
                 this.methodProxy = methodProxy;
             }
 
@@ -96,7 +118,7 @@ public class CglibAopProxy implements AopProxy {
              */
             @Override
             public Object proceed() throws Throwable {
-                return methodProxy.invoke(this.target, this.arguments);
+                return super.proceed();
             }
         }
     }

@@ -158,22 +158,36 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
         //2.遍历所有切面，判断是否有切面要切当前类，若有，则为当前bean创建代理对象
         //找到一个作用于当前类的切面即可！
         try {
+            ProxyFactory proxyFactory = new ProxyFactory();
+
             //todo 可以算是适配器模式！
             for (AspectJExpressionPointcutAdvisor advisor : candidatePointcutAdvisors) {
                 //2.1判断当前bean是否符合切点规则，符合就创建代理对象
                 ClassFilter classFilter = advisor.getPointcut().getClassFilter();
                 if (classFilter.matches(beanClass)) {
-                    //封装AdvisedSupport
-                    AdvisedSupport advisedSupport = new AdvisedSupport();
-                    //封装目标对象
                     TargetSource targetSource = new TargetSource(bean);
-                    advisedSupport.setTargetSource(targetSource);
-                    advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
-                    advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
-                    //2.2再根据这套条件创建代理对象并返回，不再判断后面的切面了！
-                    return new ProxyFactory(advisedSupport).getProxy();
+                    proxyFactory.setTargetSource(targetSource);
+                    proxyFactory.addAdvisor(advisor);
+                    proxyFactory.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
+
+
+                    //更新：现在ProxyFactory已经继承AdvisedSupport了
+//                    //封装AdvisedSupport
+//                    AdvisedSupport advisedSupport = new AdvisedSupport();
+//                    //封装目标对象
+//                    TargetSource targetSource = new TargetSource(bean);
+//                    advisedSupport.setTargetSource(targetSource);
+//                    advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
+//                    advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
+//                    //2.2再根据这套条件创建代理对象并返回，不再判断后面的切面了！
+//                    return new ProxyFactory(advisedSupport).getProxy();
                 }
             }
+
+            if (!proxyFactory.getAdvisors().isEmpty()) {
+                return proxyFactory.getProxy();
+            }
+
         } catch (Exception ex) {
             throw new BeansException("Error create proxy bean for: " + beanName, ex);
         }

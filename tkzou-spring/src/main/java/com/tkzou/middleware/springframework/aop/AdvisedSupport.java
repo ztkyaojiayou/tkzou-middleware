@@ -1,6 +1,14 @@
 package com.tkzou.middleware.springframework.aop;
 
+import com.tkzou.middleware.springframework.aop.framework.AdvisorChainFactory;
+import com.tkzou.middleware.springframework.aop.framework.DefaultAdvisorChainFactory;
 import org.aopalliance.intercept.MethodInterceptor;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 封装aop的核心逻辑，包括目标对象、方法增强拦截器（包括目标方法快照信想和诸如前置/后置通知等增强逻辑）、切入点等。
@@ -37,6 +45,57 @@ public class AdvisedSupport {
      */
     private MethodMatcher methodMatcher;
 
+    /**
+     * 用于保存每个方法对应的aop通知链
+     * 也即每个方法在执行前，需要先执行这些aop通知！
+     */
+    private transient Map<Integer, List<Object>> methodCache;
+    /**
+     * aop通知链工厂
+     * 用于获取符合某个方法的aop通知链
+     */
+    AdvisorChainFactory advisorChainFactory = new DefaultAdvisorChainFactory();
+    /**
+     * 所有的aop通知链集合
+     * 下一步就是找出符合某个方法的aop通知链
+     * 具体就是在AdvisorChainFactory接口中完成的！
+     * 然后保存在当前类的methodCache缓存中
+     */
+    private List<Advisor> advisors = new ArrayList<>();
+
+    public AdvisedSupport() {
+        this.methodCache = new ConcurrentHashMap<>(32);
+    }
+
+    /**
+     * 获取指定方法的所有aop通知/拦截器链
+     * 核心方法，通过AdvisorChainFactory接口完成
+     */
+    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class<?> targetClass) {
+        //缓存的key
+        Integer cacheKey = method.hashCode();
+        List<Object> cached = this.methodCache.get(cacheKey);
+        if (cached == null) {
+            cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
+                    this, method, targetClass);
+            this.methodCache.put(cacheKey, cached);
+        }
+        return cached;
+    }
+
+    /**
+     * 添加aop通知
+     *
+     * @param advisor
+     */
+    public void addAdvisor(Advisor advisor) {
+        advisors.add(advisor);
+    }
+
+    public List<Advisor> getAdvisors() {
+        return advisors;
+    }
+
     public boolean isProxyTargetClass() {
         return proxyTargetClass;
     }
@@ -68,4 +127,6 @@ public class AdvisedSupport {
     public void setMethodMatcher(MethodMatcher methodMatcher) {
         this.methodMatcher = methodMatcher;
     }
+
+
 }
