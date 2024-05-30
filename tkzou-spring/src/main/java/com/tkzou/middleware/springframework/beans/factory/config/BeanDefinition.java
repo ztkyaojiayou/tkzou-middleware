@@ -39,10 +39,18 @@ public class BeanDefinition {
     private String destroyMethodName;
 
     private String scope = SCOPE_SINGLETON;
-
+    /**
+     * 是否为单例bean
+     */
     private boolean singleton = true;
-
+    /**
+     * 是否为原型bean
+     */
     private boolean prototype = false;
+    /**
+     * 是否懒加载
+     */
+    private boolean lazyInit = false;
 
     /**
      * 默认构造器（这不需要，我们就使用有参构造器即可）
@@ -89,6 +97,19 @@ public class BeanDefinition {
 
     public boolean isPrototype() {
         return this.prototype;
+    }
+
+    /**
+     * 这个就是boolean型的get方法！
+     *
+     * @return
+     */
+    public boolean isLazyInit() {
+        return lazyInit;
+    }
+
+    public void setLazyInit(boolean lazyInit) {
+        this.lazyInit = lazyInit;
     }
 
     /**

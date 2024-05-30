@@ -1,5 +1,6 @@
 package com.tkzou.middleware.springframework.beans.factory.xml;
 
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.tkzou.middleware.springframework.beans.BeansException;
 import com.tkzou.middleware.springframework.beans.PropertyValue;
@@ -58,6 +59,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * 比如：<context:component-scan="com.tkzou.middleware.spring.service"/>
      */
     public static final String COMPONENT_SCAN_ELEMENT = "component-scan";
+    /**
+     * 懒加载
+     */
+    public static final String LAZYINIT_ATTRIBUTE = "lazyInit";
 
     /**
      * 两个构造器，都需要显式调用父类的构造器
@@ -146,6 +151,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
             String initMethodName = bean.attributeValue(INIT_METHOD_ATTRIBUTE);
             String destroyMethodName = bean.attributeValue(DESTROY_METHOD_ATTRIBUTE);
             String beanScope = bean.attributeValue(SCOPE_ATTRIBUTE);
+            //是否懒加载
+            String lazyInit = bean.attributeValue(LAZYINIT_ATTRIBUTE);
 
             Class<?> clazz;
             try {
@@ -167,6 +174,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
             //设置其他属性
             beanDefinition.setInitMethodName(initMethodName);
             beanDefinition.setDestroyMethodName(destroyMethodName);
+            //是否懒加载
+            beanDefinition.setLazyInit(BooleanUtil.toBoolean(lazyInit));
             //bean类型，就单例还是原型bean
             if (StrUtil.isNotEmpty(beanScope)) {
                 beanDefinition.setScope(beanScope);
