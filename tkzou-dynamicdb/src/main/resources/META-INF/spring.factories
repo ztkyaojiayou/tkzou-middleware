@@ -1,0 +1,3 @@
+#api bean导出
+com.tkzou.middleware.dynamicdb.config=\
+com.tkzou.middleware.dynamicdb.config.DynamicDbAutoConfiguration
