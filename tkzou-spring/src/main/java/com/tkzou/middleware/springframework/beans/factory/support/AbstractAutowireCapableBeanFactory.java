@@ -28,7 +28,9 @@ import java.lang.reflect.Method;
  * @date 2023/8/9 15:02
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
-
+    /**
+     * 初始化方法名
+     */
     public static final String AFTER_PROPERTIES_SET = "afterPropertiesSet";
     /**
      * 默认使用无参构造函数实例化对象
@@ -240,7 +242,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             //一般也就一个，这里就是DefaultAdvisorAutoProxyCreator
             if (bp instanceof InstantiationAwareBeanPostProcessor) {
                 //执行它的getEarlyBeanReference方法来最终获取需要提前暴露的bean
-                exposedObject = ((InstantiationAwareBeanPostProcessor) bp).getEarlyBeanReference(exposedObject, beanName);
+                exposedObject = ((InstantiationAwareBeanPostProcessor) bp).getEarlyBeanReference(exposedObject,
+                        beanName);
             }
         }
         return exposedObject;
@@ -262,7 +265,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
                 //在实例化bean之后执行所有的InstantiationAwareBeanPostProcessor中的postProcessAfterInstantiation方法
                 //如果返回false，就不再执行后续的设置属性的逻辑
-                if (!((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessAfterInstantiation(bean, beanName)) {
+                if (!((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessAfterInstantiation(bean,
+                        beanName)) {
                     continueWithPropertyPopulation = false;
                     break;
                 }

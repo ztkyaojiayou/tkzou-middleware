@@ -6,6 +6,7 @@ import com.tkzou.middleware.springframework.beans.factory.config.BeanDefinition;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * beanDefinitionMap容器
@@ -21,7 +22,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     /**
      * 存放beanName和对应的BeanDefinition的map/容器
      */
-    private Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
+    private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
 
     /**
      * 获取对应的beanDefinition对象
