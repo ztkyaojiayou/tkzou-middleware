@@ -2,7 +2,7 @@ package com.tkzou.middleware.dynamicdb.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
-import com.tkzou.middleware.dynamicdb.constant.DbsConstant;
+import com.tkzou.middleware.dynamicdb.constant.DbConstant;
 import com.tkzou.middleware.dynamicdb.core.DynamicDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,31 +23,31 @@ import java.util.Map;
 @Configuration
 public class DynamicDataSourceConfig {
 
-    @Bean(name = DbsConstant.MYSQL_MASTER)
+    @Bean(name = DbConstant.MYSQL_MASTER)
     @ConfigurationProperties("spring.datasource.mysql.master")
     public DataSource masterDataSource() {
-        log.info("数据源切换为：{}", DbsConstant.MYSQL_MASTER);
+        log.info("数据源切换为：{}", DbConstant.MYSQL_MASTER);
         return DruidDataSourceBuilder.create().build();
     }
 
-    @Bean(name = DbsConstant.MYSQL_SLAVE)
+    @Bean(name = DbConstant.MYSQL_SLAVE)
     @ConfigurationProperties("spring.datasource.mysql.slave")
     public DataSource slaveDataSource() {
-        log.info("数据源切换为：{}", DbsConstant.MYSQL_SLAVE);
+        log.info("数据源切换为：{}", DbConstant.MYSQL_SLAVE);
         return DruidDataSourceBuilder.create().build();
     }
 
-    @Bean(name = DbsConstant.ORACLE_MASTER)
+    @Bean(name = DbConstant.ORACLE_MASTER)
     @ConfigurationProperties("spring.datasource.oracle.master")
     public DataSource oracleMasterDataSource() {
-        log.info("数据源切换为oracle：{}", DbsConstant.ORACLE_MASTER);
+        log.info("数据源切换为oracle：{}", DbConstant.ORACLE_MASTER);
         return DruidDataSourceBuilder.create().build();
     }
 
-    @Bean(name = DbsConstant.ORACLE_SLAVE)
+    @Bean(name = DbConstant.ORACLE_SLAVE)
     @ConfigurationProperties("spring.datasource.oracle.slave")
     public DataSource oracleSlaveDataSource() {
-        log.info("数据源切换为oracle：{}", DbsConstant.ORACLE_SLAVE);
+        log.info("数据源切换为oracle：{}", DbConstant.ORACLE_SLAVE);
         DruidDataSource dataSource = DruidDataSourceBuilder.create().build();
         return dataSource;
     }
@@ -62,10 +62,10 @@ public class DynamicDataSourceConfig {
     public DynamicDataSource dynamicDataSource() {
         //使用map组装所有候选数据源
         Map<Object, Object> dataSourceMap = new HashMap<>(3);
-        dataSourceMap.put(DbsConstant.MYSQL_MASTER, masterDataSource());
-        dataSourceMap.put(DbsConstant.MYSQL_SLAVE, slaveDataSource());
-        dataSourceMap.put(DbsConstant.ORACLE_MASTER, oracleMasterDataSource());
-        dataSourceMap.put(DbsConstant.ORACLE_SLAVE, oracleSlaveDataSource());
+        dataSourceMap.put(DbConstant.MYSQL_MASTER, masterDataSource());
+        dataSourceMap.put(DbConstant.MYSQL_SLAVE, slaveDataSource());
+        dataSourceMap.put(DbConstant.ORACLE_MASTER, oracleMasterDataSource());
+        dataSourceMap.put(DbConstant.ORACLE_SLAVE, oracleSlaveDataSource());
         //设置动态数据源
         DynamicDataSource dynamicDataSource = new DynamicDataSource();
         //设置默认数据源（非必须）

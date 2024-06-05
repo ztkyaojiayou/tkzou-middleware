@@ -1,6 +1,6 @@
 package com.tkzou.middleware.dynamicdb.annotation;
 
-import com.tkzou.middleware.dynamicdb.constant.DbsConstant;
+import com.tkzou.middleware.dynamicdb.constant.DbConstant;
 
 import java.lang.annotation.*;
 
@@ -20,5 +20,5 @@ import java.lang.annotation.*;
 @Inherited
 public @interface DataSource {
     //切换数据源名称，默认mysql_master
-    String value() default DbsConstant.MYSQL_MASTER;
+    String value() default DbConstant.MYSQL_MASTER;
 }
