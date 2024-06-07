@@ -6,6 +6,12 @@ import java.lang.reflect.Proxy;
 
 /**
  * <p> jdk动态代理 </p>
+ * 该类集代理工厂和代理增强逻辑于一身！
+ * 这也是常见的玩法，更简洁！
+ * 且一般而言，代理增强逻辑是固定的，因此就只需要有一个InvocationHandler的实现类即可，
+ * 但也有一些场景，需要根据不同的代理类，实现不同的增强逻辑，比如openFein当中对不同的接口的代理，
+ * 因为它的增强逻辑需要使用到每个接口和它对应方法上的信息，因此每个feign接口都必须是一个独立的代理逻辑类，
+ * 也因此就出现了xxxInvocationHandlerFactory类啦！
  *
  * @author zoutongkun
  * @description
