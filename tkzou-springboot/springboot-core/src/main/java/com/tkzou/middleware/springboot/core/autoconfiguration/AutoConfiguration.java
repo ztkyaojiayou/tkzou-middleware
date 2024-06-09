@@ -1,4 +1,4 @@
-package com.tkzou.middleware.springboot.core;
+package com.tkzou.middleware.springboot.core.autoconfiguration;
 
 /**
  * 自动配置bean接口

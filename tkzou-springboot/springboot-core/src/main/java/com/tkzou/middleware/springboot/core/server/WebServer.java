@@ -1,4 +1,4 @@
-package com.tkzou.middleware.springboot.core;
+package com.tkzou.middleware.springboot.core.server;
 
 import org.springframework.web.context.WebApplicationContext;
 

@@ -1,4 +1,4 @@
-package com.tkzou.middleware.springboot.core;
+package com.tkzou.middleware.springboot.core.server;
 
 import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;

@@ -50,21 +50,24 @@ public class DoubleCacheManagerAspect {
     /**
      * 获取数据时
      */
-    @Pointcut("execution(* com.tkzou..*.*(..)) && @annotation(com.tkzou.middleware.doublecache.core.annotation.CacheAdd)")
+    @Pointcut("execution(* com.tkzou..*.*(..)) && @annotation(com.tkzou.middleware.doublecache.core.annotation" +
+            ".CacheAdd)")
     public void executionOfCacheAddMethod() {
     }
 
     /**
      * 更新数据时
      */
-    @Pointcut("execution(* com.tkzou..*.*(..)) && @annotation(com.tkzou.middleware.doublecache.core.annotation.CacheUpdate)")
+    @Pointcut("execution(* com.tkzou..*.*(..)) && @annotation(com.tkzou.middleware.doublecache.core.annotation" +
+            ".CacheUpdate)")
     public void executionOfCacheUpdateMethod() {
     }
 
     /**
      * 删除数据时
      */
-    @Pointcut("execution(* com.tkzou..*.*(..))  && @annotation(com.tkzou.middleware.doublecache.core.annotation.CacheDelete)")
+    @Pointcut("execution(* com.tkzou..*.*(..))  && @annotation(com.tkzou.middleware.doublecache.core.annotation" +
+            ".CacheDelete)")
     public void executionOfCacheDeleteMethod() {
     }
 
@@ -85,9 +88,11 @@ public class DoubleCacheManagerAspect {
                             joinPoint.getArgs(), cacheUpdateAnnotation.keyGenerator());
 
             if (cacheUpdateAnnotation.isAsync()) {
-                doubleCacheService.saveByAsync(cacheUpdateAnnotation.cacheNames(), cacheKey, returnObject, cacheUpdateAnnotation.TTL());
+                doubleCacheService.saveByAsync(cacheUpdateAnnotation.cacheNames(), cacheKey, returnObject,
+                        cacheUpdateAnnotation.TTL());
             } else {
-                doubleCacheService.save(cacheUpdateAnnotation.cacheNames(), cacheKey, returnObject, cacheUpdateAnnotation.TTL());
+                doubleCacheService.save(cacheUpdateAnnotation.cacheNames(), cacheKey, returnObject,
+                        cacheUpdateAnnotation.TTL());
             }
 
         } catch (Exception e) {

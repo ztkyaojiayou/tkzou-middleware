@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.tkzou.middleware.springboot.core;
+package com.tkzou.middleware.springboot.core.annotation;
 
+import com.tkzou.middleware.springboot.core.autoconfiguration.WebServerAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Indexed;
 
 import java.lang.annotation.*;

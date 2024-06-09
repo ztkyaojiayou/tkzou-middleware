@@ -1,7 +1,7 @@
 package com.tkzou.middleware.springboot.test;
 
 import com.tkzou.middleware.springboot.core.MySpringApplication;
-import com.tkzou.middleware.springboot.core.MySpringBootApplication;
+import com.tkzou.middleware.springboot.core.annotation.MySpringBootApplication;
 
 /**
  * springboot启动类

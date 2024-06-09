@@ -1,5 +1,6 @@
-package com.tkzou.middleware.springboot.core;
+package com.tkzou.middleware.springboot.core.annotation;
 
+import com.tkzou.middleware.springboot.core.condition.MyCondition;
 import org.springframework.context.annotation.Conditional;
 
 import java.lang.annotation.ElementType;

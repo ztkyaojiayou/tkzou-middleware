@@ -1,5 +1,6 @@
-package com.tkzou.middleware.springboot.core;
+package com.tkzou.middleware.springboot.core.condition;
 
+import com.tkzou.middleware.springboot.core.annotation.ConditionalOnClass;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;

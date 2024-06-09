@@ -1,5 +1,6 @@
-package com.tkzou.middleware.springboot.core;
+package com.tkzou.middleware.springboot.core.autoconfiguration;
 
+import com.tkzou.middleware.springboot.core.autoconfiguration.AutoConfiguration;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.type.AnnotationMetadata;
 
