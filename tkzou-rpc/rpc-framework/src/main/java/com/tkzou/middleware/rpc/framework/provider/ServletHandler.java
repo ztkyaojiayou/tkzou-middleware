@@ -1,4 +1,4 @@
-package com.tkzou.middleware.rpc.framework.protocol;
+package com.tkzou.middleware.rpc.framework.provider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,7 +10,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface ServletHandler {
     /**
-     * 请求处理，主要是对
+     * 请求处理，主要是对来自客户端的请求进行处理，并返回响应。
+     * 也即处理rpc请求
      *
      * @param req
      * @param resp

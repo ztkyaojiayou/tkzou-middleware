@@ -1,8 +1,7 @@
-package com.tkzou.middleware.rpc.framework;
+package com.tkzou.middleware.rpc.framework.consumer;
 
-import com.tkzou.middleware.rpc.framework.protocol.HttpClient;
+import com.tkzou.middleware.rpc.framework.http.HttpClient;
 import com.tkzou.middleware.rpc.framework.protocol.MethodInvocation;
-import com.tkzou.middleware.rpc.framework.protocol.MethodInvoker;
 import com.tkzou.middleware.rpc.framework.protocol.ServiceInstance;
 
 /**
@@ -20,8 +19,15 @@ public class HttpMethodInvoker implements MethodInvoker {
         this.serviceInstance = serviceInstance;
     }
 
+    /**
+     * 执行rpc接口中的方法
+     *
+     * @param methodInvocation
+     * @return
+     */
     @Override
     public String invoke(MethodInvocation methodInvocation) {
+        //方式http请求，返回结果
         HttpClient httpClient = new HttpClient();
         return httpClient.send(serviceInstance.getHostname(), serviceInstance.getPort(), methodInvocation);
     }

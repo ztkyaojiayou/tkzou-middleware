@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 服务注册中心
  * 这里就只是本地注册一下
+ * 一般而言会使用mysql或文件系统来进行存储，比如nacos！！！
  *
  * @author zoutongkun
  */

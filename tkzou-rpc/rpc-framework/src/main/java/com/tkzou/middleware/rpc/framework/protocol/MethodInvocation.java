@@ -33,7 +33,7 @@ public class MethodInvocation implements Serializable {
     /**
      * 该方法的参数类型--即该方法的入参类型
      */
-    private Class[] paramType;
+    private Class<?>[] paramType;
 
     /**
      * 构建Invocation
@@ -44,7 +44,7 @@ public class MethodInvocation implements Serializable {
      * @param paramType
      * @return
      */
-    public static MethodInvocation build(String interfaceName, String methodName, Object[] params, Class[] paramType) {
+    public static MethodInvocation build(String interfaceName, String methodName, Object[] params, Class<?>[] paramType) {
         return new MethodInvocation(interfaceName, methodName, params, paramType);
     }
 }

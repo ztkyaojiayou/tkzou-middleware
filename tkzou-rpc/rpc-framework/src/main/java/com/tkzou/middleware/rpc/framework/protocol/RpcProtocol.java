@@ -1,5 +1,7 @@
 package com.tkzou.middleware.rpc.framework.protocol;
 
+import com.tkzou.middleware.rpc.framework.consumer.MethodInvoker;
+
 /**
  * rpc协议：http或dubbo
  *

@@ -29,12 +29,13 @@ public class ServiceInstance implements Serializable {
     private Integer port;
     /**
      * 接口名（这里也可以理解为服务名）
+     * 如TestRpcService
      */
     private String interfaceName;
     /**
      * 服务实现类的clazz对象
      */
-    private Class implClass;
+    private Class<?> implClass;
 
     /**
      * 构建服务实例信息

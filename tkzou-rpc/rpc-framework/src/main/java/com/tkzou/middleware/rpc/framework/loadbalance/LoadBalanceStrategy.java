@@ -1,6 +1,6 @@
 package com.tkzou.middleware.rpc.framework.loadbalance;
 
-import com.tkzou.middleware.rpc.framework.protocol.MethodInvoker;
+import com.tkzou.middleware.rpc.framework.consumer.MethodInvoker;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class LoadBalanceStrategy {
      * @param invokerList
      * @return
      */
-    public static MethodInvoker getByDefaultStrategy(List<MethodInvoker> invokerList) {
+    public static MethodInvoker getDefault(List<MethodInvoker> invokerList) {
         IRule defaultStrategy = LoadBalanceStrategy.defaultStrategy();
         return defaultStrategy.choose(invokerList);
     }

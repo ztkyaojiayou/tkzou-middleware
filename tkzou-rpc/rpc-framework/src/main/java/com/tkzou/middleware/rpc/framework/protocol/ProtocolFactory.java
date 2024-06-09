@@ -1,6 +1,4 @@
-package com.tkzou.middleware.rpc.framework;
-
-import com.tkzou.middleware.rpc.framework.protocol.RpcProtocol;
+package com.tkzou.middleware.rpc.framework.protocol;
 
 /**
  * 发送远程请求的方式/协议

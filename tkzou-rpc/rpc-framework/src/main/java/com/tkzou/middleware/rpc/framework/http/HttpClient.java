@@ -1,5 +1,6 @@
-package com.tkzou.middleware.rpc.framework.protocol;
+package com.tkzou.middleware.rpc.framework.http;
 
+import com.tkzou.middleware.rpc.framework.protocol.MethodInvocation;
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;

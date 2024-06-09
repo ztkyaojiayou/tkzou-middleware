@@ -1,9 +1,7 @@
-package com.tkzou.middleware.rpc.framework;
+package com.tkzou.middleware.rpc.framework.protocol;
 
-import com.tkzou.middleware.rpc.framework.protocol.HttpServer;
-import com.tkzou.middleware.rpc.framework.protocol.MethodInvoker;
-import com.tkzou.middleware.rpc.framework.protocol.RpcProtocol;
-import com.tkzou.middleware.rpc.framework.protocol.ServiceInstance;
+import com.tkzou.middleware.rpc.framework.consumer.HttpMethodInvoker;
+import com.tkzou.middleware.rpc.framework.consumer.MethodInvoker;
 import com.tkzou.middleware.rpc.framework.register.LocalRegister;
 import com.tkzou.middleware.rpc.framework.register.RemoteServiceRegister;
 

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 当前配置中心的配置文件
+ * 用于配置配置中心的基本信息！
  *
  * @author zoutongkun
  * @date 2022/9/30 11:38

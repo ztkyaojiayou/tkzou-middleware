@@ -9,11 +9,15 @@ import java.util.Map;
  * @author zoutongkun
  */
 public class LocalRegister {
-
-    private static Map<String, Class> SERVICE_REGISTER = new HashMap<>();
+    /**
+     * 服务信息
+     * 这里就只是保存一下具体的实现类！
+     */
+    private static Map<String, Class<?>> SERVICE_REGISTER = new HashMap<>();
 
     /**
      * 注册服务
+     *
      * @param interfaceName
      * @param implClass
      */
@@ -23,6 +27,7 @@ public class LocalRegister {
 
     /**
      * 获取/发现服务
+     *
      * @param interfaceName
      * @return
      */

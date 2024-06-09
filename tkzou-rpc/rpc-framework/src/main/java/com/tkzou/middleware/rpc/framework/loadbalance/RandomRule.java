@@ -1,7 +1,7 @@
 package com.tkzou.middleware.rpc.framework.loadbalance;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.tkzou.middleware.rpc.framework.protocol.MethodInvoker;
+import com.tkzou.middleware.rpc.framework.consumer.MethodInvoker;
 
 import java.util.List;
 import java.util.Random;

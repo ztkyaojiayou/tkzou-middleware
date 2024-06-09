@@ -1,4 +1,6 @@
-package com.tkzou.middleware.rpc.framework.protocol;
+package com.tkzou.middleware.rpc.framework.consumer;
+
+import com.tkzou.middleware.rpc.framework.protocol.MethodInvocation;
 
 /**
  * 方法执行器

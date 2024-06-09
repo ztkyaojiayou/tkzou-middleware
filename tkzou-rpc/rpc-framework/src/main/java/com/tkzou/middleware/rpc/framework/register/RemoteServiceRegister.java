@@ -1,8 +1,8 @@
 package com.tkzou.middleware.rpc.framework.register;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.tkzou.middleware.rpc.framework.ProtocolFactory;
-import com.tkzou.middleware.rpc.framework.protocol.MethodInvoker;
+import com.tkzou.middleware.rpc.framework.protocol.ProtocolFactory;
+import com.tkzou.middleware.rpc.framework.consumer.MethodInvoker;
 import com.tkzou.middleware.rpc.framework.protocol.RpcProtocol;
 import com.tkzou.middleware.rpc.framework.protocol.ServiceInstance;
 
@@ -18,13 +18,14 @@ import java.util.*;
 public class RemoteServiceRegister {
     /**
      * 服务信息
+     * 包含具体的实现类！
      */
     private static Map<String, List<ServiceInstance>> SERVICE_REGISTER = new HashMap<>();
 
     /**
      * 注册服务
      *
-     * @param interfaceName
+     * @param interfaceName   接口名，也可以理解为服务名
      * @param serviceInstance
      */
     public static void register(String interfaceName, ServiceInstance serviceInstance) {
@@ -34,8 +35,9 @@ public class RemoteServiceRegister {
         }
         serviceInstances.add(serviceInstance);
         SERVICE_REGISTER.put(interfaceName, serviceInstances);
-        //当前因为没有使用独立的注册中心，就先保存在文件目录中以模拟实际的注册中心的数据共享功能！！！
-        saveFile();
+        //当前因为没有使用独立的注册中心，
+        //就先保存在文件目录中以模拟实际的注册中心的数据共享功能！
+        saveConfigToFile();
     }
 
     /**
@@ -45,7 +47,7 @@ public class RemoteServiceRegister {
      * @return
      */
     public static List<ServiceInstance> get(String interfaceName) {
-        SERVICE_REGISTER = getFile();
+        SERVICE_REGISTER = getConfigFromFile();
         return SERVICE_REGISTER.get(interfaceName);
     }
 
@@ -70,7 +72,11 @@ public class RemoteServiceRegister {
         return invokerList;
     }
 
-    private static void saveFile() {
+    /**
+     * 将配置信息保存到文件系统
+     * 一般而言是单独启动一个web服务来存储的！
+     */
+    private static void saveConfigToFile() {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream("/temp.txt");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
@@ -80,7 +86,13 @@ public class RemoteServiceRegister {
         }
     }
 
-    private static Map<String, List<ServiceInstance>> getFile() {
+    /**
+     * 从文件中取配置文件
+     * 相当于去独立的配置中心获取配置文件
+     *
+     * @return
+     */
+    private static Map<String, List<ServiceInstance>> getConfigFromFile() {
         try {
             FileInputStream fileInputStream = new FileInputStream("/temp.txt");
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);

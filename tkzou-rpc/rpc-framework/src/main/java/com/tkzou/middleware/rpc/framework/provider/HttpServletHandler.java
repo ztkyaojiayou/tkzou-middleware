@@ -1,7 +1,6 @@
-package com.tkzou.middleware.rpc.framework;
+package com.tkzou.middleware.rpc.framework.provider;
 
 import com.tkzou.middleware.rpc.framework.protocol.MethodInvocation;
-import com.tkzou.middleware.rpc.framework.protocol.ServletHandler;
 import com.tkzou.middleware.rpc.framework.register.LocalRegister;
 import org.apache.commons.io.IOUtils;
 
@@ -12,6 +11,7 @@ import java.lang.reflect.Method;
 
 /**
  * 具体的http处理器
+ * 也即处理rpc请求
  *
  * @author zoutongkun
  */
@@ -27,11 +27,12 @@ public class HttpServletHandler implements ServletHandler {
             //接口名，可理解为服务名
             String interfaceName = methodInvocation.getInterfaceName();
             //2.从注册中心选一个具体的实现类（可理解为服务发现，即获取一个具体的服务实例来调用）
-            Class implClass = LocalRegister.get(interfaceName);
+            Class<?> implClass = LocalRegister.get(interfaceName);
             //3.通过反射机制执行该方法
             //3.1先获取该实现类中的该方法
             Method method = implClass.getMethod(methodInvocation.getMethodName(), methodInvocation.getParamType());
             //3.2再调用该方法
+            //需要临时通过反射创建一个对象
             String result = (String) method.invoke(implClass.newInstance(), methodInvocation.getParams());
             System.out.println("tomcat返回地方结果为:" + result);
             //4.最后返回该方法的返回值给服务消费者！
