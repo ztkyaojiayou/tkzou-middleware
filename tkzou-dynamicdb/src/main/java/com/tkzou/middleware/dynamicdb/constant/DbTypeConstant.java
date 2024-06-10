@@ -1,7 +1,11 @@
 package com.tkzou.middleware.dynamicdb.constant;
 
 /**
- * @Description: TODO：动态数据源常量类
+ * 数据库类型常量
+ * 在此之前需要先区分是哪个酒店，每个酒店都对应一套数据库！
+ * 包括：生产/测试环境下的主/备库，共4个数据库
+ *
+ * @Description:
  * @Author: zoutongkun
  * @CreateDate: 2024/5/16 14:48
  */
