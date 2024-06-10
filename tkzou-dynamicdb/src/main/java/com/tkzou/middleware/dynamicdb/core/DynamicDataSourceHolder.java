@@ -1,7 +1,7 @@
 package com.tkzou.middleware.dynamicdb.core;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
-import com.tkzou.middleware.dynamicdb.constant.DbConstant;
+import com.tkzou.middleware.dynamicdb.constant.DbTypeConstant;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,7 +33,7 @@ public class DynamicDataSourceHolder {
      */
     public static String getKey() {
         String key = DYNAMIC_DATASOURCE_KEY.get();
-        return key == null ? DbConstant.MYSQL_MASTER : key;
+        return key == null ? DbTypeConstant.MYSQL_MASTER : key;
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.tkzou.middleware.dynamicdb.annotation;
 
-import com.tkzou.middleware.dynamicdb.constant.DbConstant;
+import com.tkzou.middleware.dynamicdb.constant.DbTypeConstant;
 import com.tkzou.middleware.dynamicdb.handler.VariableDataSourceHandler;
 
 import java.lang.annotation.*;
@@ -29,7 +29,7 @@ public @interface DataSource {
      *
      * @return
      */
-    String value() default DbConstant.MYSQL_MASTER;
+    String value() default DbTypeConstant.MYSQL_MASTER;
 
     /**
      * 用于获取当前请求的实际的数据源
