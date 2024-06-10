@@ -15,6 +15,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <framework.version>1.2.0-SNAPSHOT</framework.version>
     </properties>
 
     <dependencies>
@@ -51,6 +52,14 @@
             <artifactId>ojdbc8</artifactId>
             <version>19.3.0.0</version>
         </dependency>
+
+        <!--参考实现-->
+        <dependency>
+            <groupId>com.rezen.framework</groupId>
+            <artifactId>framework-db-mybatis</artifactId>
+            <version>${framework.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

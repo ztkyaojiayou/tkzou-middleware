@@ -1,7 +1,9 @@
 package com.tkzou.middleware.dynamicdb.aspect;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.tkzou.middleware.dynamicdb.annotation.DataSource;
 import com.tkzou.middleware.dynamicdb.core.DynamicDataSourceHolder;
+import com.tkzou.middleware.dynamicdb.handler.VariableDataSourceHandler;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -39,7 +41,8 @@ public class DynamicDataSourceAspect {
 
     @Around("dynamicDataSourcePointCut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        String tarDataSourceName = getTarDataSourceName(joinPoint).value();
+        //获取数据源
+        String tarDataSourceName = getTarDataSourceName(joinPoint);
         //先设置一下当前方法要使用的数据源名称
         DynamicDataSourceHolder.setKey(tarDataSourceName);
         try {
@@ -58,14 +61,26 @@ public class DynamicDataSourceAspect {
      * @param joinPoint
      * @return
      */
-    private DataSource getTarDataSourceName(ProceedingJoinPoint joinPoint) {
+    private String getTarDataSourceName(ProceedingJoinPoint joinPoint) {
+        DataSource annotation;
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        //优先从方法上获取该注解
         DataSource dataSourceAnnotation = methodSignature.getMethod().getAnnotation(DataSource.class);
         if (Objects.nonNull(dataSourceAnnotation)) {
-            return dataSourceAnnotation;
+            annotation = dataSourceAnnotation;
         } else {
+            //若没有，则再从该类上获取该注解
             Class<?> dsClass = joinPoint.getTarget().getClass();
-            return dsClass.getAnnotation(DataSource.class);
+            annotation = dsClass.getAnnotation(DataSource.class);
         }
+
+        //解析出实际的数据源
+        String dataSourceType = annotation.value();
+        VariableDataSourceHandler dataSourceHandler = SpringUtil.getBean(dataSourceAnnotation.handler());
+        //获取当前请求实际应该访问的数据源
+        //属于动态获取啦！！！
+        return dataSourceHandler.getRealDataSource(dataSourceType,
+                methodSignature.getParameterNames(),
+                methodSignature.getParameterTypes(), joinPoint.getArgs());
     }
 }

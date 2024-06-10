@@ -48,6 +48,8 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
      * 自定义添加数据源信息
      * 比如可以从数据库中读取数据源信息，然后调用此方法添加到ioc容器中
      * 这样更灵活！
+     * 备注：rezen-餐饮系统就是这么做的，
+     * 且是使用一个定时任务每隔1h拉取更新！！！
      *
      * @param dataSources 数据源实体集合
      * @return 返回添加结果
