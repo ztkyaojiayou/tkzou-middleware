@@ -31,6 +31,7 @@
         <module>tkzou-sms</module>
         <module>tkzou-mybatis</module>
         <module>tkzou-dynamicdb</module>
+        <module>tkzou-xxl-job-autoregister</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
