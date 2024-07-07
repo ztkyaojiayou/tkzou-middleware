@@ -5,10 +5,14 @@ import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
 import com.tkzou.middleware.dynamicdb.constant.DbTypeConstant;
 import com.tkzou.middleware.dynamicdb.core.DynamicDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -53,7 +57,9 @@ public class DynamicDataSourceConfig {
     }
 
     /**
-     * 注册所有数据源
+     * 初始化一个动态数据源，
+     * 用于注册所有数据源，
+     * 同时提供了获取当前线程的数据源的方法
      *
      * @return
      */
@@ -77,28 +83,34 @@ public class DynamicDataSourceConfig {
         return dynamicDataSource;
     }
 
-//    /**
-//     * 手动配置SqlSessionFactory，以便于它使用动态数据源。
-//     * todo 有些版本不需要
-//     * @param dynamicDataSource
-//     * @return
-//     * @throws Exception
-//     */
-//    @Bean("sqlSessionFactory")
-//    public SqlSessionFactory sqlSessionFactoryBean(DynamicDataSource dynamicDataSource) throws Exception {
-//        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
-//        sqlSessionFactoryBean.setDataSource(dynamicDataSource);
-//        return sqlSessionFactoryBean.getObject();
-//    }
-//
-//    /**
-//     * 重写事务管理器，管理动态数据源
-//     * todo 有些版本不需要
-//     */
-//    @Primary
-//    @Bean(value = "transactionManager")
-//    public PlatformTransactionManager annotationDrivenTransactionManager(DynamicDataSource dataSource) {
-//        return new DataSourceTransactionManager(dataSource);
-//    }
+    /**
+     * 手动配置SqlSessionFactory，以便于它使用动态数据源。
+     * todo 有些版本不需要
+     *
+     * @param dynamicDataSource
+     * @return
+     * @throws Exception
+     */
+    @Bean("sqlSessionFactory")
+    public SqlSessionFactory sqlSessionFactoryBean(DynamicDataSource dynamicDataSource) throws Exception {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dynamicDataSource);
+        return sqlSessionFactoryBean.getObject();
+    }
+
+    /**
+     * 重写事务管理器，管理动态数据源
+     * 此时注入的这个数据源就是一个动态数据源！
+     * 事务管理器是和数据源有关的，一个事务管理器需要绑定一个数据源，
+     * 这里绑定的就是动态数据源，也即即使当前配置了很多数据源，
+     * 但在某一个方法中依然只在操作一个数据源！！！
+     * 否则就是分布式事务了！！！
+     * todo 有些版本不需要
+     */
+    @Primary
+    @Bean(value = "transactionManager")
+    public PlatformTransactionManager annotationDrivenTransactionManager(DynamicDataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
+    }
 
 }

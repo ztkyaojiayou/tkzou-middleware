@@ -94,6 +94,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource
 
     /**
      * 获取数据库连接，核心方法
+     * 它是从动态数据源中获取的，是灵活的！
      * 因为AbstractRoutingDataSource继承AbstractDataSource，
      * 而AbstractDataSource实现了DataSource接口，所有存在获取数据源连接的方法
      *
