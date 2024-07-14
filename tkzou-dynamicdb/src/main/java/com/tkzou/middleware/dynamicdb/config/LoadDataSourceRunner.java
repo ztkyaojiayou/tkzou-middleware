@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 加载数据库中的数据源信息到ioc中
  * 使用定时任务拉取更新！
- *
+ * 参考：https://mp.weixin.qq.com/s/ujhSbp1JiynjJxpBCcdRYg
  * @author zoutongkun
  */
 @Component
