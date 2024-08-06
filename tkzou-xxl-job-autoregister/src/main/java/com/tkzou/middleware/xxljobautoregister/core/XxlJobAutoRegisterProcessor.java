@@ -110,8 +110,8 @@ public class XxlJobAutoRegisterProcessor implements ApplicationListener<Applicat
                         Optional<XxlJobHandlerInfo> first = allJobHandler.stream()
                                 .filter(xxlJobHandlerInfo -> xxlJobHandlerInfo.getExecutorHandler().equals(curXxlJob.value()))
                                 .findFirst();
-                        //若不存在，就跳过
-                        if (!first.isPresent()) {
+                        //若已存在，即表示已注册，则跳过
+                        if (first.isPresent()) {
                             continue;
                         }
                     }

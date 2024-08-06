@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * job自动注册注解
- *
+ * 用法：标记到带有@XxlJob的方法上，一个方法就是一个job
  * @author zoutongkun
  */
 @Target({ElementType.METHOD})
