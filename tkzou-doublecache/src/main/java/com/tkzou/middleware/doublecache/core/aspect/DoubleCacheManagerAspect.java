@@ -1,6 +1,6 @@
 package com.tkzou.middleware.doublecache.core.aspect;
 
-import com.tkzou.middleware.doublecache.core.annotation.CacheAdd;
+import com.tkzou.middleware.doublecache.core.annotation.CacheInsert;
 import com.tkzou.middleware.doublecache.core.annotation.CacheDelete;
 import com.tkzou.middleware.doublecache.core.annotation.CacheUpdate;
 import com.tkzou.middleware.doublecache.config.DoubleCacheConfig;
@@ -51,7 +51,7 @@ public class DoubleCacheManagerAspect {
      * 获取数据时
      */
     @Pointcut("execution(* com.tkzou..*.*(..)) && @annotation(com.tkzou.middleware.doublecache.core.annotation" +
-            ".CacheAdd)")
+            ".CacheInsert)")
     public void executionOfCacheAddMethod() {
     }
 
@@ -138,22 +138,22 @@ public class DoubleCacheManagerAspect {
 
         Object returnObject = null;
 
-        CacheAdd cacheAddAnnotation = null;
+        CacheInsert cacheInsertAnnotation = null;
         Object cacheKey = null;
         try {
-            cacheAddAnnotation = getAnnotation(proceedingJoinPoint, CacheAdd.class);
-            KeyGenerators keyGenerator = cacheAddAnnotation.keyGenerator();
-            if (StringUtils.isEmpty(cacheAddAnnotation.keyExpression())) {
+            cacheInsertAnnotation = getAnnotation(proceedingJoinPoint, CacheInsert.class);
+            KeyGenerators keyGenerator = cacheInsertAnnotation.keyGenerator();
+            if (StringUtils.isEmpty(cacheInsertAnnotation.keyExpression())) {
                 //构建缓存key
                 cacheKey = CacheUtil.buildCacheKey(proceedingJoinPoint.getArgs());
             } else {
                 cacheKey = spElUtil
-                        .parseAndGetCacheKeyFromExpression(cacheAddAnnotation.keyExpression(), null,
+                        .parseAndGetCacheKeyFromExpression(cacheInsertAnnotation.keyExpression(), null,
                                 proceedingJoinPoint.getArgs(), keyGenerator);
             }
             //从缓存中获取数据
             //包括两级缓存
-            returnObject = doubleCacheService.get(cacheAddAnnotation.cacheName(), cacheKey);
+            returnObject = doubleCacheService.get(cacheInsertAnnotation.cacheName(), cacheKey);
 
         } catch (Exception e) {
             log.error("getAndSaveInCache # Redis op Exception while trying to get from cache ## " + e.getMessage(), e);
@@ -167,16 +167,16 @@ public class DoubleCacheManagerAspect {
             //再写回到缓存（先写redis，再写本地缓存！）
             if (returnObject != null) {
                 try {
-                    assert cacheAddAnnotation != null;
+                    assert cacheInsertAnnotation != null;
                     //是否异步写入
-                    if (cacheAddAnnotation.isAsync()) {
+                    if (cacheInsertAnnotation.isAsync()) {
                         doubleCacheService
-                                .saveByAsync(new String[]{cacheAddAnnotation.cacheName()}, cacheKey,
-                                        returnObject, cacheAddAnnotation.TTL());
+                                .saveByAsync(new String[]{cacheInsertAnnotation.cacheName()}, cacheKey,
+                                        returnObject, cacheInsertAnnotation.TTL());
                     } else {
                         doubleCacheService
-                                .save(new String[]{cacheAddAnnotation.cacheName()}, cacheKey,
-                                        returnObject, cacheAddAnnotation.TTL());
+                                .save(new String[]{cacheInsertAnnotation.cacheName()}, cacheKey,
+                                        returnObject, cacheInsertAnnotation.TTL());
                     }
                 } catch (Exception e) {
                     log.error("getAndSaveInCache # Exception occurred while trying to save data in redis##" + e.getMessage(),

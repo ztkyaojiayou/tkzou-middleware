@@ -17,7 +17,7 @@ import static com.tkzou.middleware.doublecache.utils.KeyGenerators.SHA;
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CacheAdd {
+public @interface CacheInsert {
 
     /**
      * 缓存名称
