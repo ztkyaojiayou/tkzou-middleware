@@ -42,15 +42,15 @@ public class SmsAutoConfiguration {
      * 注入核心启动类bean
      * 这里就会字段自动注入上面的blends对象
      *
-     * @param factoryList
+     * @param customerFactoryList 用户自行实现的短信对象工厂集合
      * @param smsCommonConfig
      * @param blends
      * @return
      */
     @Bean
-    protected SmsProviderInitializer smsBlendsInitializer(List<SmsProviderFactory<? extends SmsClient, ? extends SmsProviderConfig>> factoryList,
+    protected SmsProviderInitializer smsBlendsInitializer(List<SmsProviderFactory<? extends SmsClient, ? extends SmsProviderConfig>> customerFactoryList,
                                                           SmsCommonConfig smsCommonConfig,
                                                           Map<String, Map<String, Object>> blends) {
-        return new SmsProviderInitializer(factoryList, smsCommonConfig, blends);
+        return new SmsProviderInitializer(customerFactoryList, smsCommonConfig, blends);
     }
 }

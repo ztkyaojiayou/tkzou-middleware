@@ -1,8 +1,10 @@
-package com.tkzou.middleware.sms.core.load;
+package com.tkzou.middleware.sms.core.loadbalance;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.tkzou.middleware.sms.provider.client.SmsClient;
 import com.tkzou.middleware.sms.provider.config.SmsProviderConfig;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,22 +17,19 @@ import java.util.Map;
  * @author :zoutongkun
  * 2024/4/21  20:49
  **/
-public class SmsLoad {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class SmsLoadBalancer {
     // 服务器列表，每个服务器有一个权重和当前权重
     private final List<SmsServer> smsServers = new ArrayList<>();
 
-    private static final SmsLoad smsLoad = new SmsLoad();
-
-    private SmsLoad() {
-    }
+    private static final SmsLoadBalancer SMS_LOAD_BALANCER = new SmsLoadBalancer();
 
     /**
      * 单例
-     *
      * @return
      */
-    public static SmsLoad getInstance() {
-        return new SmsLoad();
+    public static SmsLoadBalancer getInstance() {
+        return SMS_LOAD_BALANCER;
     }
 
     /**
@@ -44,6 +43,29 @@ public class SmsLoad {
      */
     public void addLoadServer(SmsClient LoadServer, int weight) {
         smsServers.add(SmsServer.create(LoadServer, weight, weight));
+    }
+
+    /**
+     * 根据配置文件创建负载均衡器
+     * <p> 创建smsBlend并加入到负载均衡器
+     *
+     * @param smsClient      短信服务
+     * @param supplierConfig 厂商配置
+     * @author :zoutongkun
+     */
+    public static void add(SmsClient smsClient, SmsProviderConfig supplierConfig) {
+        Map<String, Object> supplierConfigMap = BeanUtil.beanToMap(supplierConfig);
+        Object weight = supplierConfigMap.getOrDefault("weight", 1);
+        SMS_LOAD_BALANCER.addLoadServer(smsClient, Integer.parseInt(weight.toString()));
+    }
+
+    /**
+     * 根据配置文件创建负载均衡器
+     * @param smsClient
+     * @param weight
+     */
+    public static void add(SmsClient smsClient, int weight) {
+        SMS_LOAD_BALANCER.addLoadServer(smsClient, weight);
     }
 
     /**
@@ -91,26 +113,5 @@ public class SmsLoad {
         return selectedSmsServer.getSmsClient();
     }
 
-    /**
-     * starConfig
-     * <p> 创建smsBlend并加入到负载均衡器
-     *
-     * @param smsClient      短信服务
-     * @param supplierConfig 厂商配置
-     * @author :zoutongkun
-     */
-    public static void starConfig(SmsClient smsClient, SmsProviderConfig supplierConfig) {
-        Map<String, Object> supplierConfigMap = BeanUtil.beanToMap(supplierConfig);
-        Object weight = supplierConfigMap.getOrDefault("weight", 1);
-        smsLoad.addLoadServer(smsClient, Integer.parseInt(weight.toString()));
-    }
-
-    public static void starConfig(SmsClient smsClient, Integer weight) {
-        smsLoad.addLoadServer(smsClient, weight);
-    }
-
-    public static SmsLoad getBeanLoad() {
-        return smsLoad;
-    }
 }
 

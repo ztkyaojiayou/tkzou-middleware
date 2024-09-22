@@ -20,7 +20,7 @@ public class HuaweiClientFactory extends AbstractProviderFactory<HuaweiSmsClient
 
     /**
      * 获取建造者实例
-     *
+     * 单例模式
      * @return 建造者实例
      */
     public static HuaweiClientFactory getInstance() {

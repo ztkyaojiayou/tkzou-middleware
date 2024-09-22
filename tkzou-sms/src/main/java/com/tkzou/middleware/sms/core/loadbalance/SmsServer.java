@@ -1,4 +1,4 @@
-package com.tkzou.middleware.sms.core.load;
+package com.tkzou.middleware.sms.core.loadbalance;
 
 import com.tkzou.middleware.sms.provider.client.SmsClient;
 import lombok.AllArgsConstructor;

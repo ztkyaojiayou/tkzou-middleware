@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.tkzou.middleware.sms.common.enums.ProviderTypeEnum;
 import com.tkzou.middleware.sms.core.datainterface.SmsReadConfig;
 import com.tkzou.middleware.sms.core.interceptor.SmsInvocationHandler;
-import com.tkzou.middleware.sms.core.load.SmsLoad;
+import com.tkzou.middleware.sms.core.loadbalance.SmsLoadBalancer;
 import com.tkzou.middleware.sms.exception.SmsException;
 import com.tkzou.middleware.sms.provider.client.SmsClient;
 import com.tkzou.middleware.sms.provider.config.BaseSmsProviderConfig;
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 /**
  * SmsClientFactory 使用入口！！！
+ * 集中了项目在初始化时注入的各类SmsClientFactory
  * <p>构造工厂，用于获取一个厂商的短信实现对象
  * 在调用对应厂商的短信发送方法前，请先确保你的配置已经实现，否则无法发送该厂商对应的短信，
  * 一般情况下厂商会回执因缺少的配置所造成的的异常，但组件不会处理
@@ -31,11 +32,12 @@ import java.util.stream.Collectors;
 public abstract class SmsClientFactory {
 
     /**
+     * 在项目初始化时会注入，具体在SmsProviderInitializer类中实现！
      * <p>框架维护的所有短信服务对象</p>
      * <p>key: configId，短信服务对象的唯一标识</p>
      * <p>value: 短信服务对象</p>
      */
-    private final static Map<String, SmsClient> blends = new ConcurrentHashMap<>();
+    private final static Map<String, SmsClient> allSupportedBlendMap = new ConcurrentHashMap<>();
 
     private SmsClientFactory() {
     }
@@ -51,7 +53,7 @@ public abstract class SmsClientFactory {
         if (ObjectUtil.isEmpty(provider)) {
             throw new SmsException("供应商标识不能为空");
         }
-        return blends.values().stream().filter(smsBlend -> provider.getCode().equals(smsBlend.getProviderName())).findFirst().orElse(null);
+        return allSupportedBlendMap.values().stream().filter(smsBlend -> provider.getCode().equals(smsBlend.getProviderName())).findFirst().orElseThrow(() -> new SmsException("不支持对应供应商的短信服务对象"));
     }
 
     /**
@@ -62,7 +64,8 @@ public abstract class SmsClientFactory {
      */
     private static SmsClient renderWithRestricted(SmsClient sms) {
         SmsInvocationHandler smsInvocationHandler = SmsInvocationHandler.create(sms);
-        return (SmsClient) Proxy.newProxyInstance(sms.getClass().getClassLoader(), new Class[]{SmsClient.class}, smsInvocationHandler);
+        return (SmsClient) Proxy.newProxyInstance(sms.getClass().getClassLoader(), new Class[]{SmsClient.class},
+                smsInvocationHandler);
     }
 
     /**
@@ -70,8 +73,8 @@ public abstract class SmsClientFactory {
      *
      * @return 返回短信服务列表
      */
-    public static SmsClient getSmsBlend() {
-        return SmsLoad.getBeanLoad().getLoadServer();
+    public static SmsClient chooseSmsBlend() {
+        return SmsLoadBalancer.getInstance().getLoadServer();
     }
 
     /**
@@ -81,7 +84,7 @@ public abstract class SmsClientFactory {
      * @return 返回短信服务对象。如果未找到则返回null
      */
     public static SmsClient getSmsBlend(String configId) {
-        return blends.get(configId);
+        return allSupportedBlendMap.get(configId);
     }
 
     /**
@@ -95,7 +98,7 @@ public abstract class SmsClientFactory {
         if (StrUtil.isEmpty(provider)) {
             throw new SmsException("供应商标识不能为空");
         }
-        list = blends.values().stream().filter(smsBlend -> provider.equals(smsBlend.getProviderName())).collect(Collectors.toList());
+        list = allSupportedBlendMap.values().stream().filter(smsBlend -> provider.equals(smsBlend.getProviderName())).collect(Collectors.toList());
         return list;
     }
 
@@ -104,8 +107,8 @@ public abstract class SmsClientFactory {
      *
      * @return 短信服务对象列表
      */
-    public static List<SmsClient> getAll() {
-        return new ArrayList<>(blends.values());
+    public static List<SmsClient> getAllSupportedClient() {
+        return new ArrayList<>(allSupportedBlendMap.values());
     }
 
 //-----------------------------------注册--------------------------------------------
@@ -119,8 +122,8 @@ public abstract class SmsClientFactory {
         if (smsClient == null) {
             throw new SmsException("短信服务对象不能为空");
         }
-        blends.put(smsClient.getConfigId(), smsClient);
-        SmsLoad.starConfig(smsClient, 1);
+        allSupportedBlendMap.put(smsClient.getConfigId(), smsClient);
+        SmsLoadBalancer.add(smsClient, 1);
     }
 
     /**
@@ -132,8 +135,8 @@ public abstract class SmsClientFactory {
         if (smsClient == null) {
             throw new SmsException("短信服务对象不能为空");
         }
-        blends.put(smsClient.getConfigId(), smsClient);
-        SmsLoad.starConfig(smsClient, weight);
+        allSupportedBlendMap.put(smsClient.getConfigId(), smsClient);
+        SmsLoadBalancer.add(smsClient, weight);
     }
 
     /**
@@ -149,11 +152,11 @@ public abstract class SmsClientFactory {
             throw new SmsException("短信服务对象不能为空");
         }
         String configId = smsClient.getConfigId();
-        if (blends.containsKey(configId)) {
+        if (allSupportedBlendMap.containsKey(configId)) {
             return false;
         }
-        blends.put(configId, smsClient);
-        SmsLoad.starConfig(smsClient, 1);
+        allSupportedBlendMap.put(configId, smsClient);
+        SmsLoadBalancer.add(smsClient, 1);
         return true;
     }
 
@@ -173,11 +176,11 @@ public abstract class SmsClientFactory {
             throw new SmsException("短信服务对象不能为空");
         }
         String configId = smsClient.getConfigId();
-        if (blends.containsKey(configId)) {
+        if (allSupportedBlendMap.containsKey(configId)) {
             return false;
         }
-        blends.put(configId, smsClient);
-        SmsLoad.starConfig(smsClient, weight);
+        allSupportedBlendMap.put(configId, smsClient);
+        SmsLoadBalancer.add(smsClient, weight);
         return true;
     }
 
@@ -191,8 +194,8 @@ public abstract class SmsClientFactory {
      * <p>当configId不存在时，返回false</p>
      */
     public static boolean unregister(String configId) {
-        SmsClient blend = blends.remove(configId);
-        SmsLoad.getBeanLoad().removeLoadServer(blend);
+        SmsClient blend = allSupportedBlendMap.remove(configId);
+        SmsLoadBalancer.getInstance().removeLoadServer(blend);
         return blend != null;
     }
 

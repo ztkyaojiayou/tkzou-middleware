@@ -28,18 +28,26 @@ import java.util.Map;
  * 初始化当前项目--核心类！
  * 也是当前项目启动的入口
  * 使用springboot的事件监听机制实现初始化！
- * 常规套路
+ * 这里没有通过@configuration注入，而是在SmsAutoConfiguration中注入到ioc容器中，常规套路
  *
  * @author zoutongkun
  */
 @Slf4j
 @AllArgsConstructor
 public class SmsProviderInitializer implements ApplicationListener<ContextRefreshedEvent> {
-    private List<SmsProviderFactory<? extends SmsClient, ? extends SmsProviderConfig>> factoryList;
+    /**
+     * 用户自行实现的短信对象工厂集合,是在注入bean时依赖注入的，具体则是读取配置类中的值，当前没有，为null！
+     */
+    private List<SmsProviderFactory<? extends SmsClient, ? extends SmsProviderConfig>> customerFactoryList;
 
     private final SmsCommonConfig smsCommonConfig;
     private final Map<String, Map<String, Object>> blends;
 
+    /**
+     * 初始化
+     *
+     * @param event
+     */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() != null) {
@@ -47,8 +55,8 @@ public class SmsProviderInitializer implements ApplicationListener<ContextRefres
         }
         //注册默认支持的服务提供商，实际上就是咱们自己写的
         this.registerDefaultFactory();
-        // 注册用户实现的短信对象工厂
-        SmsProviderFactoryHolder.register(factoryList);
+        // 注册用户实现的短信对象工厂，当前没有，为null
+        SmsProviderFactoryHolder.register(customerFactoryList);
         // 解析供应商配置
         for (String configId : blends.keySet()) {
             Map<String, Object> configMap = blends.get(configId);
@@ -56,7 +64,8 @@ public class SmsProviderInitializer implements ApplicationListener<ContextRefres
             String supplier = supplierObj == null ? "" : String.valueOf(supplierObj);
             supplier = StrUtil.isEmpty(supplier) ? configId : supplier;
             //拿到对应的工厂类，由他来创建具体的client，并注册/保存到本地maP
-            SmsProviderFactory<SmsClient, SmsProviderConfig> providerFactory = (SmsProviderFactory<SmsClient, SmsProviderConfig>) SmsProviderFactoryHolder.choose(supplier);
+            SmsProviderFactory<SmsClient, SmsProviderConfig> providerFactory = (SmsProviderFactory<SmsClient,
+                    SmsProviderConfig>) SmsProviderFactoryHolder.choose(supplier);
             if (providerFactory == null) {
                 log.warn("创建\"{}\"的短信服务失败，未找到供应商为\"{}\"的服务", configId, supplier);
                 continue;

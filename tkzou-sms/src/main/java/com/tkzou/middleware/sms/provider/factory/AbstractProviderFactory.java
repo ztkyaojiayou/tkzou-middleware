@@ -23,6 +23,10 @@ public abstract class AbstractProviderFactory<S extends SmsClient, C extends Sms
      */
     private Class<C> configClass;
 
+    /**
+     * 构造方法，在这里获取当前短信服务提供商的配置类
+     * 子类会复用该方法！
+     */
     public AbstractProviderFactory() {
         //获取一下当前类的泛型参数类型，这里就是获取到配置类的class对象
         //务必掌握！

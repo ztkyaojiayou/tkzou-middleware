@@ -22,7 +22,7 @@ public class SmsProviderFactoryHolder {
      * 保存所有的短信服务提供商工厂对象
      * key：短信服务提供商名称，value：具体的工厂对象
      */
-    private static final Map<String, SmsProviderFactory<? extends SmsClient, ? extends SmsProviderConfig>> SmsProviderFactoryMap = new ConcurrentHashMap<>();
+    private static final Map<String, SmsProviderFactory<? extends SmsClient, ? extends SmsProviderConfig>> smsProviderFactoryMap = new ConcurrentHashMap<>();
 
     /**
      * 注册单个短信服务提供商工厂
@@ -33,7 +33,7 @@ public class SmsProviderFactoryHolder {
         if (factory == null) {
             throw new SmsException("注册供应商工厂失败，工厂实例不能为空");
         }
-        SmsProviderFactoryMap.put(factory.getSupplier(), factory);
+        smsProviderFactoryMap.put(factory.getSupplier(), factory);
     }
 
     /**
@@ -60,7 +60,7 @@ public class SmsProviderFactoryHolder {
      * @return
      */
     public static SmsProviderFactory<? extends SmsClient, ? extends SmsProviderConfig> choose(String provider) {
-        return SmsProviderFactoryMap.getOrDefault(provider, null);
+        return smsProviderFactoryMap.getOrDefault(provider, null);
     }
 
 }
