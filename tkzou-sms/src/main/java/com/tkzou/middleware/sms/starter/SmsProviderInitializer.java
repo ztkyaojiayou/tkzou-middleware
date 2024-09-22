@@ -57,8 +57,10 @@ public class SmsProviderInitializer implements ApplicationListener<ContextRefres
         this.registerDefaultFactory();
         // 注册用户实现的短信对象工厂，当前没有，为null
         SmsProviderFactoryHolder.register(customerFactoryList);
-        // 解析供应商配置
+        // 解析获取供应商配置
+        //configId即配置文件中的供应商名称，如huawei，alibaba等
         for (String configId : blends.keySet()) {
+            //具体的配置信息，这里是通过map封装的，因为读取时就是使用的map
             Map<String, Object> configMap = blends.get(configId);
             Object supplierObj = configMap.get(CommonConstant.SUPPLIER_KEY);
             String supplier = supplierObj == null ? "" : String.valueOf(supplierObj);
@@ -72,6 +74,7 @@ public class SmsProviderInitializer implements ApplicationListener<ContextRefres
             }
             configMap.put("config-id", configId);
             StringUtil.replaceKeysSeparator(configMap, "-", "_");
+            //将配置信息转为对应的配置类，其实也可以在获取配置信息时直接通过对应的配置类接收！(易知就需要维护一个配置类和配置文件中的供应商key的映射关系，也很简单，就使用providerFactory.getConfigClass()即可！
             JSONObject configJson = new JSONObject(configMap);
             SmsProviderConfig supplierConfig = JSONUtil.toBean(configJson, providerFactory.getConfigClass());
             //注册smsClient到本地map
