@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit;
  * @author zoutongkun
  * @date 2024/4/15
  */
-public class TwoLevelCacheService implements DoubleCacheService {
+public class SecondLevelCacheService implements DoubleCacheService {
 
-    private static final Logger logger = LoggerFactory.getLogger(TwoLevelCacheService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SecondLevelCacheService.class);
 
     /**
      * 二级缓存
@@ -48,9 +48,9 @@ public class TwoLevelCacheService implements DoubleCacheService {
     private DoubleCacheConfig doubleCacheConfig;
 
 
-    public TwoLevelCacheService(DoubleCacheService secondDoubleCacheService,
-                                NotifyService notifyService,
-                                DoubleCacheConfig doubleCacheConfig) {
+    public SecondLevelCacheService(DoubleCacheService secondDoubleCacheService,
+                                   NotifyService notifyService,
+                                   DoubleCacheConfig doubleCacheConfig) {
         this.secondDoubleCacheService = secondDoubleCacheService;
         this.notifyService = notifyService;
         this.doubleCacheConfig = doubleCacheConfig;

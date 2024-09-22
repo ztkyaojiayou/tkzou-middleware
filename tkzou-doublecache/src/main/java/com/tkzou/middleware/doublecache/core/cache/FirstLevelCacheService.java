@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author zoutongkun
  */
-public class OneLevelCacheService implements DoubleCacheService {
+public class FirstLevelCacheService implements DoubleCacheService {
 
-    private static final Logger logger = LoggerFactory.getLogger(OneLevelCacheService.class);
+    private static final Logger logger = LoggerFactory.getLogger(FirstLevelCacheService.class);
 
     private ExecutorService serviceCallExecutorService;
 
@@ -30,9 +30,9 @@ public class OneLevelCacheService implements DoubleCacheService {
     /**
      * 初始化
      */
-    public OneLevelCacheService(RedissonClient redissonClient,
-                                ExecutorService serviceCallExecutorService,
-                                DoubleCacheConfig doubleCacheConfig) {
+    public FirstLevelCacheService(RedissonClient redissonClient,
+                                  ExecutorService serviceCallExecutorService,
+                                  DoubleCacheConfig doubleCacheConfig) {
         this.redissonClient = redissonClient;
         this.serviceCallExecutorService = serviceCallExecutorService;
         this.doubleCacheConfig = doubleCacheConfig;

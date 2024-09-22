@@ -2,8 +2,8 @@ package com.tkzou.middleware.doublecache.config;
 
 import com.tkzou.middleware.doublecache.common.NamedThreadFactory;
 import com.tkzou.middleware.doublecache.core.cache.DoubleCacheService;
-import com.tkzou.middleware.doublecache.core.cache.OneLevelCacheService;
-import com.tkzou.middleware.doublecache.core.cache.TwoLevelCacheService;
+import com.tkzou.middleware.doublecache.core.cache.FirstLevelCacheService;
+import com.tkzou.middleware.doublecache.core.cache.SecondLevelCacheService;
 import com.tkzou.middleware.doublecache.core.listener.CacheUpdateMessageListener;
 import com.tkzou.middleware.doublecache.core.notify.NotifyByRedisImpl;
 import com.tkzou.middleware.doublecache.core.notify.NotifyService;
@@ -173,10 +173,10 @@ public class DoubleCacheAutoConfiguration {
         DoubleCacheService doubleCacheService;
         // 判断是否开启两级缓存，默认只开启redis缓存
         if (doubleCacheConfig.isEnableSecondCache()) {
-            DoubleCacheService secondDoubleCacheService = new OneLevelCacheService(redissonClient, redisExecutor, doubleCacheConfig);
-            doubleCacheService = new TwoLevelCacheService(secondDoubleCacheService, notifyService, doubleCacheConfig);
+            DoubleCacheService secondDoubleCacheService = new FirstLevelCacheService(redissonClient, redisExecutor, doubleCacheConfig);
+            doubleCacheService = new SecondLevelCacheService(secondDoubleCacheService, notifyService, doubleCacheConfig);
         } else {
-            doubleCacheService = new OneLevelCacheService(redissonClient, redisExecutor, doubleCacheConfig);
+            doubleCacheService = new FirstLevelCacheService(redissonClient, redisExecutor, doubleCacheConfig);
         }
         return doubleCacheService;
     }
@@ -197,7 +197,7 @@ public class DoubleCacheAutoConfiguration {
     public RTopic subscribe(RedissonClient redissonClient, DoubleCacheService caffeineDoubleCacheService) {
         RTopic rTopic = redissonClient.getTopic(doubleCacheConfig.getTopic());
         CacheUpdateMessageListener messageListener =
-                new CacheUpdateMessageListener((TwoLevelCacheService) caffeineDoubleCacheService);
+                new CacheUpdateMessageListener((SecondLevelCacheService) caffeineDoubleCacheService);
         rTopic.addListener(messageListener);
         return rTopic;
     }

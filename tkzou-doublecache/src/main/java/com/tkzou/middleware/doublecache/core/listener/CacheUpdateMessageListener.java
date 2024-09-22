@@ -1,7 +1,7 @@
 package com.tkzou.middleware.doublecache.core.listener;
 
 import com.tkzou.middleware.doublecache.config.DoubleCacheConfig;
-import com.tkzou.middleware.doublecache.core.cache.TwoLevelCacheService;
+import com.tkzou.middleware.doublecache.core.cache.SecondLevelCacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.listener.MessageListener;
 
@@ -19,10 +19,10 @@ public class CacheUpdateMessageListener implements MessageListener<CacheUpdateMe
     /**
      * Caffeine 缓存管理实现接口
      */
-    private TwoLevelCacheService twoLevelCacheService;
+    private SecondLevelCacheService secondLevelCacheService;
 
-    public CacheUpdateMessageListener(TwoLevelCacheService twoLevelCacheService) {
-        this.twoLevelCacheService = twoLevelCacheService;
+    public CacheUpdateMessageListener(SecondLevelCacheService secondLevelCacheService) {
+        this.secondLevelCacheService = secondLevelCacheService;
     }
 
     /**
@@ -46,7 +46,7 @@ public class CacheUpdateMessageListener implements MessageListener<CacheUpdateMe
             // 如果是当前节点，则不做清除（这里主要是兼容redis更新的场景，而对于删除操作，则当前节点的本地缓存也需要删除！）
             if (!DoubleCacheConfig.SYSTEM_ID.equals(cacheUpdateMessage.getSystemId())) {
                 // 发送清理本地缓存的信息
-                twoLevelCacheService.clearNotSend(cacheUpdateMessage.getCacheNames(), cacheUpdateMessage.getKey());
+                secondLevelCacheService.clearNotSend(cacheUpdateMessage.getCacheNames(), cacheUpdateMessage.getKey());
                 log.info("onMessage # clear local cache {}, the key is {}",
                         cacheUpdateMessage.getCacheNames(), cacheUpdateMessage.getKey());
             }
