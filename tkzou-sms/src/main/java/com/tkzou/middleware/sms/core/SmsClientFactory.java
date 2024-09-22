@@ -3,7 +3,7 @@ package com.tkzou.middleware.sms.core;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.tkzou.middleware.sms.common.enums.ProviderTypeEnum;
-import com.tkzou.middleware.sms.core.datainterface.SmsReadConfig;
+import com.tkzou.middleware.sms.core.datainterface.SmsCustomerConfig;
 import com.tkzou.middleware.sms.core.interceptor.SmsInvocationHandler;
 import com.tkzou.middleware.sms.core.loadbalance.SmsLoadBalancer;
 import com.tkzou.middleware.sms.exception.SmsException;
@@ -218,12 +218,12 @@ public abstract class SmsClientFactory {
      * <p>该方法创建的短信实例将会交给框架进行托管，后续可以通过getSmsBlend获取
      * <p>该方法会直接调用接口实现
      *
-     * @param smsReadConfig 读取额外配置接口
+     * @param smsCustomerConfig 读取额外配置接口
      * @param configId      配置ID
      * @author :zoutongkun
      */
-    public static void createSmsBlend(SmsReadConfig smsReadConfig, String configId) {
-        BaseSmsProviderConfig supplierConfig = smsReadConfig.getSupplierConfig(configId);
+    public static void createSmsBlend(SmsCustomerConfig smsCustomerConfig, String configId) {
+        BaseSmsProviderConfig supplierConfig = smsCustomerConfig.getSupplierConfig(configId);
         SmsClient smsClient = doCreate(supplierConfig);
         register(smsClient);
     }
@@ -234,11 +234,11 @@ public abstract class SmsClientFactory {
      * <p>该方法创建的短信实例将会交给框架进行托管，后续可以通过getSmsBlend获取
      * <p>该方法会直接调用接口实现
      *
-     * @param smsReadConfig 读取额外配置接口
+     * @param smsCustomerConfig 读取额外配置接口
      * @author :zoutongkun
      */
-    public static void createSmsBlend(SmsReadConfig smsReadConfig) {
-        List<BaseSmsProviderConfig> supplierConfigList = smsReadConfig.getSupplierConfigList();
+    public static void createSmsBlend(SmsCustomerConfig smsCustomerConfig) {
+        List<BaseSmsProviderConfig> supplierConfigList = smsCustomerConfig.getSupplierConfigList();
         supplierConfigList.forEach(supplierConfig -> {
             SmsClient smsClient = doCreate(supplierConfig);
             register(smsClient);
@@ -264,12 +264,12 @@ public abstract class SmsClientFactory {
      * <p>该方法创建的短信实例将会交给框架进行托管，后续可以通过getSmsBlend获取
      * <p>该方法会直接调用接口实现
      *
-     * @param smsReadConfig 读取额外配置接口
+     * @param smsCustomerConfig 读取额外配置接口
      * @param configId      配置ID
      * @author :zoutongkun
      */
-    public static void createRestrictedSmsBlend(SmsReadConfig smsReadConfig, String configId) {
-        BaseSmsProviderConfig supplierConfig = smsReadConfig.getSupplierConfig(configId);
+    public static void createRestrictedSmsBlend(SmsCustomerConfig smsCustomerConfig, String configId) {
+        BaseSmsProviderConfig supplierConfig = smsCustomerConfig.getSupplierConfig(configId);
         SmsClient smsClient = doCreate(supplierConfig);
         smsClient = renderWithRestricted(smsClient);
         register(smsClient);
@@ -281,11 +281,11 @@ public abstract class SmsClientFactory {
      * <p>该方法创建的短信实例将会交给框架进行托管，后续可以通过getSmsBlend获取
      * <p>该方法会直接调用接口实现
      *
-     * @param smsReadConfig 读取额外配置接口
+     * @param smsCustomerConfig 读取额外配置接口
      * @author :zoutongkun
      */
-    public static void createRestrictedSmsBlend(SmsReadConfig smsReadConfig) {
-        List<BaseSmsProviderConfig> supplierConfigList = smsReadConfig.getSupplierConfigList();
+    public static void createRestrictedSmsBlend(SmsCustomerConfig smsCustomerConfig) {
+        List<BaseSmsProviderConfig> supplierConfigList = smsCustomerConfig.getSupplierConfigList();
         supplierConfigList.forEach(supplierConfig -> {
             SmsClient smsClient = doCreate(supplierConfig);
             smsClient = renderWithRestricted(smsClient);
