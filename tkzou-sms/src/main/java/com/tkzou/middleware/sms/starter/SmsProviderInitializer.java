@@ -71,7 +71,7 @@ public class SmsProviderInitializer implements ApplicationListener<ContextRefres
                 continue;
             }
             configMap.put("config-id", configId);
-            StringUtil.replaceKeysSeperator(configMap, "-", "_");
+            StringUtil.replaceKeysSeparator(configMap, "-", "_");
             JSONObject configJson = new JSONObject(configMap);
             SmsProviderConfig supplierConfig = JSONUtil.toBean(configJson, providerFactory.getConfigClass());
             //注册smsClient到本地map

@@ -147,20 +147,20 @@ public class StringUtil {
      * 将Map中所有key的分隔符转换为新的分隔符
      *
      * @param map          map对象
-     * @param seperator    旧分隔符
-     * @param newSeperator 新分隔符
+     * @param separator    旧分隔符
+     * @param newSeparator 新分隔符
      */
-    public static void replaceKeysSeperator(Map<String, Object> map, String seperator, String newSeperator) {
+    public static void replaceKeysSeparator(Map<String, Object> map, String separator, String newSeparator) {
         if (CollUtil.isEmpty(map)) {
             return;
         }
         List<String> keySet = new ArrayList<>(map.keySet());
         for (String key : keySet) {
-            if (StrUtil.isEmpty(key) || !key.contains(seperator)) {
+            if (StrUtil.isEmpty(key) || !key.contains(separator)) {
                 continue;
             }
             String value = String.valueOf(map.get(key));
-            String newKey = key.replaceAll(seperator, newSeperator);
+            String newKey = key.replaceAll(separator, newSeparator);
             map.putIfAbsent(newKey, value);
             map.remove(key);
         }
