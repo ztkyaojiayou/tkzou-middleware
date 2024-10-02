@@ -13,9 +13,11 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * Description:
- *
+ * Description: 本地消息表
+ * 用于保存一个rpc方法的基本消息和对应的重试记录信息
+ * <p>
  * Date: 2024-08-06
+ *
  * @author zoutongkun
  */
 @Data
@@ -26,7 +28,9 @@ import java.util.Date;
 public class MethodRetryRecord {
     public final static byte STATUS_WAIT = 1;
     public final static byte STATUS_FAIL = 2;
-
+    /**
+     * 本地消息id，用于标识一个rpc方法的基本消息和对应的重试记录信息
+     */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
@@ -36,6 +40,8 @@ public class MethodRetryRecord {
     private RetryMethodMetadata retryMethodMetadataJson;
     /**
      * 状态 1待执行 2已失败
+     * 待执行表示第一次执行或重试了但未成功的情况
+     * 执行成功就直接删除啦！！！
      */
     @TableField("status")
     @Builder.Default
@@ -48,6 +54,7 @@ public class MethodRetryRecord {
     private Date nextRetryTime = new Date();
     /**
      * 已经重试的次数
+     * 默认0
      */
     @TableField("retry_times")
     @Builder.Default

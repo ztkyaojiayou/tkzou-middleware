@@ -6,7 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Description:唯一标识一个方法信息的dto，用于执行失败后将该方法的信息发送到mq以重试
+ * Description:唯一标识一个方法信息的dto，用于执行失败后重试
+ *
  * <p>
  * Date: 2024-08-06
  *

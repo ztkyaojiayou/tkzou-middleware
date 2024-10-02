@@ -23,7 +23,16 @@ import java.util.stream.Collectors;
 
 /**
  * 方法重试服务
- * 参考：https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247533040&idx=1&sn=cb5ea58167cefe8e73cf5a260b0b65cd&chksm=fdc2f120ad5fa53c29ae5affb55271454b6ac5d1541b84ab682ad5dac62d73ddc29ff2e6c0f5&scene=90&xtrack=1&sessionid=1713405355&subscene=93&clicktime=1713405360&enterid=1713405360&flutter_pos=0&biz_enter_id=4&ascene=56&devicetype=iOS15.4.1&version=18002a32&nettype=3G+&abtest_cookie=AAACAA%3D%3D&lang=zh_CN&countrycode=CN&fontScale=106&exportkey=n_ChQIAhIQfo5Lxa17c1QvJgm9BnzMnxLXAQIE97dBBAEAAAAAAEszBw7%2BlRAAAAAOpnltbLcz9gKNyK89dVj0rpIQvZdtB0%2F9oTcyo%2BhU6s7xHMbXftiR%2BMZ9Viuuob9ajBr4kAXZvGO1VrZowIcnP%2B7rxmgVGjw1HmLMiEhcjhAcb35wZIavo9SyJ2cV1yJTJXcoOU4RXr7D2eznne8yzu1e3tybKfXRPSoNqW9DpNCKyu0fz0EkDnDJs%2B7bVNvfFLTbKy8bVaEHngIg1kvWiUg9hJO%2B608uzjWPud1dd%2FxvRoGuAvhYkSFttCF%2Fr%2Bt6&pass_ticket=%2BdhHrOGvGgVSp1p5exANhRqBqH3MvBFIcraWLaHSbqyBUVZCgfl%2Bao0oyZbmhkIhlKHePnKwylzHnmMxQC2N%2Bw%3D%3D&wx_header=3
+ * 参考：https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247533040&idx=1&sn
+ * =cb5ea58167cefe8e73cf5a260b0b65cd&chksm
+ * =fdc2f120ad5fa53c29ae5affb55271454b6ac5d1541b84ab682ad5dac62d73ddc29ff2e6c0f5&scene=90&xtrack
+ * =1&sessionid=1713405355&subscene=93&clicktime=1713405360&enterid=1713405360&flutter_pos=0
+ * &biz_enter_id=4&ascene=56&devicetype=iOS15.4
+ * .1&version=18002a32&nettype=3G+&abtest_cookie=AAACAA%3D%3D&lang=zh_CN&countrycode=CN&fontScale
+ * =106&exportkey=n_ChQIAhIQfo5Lxa17c1QvJgm9BnzMnxLXAQIE97dBBAEAAAAAAEszBw7
+ * %2BlRAAAAAOpnltbLcz9gKNyK89dVj0rpIQvZdtB0%2F9oTcyo%2BhU6s7xHMbXftiR
+ * %2BMZ9Viuuob9ajBr4kAXZvGO1VrZowIcnP
+ * %2B7rxmgVGjw1HmLMiEhcjhAcb35wZIavo9SyJ2cV1yJTJXcoOU4RXr7D2eznne8yzu1e3tybKfXRPSoNqW9DpNCKyu0fz0EkDnDJs%2B7bVNvfFLTbKy8bVaEHngIg1kvWiUg9hJO%2B608uzjWPud1dd%2FxvRoGuAvhYkSFttCF%2Fr%2Bt6&pass_ticket=%2BdhHrOGvGgVSp1p5exANhRqBqH3MvBFIcraWLaHSbqyBUVZCgfl%2Bao0oyZbmhkIhlKHePnKwylzHnmMxQC2N%2Bw%3D%3D&wx_header=3
  * Date: 2024-03-20
  *
  * @author zoutongkun
@@ -54,7 +63,9 @@ public class MethodRetryService {
 
         //保存执行数据
         saveRecord(record);
-        //2.有事务，则添加一个事务同步器，并重写afterCompletion方法（此方法在事务提交后会做回调）
+        //2.则添加一个事务同步器，并重写afterCompletion方法（此方法在事务提交后会做回调）
+        //作用是当事务提交后（此时这条执行rpc方法的消息就确保在本地事务写成功啦！）执行一次该rpc方法，
+        // 此时即使超时了也无所谓（若能返回确定的成功或失败那是最好！），重试即可！
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             /**
              * 事务提交后会做的事情，该方法无法获取到当前事务的状态
@@ -98,6 +109,12 @@ public class MethodRetryService {
         });
     }
 
+    /**
+     * 通过反射机制执行指定方法
+     * 第一次或重试都是执行该方法
+     *
+     * @param record
+     */
     public void doInvoke(MethodRetryRecord record) {
         RetryMethodMetadata retryMethodMetadata = record.getRetryMethodMetadataJson();
         try {
@@ -106,10 +123,11 @@ public class MethodRetryService {
             //解析要重试的方法的元信息，通过反射机制执行方法
             Class<?> beanClass = Class.forName(retryMethodMetadata.getClassName());
             Object bean = SpringUtil.getBean(beanClass);
-            List<String> parameterStrings = JsonUtils.toList(retryMethodMetadata.getParameterTypes(), String.class);
+            List<String> parameterStrings =
+                JsonUtils.toList(retryMethodMetadata.getParameterTypes(), String.class);
             List<Class<?>> parameterClasses = getMethodParameters(parameterStrings);
             Method method = ReflectUtil.getMethod(beanClass, retryMethodMetadata.getMethodName(),
-                    parameterClasses.toArray(new Class[]{}));
+                parameterClasses.toArray(new Class[]{}));
             Object[] args = getMethodArgs(retryMethodMetadata, parameterClasses);
             //执行方法（第一次或重试）
             method.invoke(bean, args);
@@ -117,15 +135,17 @@ public class MethodRetryService {
             removeRecord(record.getId());
         } catch (Throwable e) {
             log.error("SecureInvokeService invoke fail", e);
-            //执行失败，等待下次执行
+            //执行失败比如超时！！！更新本地消息表，等待下次执行即可
             updateRecord(record, e.getMessage());
         } finally {
+            //再清理一下
             MethodInvokeContextHolder.invoked();
         }
     }
 
     @NotNull
-    private Object[] getMethodArgs(RetryMethodMetadata retryMethodMetadata, List<Class<?>> parameterClasses) {
+    private Object[] getMethodArgs(RetryMethodMetadata retryMethodMetadata,
+                                   List<Class<?>> parameterClasses) {
         JsonNode jsonNode = JsonUtils.toJsonNode(retryMethodMetadata.getArgs());
         Object[] args = new Object[jsonNode.size()];
         for (int i = 0; i < jsonNode.size(); i++) {
@@ -147,30 +167,57 @@ public class MethodRetryService {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 新增本地消息
+     *
+     * @param record
+     */
     private void saveRecord(MethodRetryRecord record) {
         localMsgRetryRecordDao.save(record);
     }
 
+    /**
+     * 更新本地消息
+     *
+     * @param record
+     * @param errorMsg
+     */
     private void updateRecord(MethodRetryRecord record, String errorMsg) {
-        Integer retryTimes = record.getRetryTimes() + 1;
         MethodRetryRecord update = new MethodRetryRecord();
         update.setId(record.getId());
         update.setFailReason(errorMsg);
-        update.setNextRetryTime(getNextRetryTime(retryTimes));
+        //重试次数大于注解上配置的3次后就直接视为失败！
+        //此时重试次数就不用管了，统一置为-1即可
+        //更新重试次数
+        Integer retryTimes = record.getRetryTimes() + 1;
         if (retryTimes > record.getMaxRetryTimes()) {
+            update.setRetryTimes(-1);
             update.setStatus(MethodRetryRecord.STATUS_FAIL);
         } else {
+            update.setNextRetryTime(genNextRetryTime(retryTimes));
             update.setRetryTimes(retryTimes);
         }
         localMsgRetryRecordDao.updateById(update);
     }
 
+    /**
+     * 删除本地消息
+     *
+     * @param id
+     */
     private void removeRecord(Long id) {
         localMsgRetryRecordDao.removeById(id);
     }
 
-    private Date getNextRetryTime(Integer retryTimes) {//或者可以采用退避算法
-        double waitMinutes = Math.pow(RETRY_INTERVAL_MINUTES, retryTimes);//重试时间指数上升 2m 4m 8m 16m
+    /**
+     * 构建下次重试时间
+     *
+     * @param retryTimes
+     * @return
+     */
+    private Date genNextRetryTime(Integer retryTimes) {//或者可以采用退避算法
+        //指数运算
+        double waitMinutes = Math.pow(RETRY_INTERVAL_MINUTES, retryTimes);//重试时间指数上升 即：2m 4m 8m 16m
         return DateUtil.offsetMinute(new Date(), (int) waitMinutes);
     }
 

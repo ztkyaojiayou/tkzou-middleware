@@ -19,6 +19,7 @@ package com.tkzou.middleware.localmsgretry.methodretry.support;
 import org.springframework.lang.Nullable;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * 线程池配置类
@@ -35,7 +36,7 @@ public interface MethodRetryConfigurer {
      */
     @Nullable
     default Executor getExecutor() {
-        return null;
+        return ForkJoinPool.commonPool();
     }
 
 }

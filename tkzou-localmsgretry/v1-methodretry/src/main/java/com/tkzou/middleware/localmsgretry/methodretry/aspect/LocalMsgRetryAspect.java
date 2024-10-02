@@ -51,19 +51,21 @@ public class LocalMsgRetryAspect {
         //先组装成要入库的实体
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         List<String> parameters =
-                Stream.of(method.getParameterTypes()).map(Class::getName).collect(Collectors.toList());
+            Stream.of(method.getParameterTypes()).map(Class::getName).collect(Collectors.toList());
         RetryMethodMetadata curMethodMetadata = RetryMethodMetadata.builder()
-                .args(JsonUtils.toStr(joinPoint.getArgs()))
-                .className(method.getDeclaringClass().getName())
-                .methodName(method.getName())
-                .parameterTypes(JsonUtils.toStr(parameters))
-                .build();
+            .args(JsonUtils.toStr(joinPoint.getArgs()))
+            .className(method.getDeclaringClass().getName())
+            .methodName(method.getName())
+            .parameterTypes(JsonUtils.toStr(parameters))
+            .build();
         MethodRetryRecord methodRetryRecord = MethodRetryRecord.builder()
-                .retryMethodMetadataJson(curMethodMetadata)
-                .maxRetryTimes(localMsgRetryable.maxRetryTimes())
-                .nextRetryTime(DateUtil.offsetMinute(new Date(), (int) MethodRetryService.RETRY_INTERVAL_MINUTES))
-                .build();
-        //执行方法
+            .retryMethodMetadataJson(curMethodMetadata)
+            .maxRetryTimes(localMsgRetryable.maxRetryTimes())
+            .nextRetryTime(DateUtil.offsetMinute(new Date(),
+                (int) MethodRetryService.RETRY_INTERVAL_MINUTES))
+            .build();
+        //处理要执行的方法
+        //干两件事：1.写入本地消息表，2.执行一次
         methodRetryService.handle(methodRetryRecord, async);
         return null;
     }

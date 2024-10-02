@@ -28,11 +28,14 @@ public class MethodRetryJob {
     /**
      * 重试
      * 每5s重试一次
+     * 重试范围：最近2min的待执行状态的记录
+     * 对于重试多次后还是失败的记录，可以再专门使用job处理！
      */
     @Scheduled(cron = "*/5 * * * * ?")
     public void methodRetry() {
         List<MethodRetryRecord> methodRetryRecords = localMsgRetryRecordDao.getWaitRetryRecords();
         for (MethodRetryRecord methodRetryRecord : methodRetryRecords) {
+            //默认异步
             methodRetryService.doAsyncInvoke(methodRetryRecord);
         }
     }

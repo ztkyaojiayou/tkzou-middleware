@@ -1,6 +1,5 @@
 package com.tkzou.middleware.localmsgretry.methodretry.config;
 
-import com.tkzou.middleware.localmsgretry.methodretry.aspect.LocalMsgRetryAspect;
 import com.tkzou.middleware.localmsgretry.methodretry.mapper.LocalMsgRetryRecordDao;
 import com.tkzou.middleware.localmsgretry.methodretry.mapper.LocalMsgRetryRecordMapper;
 import com.tkzou.middleware.localmsgretry.methodretry.service.MethodRetryService;
@@ -9,8 +8,8 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -25,27 +24,30 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Description:
- *
+ * Description:springboot自动配置类
+ * 通过spi机制统一导出bean
  * Date: 2024-08-06
+ *
  * @author zoutongkun
  */
 @Configuration
 @EnableScheduling
 @MapperScan(basePackageClasses = LocalMsgRetryRecordMapper.class)
-@Import({LocalMsgRetryAspect.class, LocalMsgRetryRecordDao.class})
+@ComponentScan("com.tkzou.middleware.localmsgretry.methodretry")
 public class MethodRetryAutoConfiguration {
 
     @Nullable
     protected Executor executor;
 
     /**
+     * 收集并设置自定义的线程池
      * Collect any {@link AsyncConfigurer} beans through autowiring.
      */
     @Autowired
     void setConfigurers(ObjectProvider<MethodRetryConfigurer> configurers) {
         Supplier<MethodRetryConfigurer> configurer = SingletonSupplier.of(() -> {
-            List<MethodRetryConfigurer> candidates = configurers.stream().collect(Collectors.toList());
+            List<MethodRetryConfigurer> candidates =
+                configurers.stream().collect(Collectors.toList());
             if (CollectionUtils.isEmpty(candidates)) {
                 return null;
             }
@@ -54,11 +56,12 @@ public class MethodRetryAutoConfiguration {
             }
             return candidates.get(0);
         });
-        executor = Optional.ofNullable(configurer.get()).map(MethodRetryConfigurer::getExecutor).orElse(ForkJoinPool.commonPool());
+        executor =
+            Optional.ofNullable(configurer.get()).map(MethodRetryConfigurer::getExecutor).orElse(ForkJoinPool.commonPool());
     }
 
     @Bean
-    public MethodRetryService getSecureInvokeService(LocalMsgRetryRecordDao dao) {
+    public MethodRetryService buildMethodRetryService(LocalMsgRetryRecordDao dao) {
         return new MethodRetryService(dao, executor);
     }
 }
