@@ -112,6 +112,10 @@ public class MethodRetryService {
     /**
      * 通过反射机制执行指定方法
      * 第一次或重试都是执行该方法
+     * 注意：当第二次执行时（即第二个线程！）此时又会走到切面逻辑，此时就不会开事务啦，
+     * 因为该方法本身没有加事务注解，但是TransactionSynchronizationManager.isActualTransactionActive()
+     * 还是返回true，可能是bug，
+     * 因此我们使用一个threadLocal来维护一下即可！
      *
      * @param record
      */
@@ -129,13 +133,13 @@ public class MethodRetryService {
             Method method = ReflectUtil.getMethod(beanClass, retryMethodMetadata.getMethodName(),
                 parameterClasses.toArray(new Class[]{}));
             Object[] args = getMethodArgs(retryMethodMetadata, parameterClasses);
-            //执行方法（第一次或重试）
+            //执行方法（第一次或重试），因为一般是写数据，因此无需考虑返回值！
             method.invoke(bean, args);
             //执行成功删除该记录
             removeRecord(record.getId());
         } catch (Throwable e) {
             log.error("SecureInvokeService invoke fail", e);
-            //执行失败比如超时！！！更新本地消息表，等待下次执行即可
+            //执行失败或超时！！！此时不回滚前面的操作，而是更新本地消息表，通过job重试来保证其成功即可！！！
             updateRecord(record, e.getMessage());
         } finally {
             //再清理一下

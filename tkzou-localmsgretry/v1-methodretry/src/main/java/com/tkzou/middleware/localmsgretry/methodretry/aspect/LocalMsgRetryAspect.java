@@ -44,6 +44,8 @@ public class LocalMsgRetryAspect {
         boolean async = localMsgRetryable.isAsync();
         boolean inTransaction = TransactionSynchronizationManager.isActualTransactionActive();
         //非事务状态，直接执行，不做任何保证，也即失败了也不重试，当然，也是可以做的！！！
+        //但这里一个小bug，即在事务提交后再执行该方法时inTransaction依旧为true，理论上应该是false,因为此时并没有开事务!
+        //因此为了保证第二次进来时不走带事务的逻辑而直接执行，我们就使用threadLocal标识一下！！！
         if (MethodInvokeContextHolder.isInvoking() || !inTransaction) {
             return joinPoint.proceed();
         }
@@ -67,6 +69,7 @@ public class LocalMsgRetryAspect {
         //处理要执行的方法
         //干两件事：1.写入本地消息表，2.执行一次
         methodRetryService.handle(methodRetryRecord, async);
+        //因为是写数据，因此可以不考虑返回值
         return null;
     }
 }
