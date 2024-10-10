@@ -1,0 +1,75 @@
+package com.tkzou.middleware.transaction.localmsgretry.aspect;
+
+import cn.hutool.core.date.DateUtil;
+import com.tkzou.middleware.transaction.localmsgretry.annotation.LocalMsgRetryable;
+import com.tkzou.middleware.transaction.localmsgretry.entity.MethodRetryRecord;
+import com.tkzou.middleware.transaction.localmsgretry.entity.RetryMethodMetadata;
+import com.tkzou.middleware.transaction.localmsgretry.service.MethodInvokeContextHolder;
+import com.tkzou.middleware.transaction.localmsgretry.service.MethodRetryService;
+import com.tkzou.middleware.transaction.localmsgretry.util.JsonUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.lang.reflect.Method;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+/**
+ * 本地消息表方法重试切面
+ * <p>
+ * Date: 2024-04-20
+ *
+ * @author zoutongkun
+ */
+@Slf4j
+@Aspect
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)//确保最先执行
+@Component
+public class LocalMsgRetryAspect {
+    @Autowired
+    private MethodRetryService methodRetryService;
+
+    @Around("@annotation(localMsgRetryable)")
+    public Object around(ProceedingJoinPoint joinPoint, LocalMsgRetryable localMsgRetryable) throws Throwable {
+        boolean async = localMsgRetryable.isAsync();
+        boolean inTransaction = TransactionSynchronizationManager.isActualTransactionActive();
+        //非事务状态，直接执行，不做任何保证，也即失败了也不重试，当然，也是可以做的！！！
+        //但这里一个小bug，即在事务提交后再执行该方法时inTransaction依旧为true，理论上应该是false,因为此时并没有开事务!
+        //因此为了保证第二次进来时不走带事务的逻辑而直接执行，我们就使用threadLocal标识一下！！！
+        if (MethodInvokeContextHolder.isInvoking() || !inTransaction) {
+            return joinPoint.proceed();
+        }
+
+        //先组装成要入库的实体
+        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        List<String> parameters =
+            Stream.of(method.getParameterTypes()).map(Class::getName).collect(Collectors.toList());
+        RetryMethodMetadata curMethodMetadata = RetryMethodMetadata.builder()
+            .args(JsonUtils.toStr(joinPoint.getArgs()))
+            .className(method.getDeclaringClass().getName())
+            .methodName(method.getName())
+            .parameterTypes(JsonUtils.toStr(parameters))
+            .build();
+        MethodRetryRecord methodRetryRecord = MethodRetryRecord.builder()
+            .retryMethodMetadataJson(curMethodMetadata)
+            .maxRetryTimes(localMsgRetryable.maxRetryTimes())
+            .nextRetryTime(DateUtil.offsetMinute(new Date(),
+                (int) MethodRetryService.RETRY_INTERVAL_MINUTES))
+            .build();
+        //处理要执行的方法
+        //干两件事：1.写入本地消息表，2.执行一次
+        methodRetryService.handle(methodRetryRecord, async);
+        //因为是写数据，因此可以不考虑返回值
+        return null;
+    }
+}

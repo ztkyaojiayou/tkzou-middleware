@@ -38,7 +38,8 @@ public class ClassPathMapperScanner extends ClassPathBeanDefinitionScanner {
     public Set<BeanDefinitionHolder> doScan(String... basePackages) {
         Set<BeanDefinitionHolder> beanDefinitionHolders = super.doScan(basePackages);
         for (BeanDefinitionHolder beanDefinitionHolder : beanDefinitionHolders) {
-            AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) beanDefinitionHolder.getBeanDefinition();
+            AbstractBeanDefinition beanDefinition =
+                (AbstractBeanDefinition) beanDefinitionHolder.getBeanDefinition();
             beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanDefinition.getBeanClassName());
             //修改为FactoryBean类型，便于代理mapper接口！
             //这样一来，spring在创建该类型的bean时就会调用FactoryBean的getObject方法，从而获取到代理对象

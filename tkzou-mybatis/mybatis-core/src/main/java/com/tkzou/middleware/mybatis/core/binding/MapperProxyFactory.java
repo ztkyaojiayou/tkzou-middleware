@@ -34,7 +34,7 @@ public class MapperProxyFactory {
          * 第三个参数：实现InvocationHandler接口，也即MapperProxy，这个对象非常重要！
          */
         return (T) Proxy.newProxyInstance(mapperClass.getClassLoader(), new Class[]{mapperClass},
-                new MapperProxy(sqlSession, mapperClass));
+            new MapperProxy(sqlSession, mapperClass));
     }
 
 }

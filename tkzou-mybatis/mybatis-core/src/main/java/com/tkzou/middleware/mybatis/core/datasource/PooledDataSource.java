@@ -43,7 +43,8 @@ public class PooledDataSource implements DataSource {
         //初始化指定数量的数据库连接
         for (int i = 0; i < this.POOL_SIZE; i++) {
             Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0" +
-                    ".1:3306/mybatis-tkzou?useUnicode=true&characterEncoding=UTF8&useSSL=false", "root", "root");
+                    ".1:3306/mybatis-tkzou?useUnicode=true&characterEncoding=UTF8&useSSL=false",
+                "root", "root");
             this.pool.add(new PooledConnection(this, connection).getProxy());
         }
     }
@@ -56,7 +57,8 @@ public class PooledDataSource implements DataSource {
         } else {
             //若没有，则重新创建连接
             Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0" +
-                    ".1:3306/mybatis-tkzou?useUnicode=true&characterEncoding=UTF8&useSSL=false", "root", "root");
+                    ".1:3306/mybatis-tkzou?useUnicode=true&characterEncoding=UTF8&useSSL=false",
+                "root", "root");
             Connection newConnection = new PooledConnection(this, connection).getProxy();
             this.pool.add(newConnection);
             return newConnection;

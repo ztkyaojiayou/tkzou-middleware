@@ -23,7 +23,7 @@
         <module>tkzou-springboot</module>
         <module>tkzou-rpc</module>
         <module>tkzou-doublecache</module>
-        <module>tkzou-localmsgretry</module>
+        <module>tkzou-transaction</module>
         <module>tkzou-configcenter</module>
         <module>tkzou-binlog</module>
         <module>tkzou-springcloud</module>
