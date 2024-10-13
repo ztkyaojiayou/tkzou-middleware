@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 /**
  * bean的属性集合类
+ *
  * @author zoutongkun
  * @description: TODO
  * @date 2023/8/10 11:04
@@ -46,7 +47,7 @@ public class PropertyValues {
      */
     public PropertyValue getPropertyValue(String propertyName) {
         List<PropertyValue> resPropertyList =
-                this.propertyValueList.stream().filter(o -> o.getName().equals(propertyName)).collect(Collectors.toList());
+            this.propertyValueList.stream().filter(o -> o.getName().equals(propertyName)).collect(Collectors.toList());
         if (CollectionUtil.isEmpty(resPropertyList)) {
             return null;
         }

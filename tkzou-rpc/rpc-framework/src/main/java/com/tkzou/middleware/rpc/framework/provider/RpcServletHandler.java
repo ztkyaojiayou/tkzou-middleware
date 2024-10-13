@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
  *
  * @author zoutongkun
  */
-public class HttpServletHandler implements ServletHandler {
+public class RpcServletHandler implements ServletHandler {
 
     @Override
     public void handler(HttpServletRequest req, HttpServletResponse resp) {
@@ -23,7 +23,7 @@ public class HttpServletHandler implements ServletHandler {
         try {
             //1.获取服务消费者在请求体中发送的要调用的方法元消息methodInvocation
             MethodInvocation methodInvocation =
-                    (MethodInvocation) new ObjectInputStream(req.getInputStream()).readObject();
+                (MethodInvocation) new ObjectInputStream(req.getInputStream()).readObject();
             //接口名，可理解为服务名
             String interfaceName = methodInvocation.getInterfaceName();
             //2.从注册中心选一个具体的实现类（可理解为服务发现，即获取一个具体的服务实例来调用）

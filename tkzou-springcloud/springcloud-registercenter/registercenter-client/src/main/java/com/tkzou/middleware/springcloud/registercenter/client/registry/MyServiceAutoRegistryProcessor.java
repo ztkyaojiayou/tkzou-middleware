@@ -9,6 +9,7 @@ import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
  * 具体是如何实现的？
  * 就是监听springboot发布的WebServerInitializedEvent事件
  * 具体是由AbstractAutoServiceRegistration监听并调用的！
+ * 然后依次调用onApplicationEvent->bind->start->register()
  * 最终就会调用MyServiceRegistry的register方法！！！
  * 这就连起来啦！
  *
@@ -19,7 +20,8 @@ public class MyServiceAutoRegistryProcessor extends AbstractAutoServiceRegistrat
 
     private MyRegistration myRegistration;
 
-    public MyServiceAutoRegistryProcessor(ServiceRegistry<Registration> serviceRegistry, MyRegistration myRegistration) {
+    public MyServiceAutoRegistryProcessor(ServiceRegistry<Registration> serviceRegistry,
+                                          MyRegistration myRegistration) {
         super(serviceRegistry, null);
         this.myRegistration = myRegistration;
     }

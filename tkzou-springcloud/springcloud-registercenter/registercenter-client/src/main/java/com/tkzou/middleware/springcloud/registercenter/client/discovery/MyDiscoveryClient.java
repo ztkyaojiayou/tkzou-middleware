@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * 服务发现实现类
  * 即从注册中心找到当前服务名称的所有实例
  * 本质就是发送一个http请求去调接口！！！
- * 该bean在MyDiscoveryAutoConfiguration类中集中加载到ioc容器！
+ * 该bean在MyServiceAutoDiscoveryConfiguration类中集中加载到ioc容器！
  * 这其实也是推荐的方式，即尽量不要通过类似@component或@configuration等注解分散到各个角落，不易维护！！！
  *
  * @author zoutongkun
@@ -45,6 +45,7 @@ public class MyDiscoveryClient implements DiscoveryClient {
         Map<String, Object> param = new HashMap<>();
         param.put("serviceName", serviceId);
         //从注册中心获取，使用http请求即可！
+        //返回的是一个json串
         String response = HttpUtil.get(myDiscoveryProperties.getConfigServerUrl() + "/list", param);
         logger.info("query service instance, serviceId: {}, response: {}", serviceId, response);
         //使用fastJson解析
@@ -69,7 +70,8 @@ public class MyDiscoveryClient implements DiscoveryClient {
      */
     @Override
     public List<String> getServices() {
-        String response = HttpUtil.post(myDiscoveryProperties.getConfigServerUrl() + "/listServiceNames", new HashMap<>());
+        String response = HttpUtil.post(myDiscoveryProperties.getConfigServerUrl() +
+            "/listServiceNames", new HashMap<>());
         logger.info("query service instance list, response: {}", response);
         return JSON.parseArray(response, String.class);
     }

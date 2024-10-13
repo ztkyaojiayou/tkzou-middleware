@@ -21,7 +21,8 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      * 正在创建的单例对象
      * 用于判断是否产生循环依赖
      */
-    private final Set singletonsCurrentlyInCreation = Collections.newSetFromMap(new ConcurrentHashMap(16));
+    private final Set singletonsCurrentlyInCreation =
+        Collections.newSetFromMap(new ConcurrentHashMap(16));
 
     /**
      * 使用map存放最终的单例对象，也即平时说的ioc容器！！！
@@ -90,7 +91,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      *
      * @param beanName
      * @param allowEarlyReference
-     * @return
+     * @return 可能为空，此时就需要执行createBean方法创建！
      */
     @Override
     public Object getSingleton(String beanName, boolean allowEarlyReference) {
@@ -104,14 +105,14 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
             singletonObject = earlySingletonObjects.get(beanName);
             //4.若二级缓存为空，并且允许循环依赖，则就要解决循环依赖，则从三级缓存中获取
             if (ObjectUtil.isEmpty(singletonObject) && allowEarlyReference) {
-                //再从三级缓存取，肯定有，因为在此之前就已经设置好了！
+                //再从三级缓存取（不一定有，只有在第一次createBean时才会放进去！！！）
                 //注意：三级缓存中存放的是ObjectFactory，即创建代理对象的对象工厂
                 //todo 源码中这里加锁了，且使用了双重检锁模式的单例模式，这里先不用了
                 ObjectFactory<?> singletonFactory = singletonFactories.get(beanName);
                 if (ObjectUtil.isNotEmpty(singletonFactory)) {
                     //获取代理对象，此时就是执行getEarlyBeanReference方法，
                     //且beanName, beanDefinition, finalBean这个参数也是有值的，
-                    //因为在添加时就已经被保存起来啦！！！
+                    //因为在第一次createBean时添加时就已经被保存起来啦！！！
                     //且这个finalBean就是原始的bean！
                     singletonObject = singletonFactory.getObject();
                     //5.将代理对象放入二级缓存
@@ -124,6 +125,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
         //7.标记一下当前bean已经创建完成
         afterSingletonCreation(beanName);
+        //注意：是可能为空的！！！
         return singletonObject;
     }
 
@@ -163,7 +165,8 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
             try {
                 disposableBean.destroy();
             } catch (Exception e) {
-                throw new BeansException("在bean销毁前执行的destroy中，该bean'" + beanName + "' 的该方法执行异常：", e);
+                throw new BeansException("在bean销毁前执行的destroy中，该bean'" + beanName + "' 的该方法执行异常：",
+                    e);
             }
         }
     }
@@ -197,7 +200,8 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      */
     protected void afterSingletonCreation(String beanName) {
         if (!this.singletonsCurrentlyInCreation.remove(beanName)) {
-            throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
+            throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in " +
+                "creation");
         }
     }
 

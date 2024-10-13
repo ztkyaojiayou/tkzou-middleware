@@ -1,6 +1,6 @@
 package com.tkzou.middleware.rpc.framework.consumer;
 
-import com.tkzou.middleware.rpc.framework.provider.HttpServletHandler;
+import com.tkzou.middleware.rpc.framework.provider.RpcServletHandler;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) {
-        new HttpServletHandler().handler(req, resp);
+        new RpcServletHandler().handler(req, resp);
     }
 
 }

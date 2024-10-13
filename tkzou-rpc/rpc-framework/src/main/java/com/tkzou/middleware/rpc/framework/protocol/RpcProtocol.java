@@ -19,6 +19,7 @@ public interface RpcProtocol {
     /**
      * 引用服务
      * 即服务发现，由服务消费者在使用时调用
+     * 最终生成一个调用rpc方法的RpcMethodInvoker
      *
      * @param serviceInstance
      * @return

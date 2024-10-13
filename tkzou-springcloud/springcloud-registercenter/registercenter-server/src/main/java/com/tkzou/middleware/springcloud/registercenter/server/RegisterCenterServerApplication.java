@@ -6,7 +6,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * 注册中心
+ * 注册中心，本质上就是一个常规的springboot web服务
+ * 就是针对服务信息的crud，同时对外提供接口以获取服务信息！！！
  * 就只是基于内存
  * 因为注册中心非重点
  *

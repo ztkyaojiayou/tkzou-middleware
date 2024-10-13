@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 
 /**
- * 服务注册配置类
+ * 服务注册配置类，即当前服务的信息，用于注册！
  * 会统一在ServiceRegisterCoreBeanAutoConfiguration类中加载为bean！！！
  * 这里就不加@configuration或@component注解了
  *

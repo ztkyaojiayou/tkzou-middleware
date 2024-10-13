@@ -74,8 +74,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         Object sharedInstance = getSingleton(beanName);
         if (ObjectUtils.isNotEmpty(sharedInstance)) {
             //此时可能是FactoryBean，也可能是普通的bean，对于前者，单独处理，
-            //这里就没支持获取这个FactoryBean本身了，因为意义也不大，
-            //但源码中是支持的，实现上很简单，就是对beanName做个区分即可！
+            //实现上很简单，就是对beanName做个区分即可！
             //且对于这类bean，会把真正的bean存入一个单独的缓存中，也即factoryBeanObjectCache
             return getObjectForBeanInstance(sharedInstance, beanName);
         }

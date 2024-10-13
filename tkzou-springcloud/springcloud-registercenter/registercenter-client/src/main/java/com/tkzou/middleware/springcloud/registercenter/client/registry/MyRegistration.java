@@ -15,7 +15,9 @@ import java.util.Map;
  * @date 2024/4/28
  */
 public class MyRegistration implements Registration {
-
+    /**
+     * 当前服务的元信息
+     */
     private MyDiscoveryProperties myDiscoveryProperties;
 
     /**

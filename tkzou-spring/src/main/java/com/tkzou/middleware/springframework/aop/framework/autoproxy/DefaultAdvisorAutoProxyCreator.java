@@ -1,6 +1,9 @@
 package com.tkzou.middleware.springframework.aop.framework.autoproxy;
 
-import com.tkzou.middleware.springframework.aop.*;
+import com.tkzou.middleware.springframework.aop.Advisor;
+import com.tkzou.middleware.springframework.aop.ClassFilter;
+import com.tkzou.middleware.springframework.aop.Pointcut;
+import com.tkzou.middleware.springframework.aop.TargetSource;
 import com.tkzou.middleware.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import com.tkzou.middleware.springframework.aop.framework.ProxyFactory;
 import com.tkzou.middleware.springframework.beans.BeansException;
@@ -10,7 +13,6 @@ import com.tkzou.middleware.springframework.beans.factory.BeanFactoryAware;
 import com.tkzou.middleware.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.tkzou.middleware.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.MethodInterceptor;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,7 +30,8 @@ import java.util.Set;
  * @description :
  * @modyified By:
  */
-public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
+public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPostProcessor,
+    BeanFactoryAware {
     /**
      * 把ioc容器对象通过aware接口注入进来备用！
      * 这样就可以直接单独获取或创建bean啦，即使此时refresh方法没有执行！！！
@@ -68,7 +71,8 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
     }
 
     @Override
-    public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) throws BeansException {
+    public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean,
+                                                    String beanName) throws BeansException {
         //对应代理对象，属性不做处理，直接就是返回代理对象即可
         return pvs;
     }
@@ -82,8 +86,8 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      */
     private boolean isInfrastructureClass(Class<?> beanClass) {
         return Advice.class.isAssignableFrom(beanClass)
-                || Pointcut.class.isAssignableFrom(beanClass)
-                || Advisor.class.isAssignableFrom(beanClass);
+            || Pointcut.class.isAssignableFrom(beanClass)
+            || Advisor.class.isAssignableFrom(beanClass);
     }
 
     @Override
@@ -153,7 +157,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
         //1.获取/初始化项目中配置或自定义的所有AspectJExpressionPointcutAdvisor切面
         //此时因为ioc容器还没有初始化完成，因此本质上就是单独创建这些bean并将其注入到ioc容器中
         Collection<AspectJExpressionPointcutAdvisor> candidatePointcutAdvisors =
-                beanFactory.getBeansOfType(AspectJExpressionPointcutAdvisor.class).values();
+            beanFactory.getBeansOfType(AspectJExpressionPointcutAdvisor.class).values();
 
         //2.遍历所有切面，判断是否有切面要切当前类，若有，则为当前bean创建代理对象
         //找到一个作用于当前类的切面即可！
@@ -163,6 +167,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
             //todo 可以算是适配器模式！
             for (AspectJExpressionPointcutAdvisor advisor : candidatePointcutAdvisors) {
                 //2.1判断当前bean是否符合切点规则，符合就创建代理对象
+                //比如若当前bean上有@transactional注解，就会创建对应的代理对象，代理增强逻辑就是事务相关的逻辑！！！
                 ClassFilter classFilter = advisor.getPointcut().getClassFilter();
                 if (classFilter.matches(beanClass)) {
                     TargetSource targetSource = new TargetSource(bean);

@@ -11,16 +11,17 @@ import com.tkzou.middleware.rpc.framework.protocol.ServiceInstance;
  *
  * @author zoutongkun
  */
-public class HttpMethodInvoker implements MethodInvoker {
+public class RpcMethodInvoker implements MethodInvoker {
 
     private ServiceInstance serviceInstance;
 
-    public HttpMethodInvoker(ServiceInstance serviceInstance) {
+    public RpcMethodInvoker(ServiceInstance serviceInstance) {
         this.serviceInstance = serviceInstance;
     }
 
     /**
      * 执行rpc接口中的方法
+     * 本质就是发起http请求！！！
      *
      * @param methodInvocation
      * @return
@@ -28,7 +29,7 @@ public class HttpMethodInvoker implements MethodInvoker {
     @Override
     public String invoke(MethodInvocation methodInvocation) {
         //方式http请求，返回结果
-        HttpClient httpClient = new HttpClient();
-        return httpClient.send(serviceInstance.getHostname(), serviceInstance.getPort(), methodInvocation);
+        return HttpClient.getInstance().send(serviceInstance.getHostname(),
+            serviceInstance.getPort(), methodInvocation);
     }
 }

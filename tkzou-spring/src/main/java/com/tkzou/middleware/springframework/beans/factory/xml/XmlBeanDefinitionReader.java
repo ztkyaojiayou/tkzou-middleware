@@ -136,7 +136,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
             //如"com.tkzou.middleware.spring"
             String scanPath = componentScan.attributeValue(BASE_PACKAGE_ATTRIBUTE);
             if (StrUtil.isEmpty(scanPath)) {
-                throw new BeansException("The value of base-package attribute can not be empty or null");
+                throw new BeansException("The value of base-package attribute can not be empty or" +
+                    " null");
             }
             //扫描包--核心方法，也即把带有@Component注解的类信息组装成BeanDefinition对象
             scanPackage(scanPath);
@@ -213,6 +214,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * @param scanPath
      */
     private void scanPackage(String scanPath) {
+        //可能配置了多个包连路径
         String[] basePackages = StrUtil.splitToArray(scanPath, ',');
         ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(getRegistry());
         scanner.doScan(basePackages);

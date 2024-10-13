@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2024/4/28
  */
 @Configuration
-public class MyDiscoveryConfiguration {
+public class MyServiceAutoDiscoveryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean

@@ -17,6 +17,21 @@ import java.net.URL;
  * @author zoutongkun
  */
 public class HttpClient {
+
+    private HttpClient() {
+    }
+
+    private static final HttpClient httpClient = new HttpClient();
+
+    /**
+     * 获取单例
+     *
+     * @return
+     */
+    public static HttpClient getInstance() {
+        return httpClient;
+    }
+
     /**
      * 发送http请求
      *

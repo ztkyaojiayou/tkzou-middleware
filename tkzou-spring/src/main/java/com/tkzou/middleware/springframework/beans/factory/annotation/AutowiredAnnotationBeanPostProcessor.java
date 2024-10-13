@@ -19,7 +19,8 @@ import java.lang.reflect.Field;
  * @description :
  * @modyified By:
  */
-public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
+public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareBeanPostProcessor,
+    BeanFactoryAware {
     /**
      * ioc容器对象，通过实现BeanFactoryAware注入！
      * 在spring中，随时通过实现BeanFactoryAware来注入ioc容器对象
@@ -43,12 +44,14 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
      * @throws BeansException
      */
     @Override
-    public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) throws BeansException {
+    public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean,
+                                                    String beanName) throws BeansException {
         //1.处理字段上的@Value注解
         Class<?> aClass = bean.getClass();
         Field[] declaredFields = aClass.getDeclaredFields();
         //遍历处理每一个字段，寻找带有@Value注解的字段
         for (Field field : declaredFields) {
+            //判断是否带有@Value注解
             Value valueAnnotation = field.getAnnotation(Value.class);
             if (ObjectUtil.isNotEmpty(valueAnnotation)) {
                 //此时为：${tkzou.name}"，需要解析对应的值
@@ -60,6 +63,7 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
                 //即根据用户配置的类型转换器来判断是否需要转换类型！
                 Class<?> sourceType = value.getClass();
                 Class<?> targetType = (Class<?>) TypeUtil.getType(field);
+                //如果有类型器，则使用该转换器进行转换
                 ConversionService conversionService = beanFactory.getConversionService();
                 if (conversionService != null) {
                     if (conversionService.canConvert(sourceType, targetType)) {
@@ -87,6 +91,7 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
                     //属性名称，通过@Qualifier注解定义
                     dependentBeanName = qualifierAnnotation.value();
                     //1.优先按照该beanName去ioc容器中找bean，当前前提是bean属于该type！
+                    //若没有就顺势创建！！！
                     dependentBean = beanFactory.getBean(dependentBeanName, fieldType);
                 } else {
                     //2.否则就先按type再按字段名找一个即可

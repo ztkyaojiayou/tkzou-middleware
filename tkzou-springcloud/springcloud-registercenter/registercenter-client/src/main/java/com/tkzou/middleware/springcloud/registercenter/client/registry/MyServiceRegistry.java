@@ -49,13 +49,14 @@ public class MyServiceRegistry implements ServiceRegistry<Registration> {
         param.put("ip", registration.getHost());
         param.put("port", registration.getPort());
         //通过http的方式注册到远程的注册中心如nacos
-        String result = HttpUtil.post(myDiscoveryProperties.getConfigServerUrl() + "/register", param);
+        String result = HttpUtil.post(myDiscoveryProperties.getConfigServerUrl() + "/register",
+            param);
         if (Boolean.parseBoolean(result)) {
             logger.info("register service successfully, serviceName: {}, ip: {}, port: {}",
-                    registration.getServiceId(), registration.getHost(), registration.getPort());
+                registration.getServiceId(), registration.getHost(), registration.getPort());
         } else {
             logger.error("register service failed, serviceName: {}, ip: {}, port: {}",
-                    registration.getServiceId(), registration.getHost(), registration.getPort());
+                registration.getServiceId(), registration.getHost(), registration.getPort());
             throw new RuntimeException("register service failed, serviceName");
         }
     }
@@ -72,13 +73,16 @@ public class MyServiceRegistry implements ServiceRegistry<Registration> {
         param.put("ip", myDiscoveryProperties.getIp());
         param.put("port", myDiscoveryProperties.getPort());
 
-        String result = HttpUtil.post(myDiscoveryProperties.getConfigServerUrl() + "/deregister", param);
+        String result = HttpUtil.post(myDiscoveryProperties.getConfigServerUrl() + "/deregister",
+            param);
         if (Boolean.parseBoolean(result)) {
             logger.info("de-register service successfully, serviceName: {}, ip: {}, port: {}",
-                    myDiscoveryProperties.getServiceName(), myDiscoveryProperties.getIp(), myDiscoveryProperties.getPort());
+                myDiscoveryProperties.getServiceName(), myDiscoveryProperties.getIp(),
+                myDiscoveryProperties.getPort());
         } else {
             logger.warn("de-register service failed, serviceName: {}, ip: {}, port: {}",
-                    myDiscoveryProperties.getServiceName(), myDiscoveryProperties.getIp(), myDiscoveryProperties.getPort());
+                myDiscoveryProperties.getServiceName(), myDiscoveryProperties.getIp(),
+                myDiscoveryProperties.getPort());
         }
     }
 

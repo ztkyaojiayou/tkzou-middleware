@@ -1,7 +1,7 @@
 package com.tkzou.middleware.rpc.framework.protocol;
 
-import com.tkzou.middleware.rpc.framework.consumer.HttpMethodInvoker;
 import com.tkzou.middleware.rpc.framework.consumer.MethodInvoker;
+import com.tkzou.middleware.rpc.framework.consumer.RpcMethodInvoker;
 import com.tkzou.middleware.rpc.framework.register.LocalRegister;
 import com.tkzou.middleware.rpc.framework.register.RemoteServiceRegister;
 
@@ -25,7 +25,7 @@ public class HttpProtocol implements RpcProtocol {
 
     @Override
     public MethodInvoker refer(ServiceInstance serviceInstance) {
-        return new HttpMethodInvoker(serviceInstance);
+        return new RpcMethodInvoker(serviceInstance);
     }
 
 }

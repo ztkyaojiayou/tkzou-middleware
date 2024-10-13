@@ -258,6 +258,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     /**
      * 发布当前事件
+     * 所有的监听者已经在等着这个事件发布啦！
      *
      * @param event
      */
