@@ -21,6 +21,14 @@ public class LoadBalanceClientContextFactory extends NamedContextFactory<RibbonC
         super(RibbonClientConfiguration.class, NAMESPACE, "ribbon.client.name");
     }
 
+    /**
+     * 获取一个负载均衡器
+     *
+     * @param name
+     * @param type
+     * @param <C>
+     * @return
+     */
     @Override
     public <C> C getInstance(String name, Class<C> type) {
         return super.getInstance(name, type);

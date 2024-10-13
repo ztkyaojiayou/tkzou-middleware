@@ -15,7 +15,7 @@ import java.util.HashMap;
  * 具备负载均衡能力的feign client
  * 因为集成了ribbon提供的LoadBalancerClient
  * 使用了装饰器模式
- * 装饰了Client
+ * 装饰了Client，至于Client.Default的具体实现则不再重要！
  *
  * @author zoutongkun
  * @date 2024/4/29
@@ -24,11 +24,12 @@ public class LoadBalancerFeignClient implements Client {
     /**
      * 由负载均衡模块提供，具体为：RibbonLoadBalancerClient
      */
-    private LoadBalancerClient loadBalancerClient;
+    private final LoadBalancerClient loadBalancerClient;
     /**
      * 实际发送请求的httpClient
+     * 这里就是注入的feign自带的Client.Default
      */
-    private Client delegate;
+    private final Client delegate;
 
     public LoadBalancerFeignClient(LoadBalancerClient loadBalancerClient, Client delegate) {
         this.loadBalancerClient = loadBalancerClient;
@@ -42,11 +43,10 @@ public class LoadBalancerFeignClient implements Client {
      * @param request
      * @param options
      * @return
-     * @throws IOException
      */
     @SuppressWarnings("deprecation")
     @Override
-    public Response execute(Request request, Request.Options options) throws IOException {
+    public Response execute(Request request, Request.Options options) {
         try {
             //客户端负载均衡
             URI original = URI.create(request.url());
@@ -57,8 +57,9 @@ public class LoadBalancerFeignClient implements Client {
             //重建请求URI，即把服务名改成具体实例的ip+端口
             URI uri = loadBalancerClient.reconstructURI(serviceInstance, original);
             //构建请求
-            Request newRequest = Request.create(request.httpMethod(), uri.toASCIIString(), new HashMap<>(),
-                    request.body(), StandardCharsets.UTF_8);
+            Request newRequest = Request.create(request.httpMethod(), uri.toASCIIString(),
+                new HashMap<>(),
+                request.body(), StandardCharsets.UTF_8);
             // 再发送请求，此时就需要一个httpClient，就需要在自动配置类中注入，
             // 这里注入的就是feign自带的Client.Default
             return delegate.execute(newRequest, options);

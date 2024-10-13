@@ -3,8 +3,12 @@ package com.tkzou.middleware.springcloud.loadbalancer.config;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.*;
+import com.tkzou.middleware.springcloud.loadbalancer.core.MyLoadBalancer;
+import com.tkzou.middleware.springcloud.loadbalancer.core.MyRandomRule;
+import com.tkzou.middleware.springcloud.loadbalancer.core.ServiceManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,6 +30,24 @@ public class RibbonClientConfiguration {
         DefaultClientConfigImpl config = new DefaultClientConfigImpl();
         config.loadProperties(name);
         return config;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceManager serviceManager(DiscoveryClient discoveryClient) {
+        return new ServiceManager(discoveryClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IRule rule(ServiceManager serviceManager) {
+        return new MyRandomRule(serviceManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ILoadBalancer loadBalancer(IRule rule, ServiceManager serviceManager) {
+        return new MyLoadBalancer(rule, serviceManager);
     }
 
     @Bean

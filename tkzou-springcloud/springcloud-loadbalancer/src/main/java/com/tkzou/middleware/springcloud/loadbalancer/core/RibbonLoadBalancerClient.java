@@ -54,7 +54,7 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
         ILoadBalancer loadBalancer = clientFactory.getInstance(serviceId, ILoadBalancer.class);
         //再基于负载均衡策略选择一个具体的服务实例
         //在配置类中自动注入了ZoneAwareLoadBalancer这个负载均衡策略！
-        Server server = loadBalancer.chooseServer("default");
+        Server server = loadBalancer.chooseServer(serviceId);
         if (server != null) {
             //再转为springcloud标准化的服务实例对象--ServiceInstance
             return new MyServiceInstance(serviceId, server.getHost(), server.getPort());
@@ -116,7 +116,8 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
      * @throws IOException
      */
     @Override
-    public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
+    public <T> T execute(String serviceId, ServiceInstance serviceInstance,
+                         LoadBalancerRequest<T> request) throws IOException {
         try {
             return request.apply(serviceInstance);
         } catch (Exception ex) {

@@ -23,6 +23,7 @@ public class MyServiceAutoDiscoveryConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public MyDiscoveryClient myDiscoveryClient(MyDiscoveryProperties myDiscoveryProperties) {
         return new MyDiscoveryClient(myDiscoveryProperties);
     }

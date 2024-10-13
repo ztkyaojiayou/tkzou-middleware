@@ -26,27 +26,32 @@ public class FeignClientFactoryBean implements FactoryBean<Object>, ApplicationC
      * 当前bean的实际的class，
      * 是带有@FeignClient注解的类的class，
      * 而非xxxFactoryBean.class
+     * 它是一个代理对象，里面就会封装好调用rpc的逻辑！！！
      */
     private Class<?> type;
 
     private ApplicationContext applicationContext;
 
     @Override
-    public Object getObject() throws Exception {
+    public Object getObject() {
         //这里使用的bean都需要在自动配置类中注入！
-        FeignClientContextFactory feignClientContextFactory = applicationContext.getBean(FeignClientContextFactory.class);
+        FeignClientContextFactory feignClientContextFactory =
+            applicationContext.getBean(FeignClientContextFactory.class);
         Encoder encoder = feignClientContextFactory.getInstance(contextId, Encoder.class);
         Decoder decoder = feignClientContextFactory.getInstance(contextId, Decoder.class);
         Contract contract = feignClientContextFactory.getInstance(contextId, Contract.class);
+        //用于调用rpc接口的httpClient！！！
+        //这是就是LoadBalancerFeignClient
         Client client = feignClientContextFactory.getInstance(contextId, Client.class);
         //通过feign的builder去生成对应的bean
+        //它是一个代理对象！！！
         //本质也是通过反射机制生成
         return Feign.builder()
-                .encoder(encoder)
-                .decoder(decoder)
-                .contract(contract)
-                .client(client)
-                .target(new HardCodedTarget<>(type, contextId, "http://" + contextId));
+            .encoder(encoder)
+            .decoder(decoder)
+            .contract(contract)
+            .client(client)
+            .target(new HardCodedTarget<>(type, contextId, "http://" + contextId));
     }
 
     @Override

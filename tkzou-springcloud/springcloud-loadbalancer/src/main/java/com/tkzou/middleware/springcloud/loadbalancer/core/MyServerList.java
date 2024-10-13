@@ -32,8 +32,10 @@ public class MyServerList extends AbstractServerList<MyRibbonServer> {
     private static Logger logger = LoggerFactory.getLogger(MyServerList.class);
 
     private MyDiscoveryProperties discoveryProperties;
-
-    private String serviceId;
+    /**
+     * 服务名称，也即服务id
+     */
+    private String serviceName;
 
     public MyServerList(MyDiscoveryProperties discoveryProperties) {
         this.discoveryProperties = discoveryProperties;
@@ -61,24 +63,24 @@ public class MyServerList extends AbstractServerList<MyRibbonServer> {
 
     private List<MyRibbonServer> getServer() {
         Map<String, Object> param = new HashMap<>();
-        param.put("serviceName", serviceId);
+        param.put("serviceName", serviceName);
         //通过http发送接口请求
         String response = HttpUtil.get(discoveryProperties.getConfigServerUrl() + "/list", param);
-        logger.info("query service instance, serviceId: {}, response: {}", serviceId, response);
+        logger.info("query service instance, serviceId: {}, response: {}", serviceName, response);
         //解析http请求结果
         return JSON.parseArray(response).stream().map(hostInfo -> {
             String ip = ((JSONObject) hostInfo).getString("ip");
             Integer port = ((JSONObject) hostInfo).getInteger("port");
-            return new MyRibbonServer(ip, port);
+            return new MyRibbonServer(serviceName, ip, port);
         }).collect(Collectors.toList());
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public String getServiceName() {
+        return serviceName;
     }
 
     @Override
     public void initWithNiwsConfig(IClientConfig iClientConfig) {
-        this.serviceId = iClientConfig.getClientName();
+        this.serviceName = iClientConfig.getClientName();
     }
 }
