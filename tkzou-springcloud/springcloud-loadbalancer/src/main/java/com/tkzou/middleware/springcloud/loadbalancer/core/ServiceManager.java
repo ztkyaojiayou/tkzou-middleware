@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
  * @modyified By:
  */
 public class ServiceManager {
+    private static final ScheduledThreadPoolExecutor scheduledExecutor =
+        ThreadUtil.createScheduledExecutor(1);
     /**
      * 所有服务实例信息
      * key:服务名称
@@ -40,7 +42,7 @@ public class ServiceManager {
     public ServiceManager(DiscoveryClient discoveryClient) {
         this.discoveryClient = discoveryClient;
         //初始化时从注册中心拉取最新的服务注册信息到本地
-        pullServiceInfoFromRegister();
+        pullServiceInfoFromRemoteRegister();
     }
 
     /**
@@ -70,11 +72,10 @@ public class ServiceManager {
     }
 
     /**
-     * 从服务注册中心定时拉取服务注册信息到本地
+     * 从远程服务注册中心定时拉取服务注册信息到本地
      */
-    private void pullServiceInfoFromRegister() {
+    private void pullServiceInfoFromRemoteRegister() {
         //使用一个定时任务从服务注册中心拉取最新的服务注册信息！！！
-        ScheduledThreadPoolExecutor scheduledExecutor = ThreadUtil.createScheduledExecutor(1);
         scheduledExecutor.scheduleWithFixedDelay(() -> {
             //从注册中心拉取最新的服务注册信息
             List<String> services = discoveryClient.getServices();

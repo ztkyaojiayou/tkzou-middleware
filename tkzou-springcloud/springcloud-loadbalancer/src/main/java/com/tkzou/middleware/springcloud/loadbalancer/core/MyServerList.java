@@ -50,7 +50,7 @@ public class MyServerList extends AbstractServerList<MyRibbonServer> {
     public MyServerList(MyDiscoveryProperties discoveryProperties) {
         this.discoveryProperties = discoveryProperties;
         //每10s定时刷新服务注册信息
-        scheduledExecutor.scheduleWithFixedDelay(this::refreshServerInfos, 10, 10,
+        scheduledExecutor.scheduleWithFixedDelay(this::pullServiceInfoFromRemoteRegister, 10, 10,
             TimeUnit.SECONDS);
     }
 
@@ -79,7 +79,7 @@ public class MyServerList extends AbstractServerList<MyRibbonServer> {
      *
      * @return
      */
-    private void refreshServerInfos() {
+    private void pullServiceInfoFromRemoteRegister() {
         Map<String, Object> param = new HashMap<>();
         param.put("serviceName", serviceName);
         //通过http发送接口请求
