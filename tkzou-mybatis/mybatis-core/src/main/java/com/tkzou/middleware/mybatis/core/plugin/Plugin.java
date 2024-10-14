@@ -14,6 +14,8 @@ import java.util.Set;
  * <p> 插件代理 </p>
  * 也是代理模式
  * 用于代理插件/拦截器/Interceptor
+ * 主要是定义增强逻辑！但一般也会融合生成代理对象的方法！
+ * 相当于MapperProxy类
  *
  * @author zoutongkun
  * @description
@@ -23,18 +25,18 @@ public class Plugin implements InvocationHandler {
     /**
      * 目标类，也即被代理的类
      */
-    private Object target;
+    private final Object target;
     /**
      * 插件，做到可插拔，更灵活
      * 可以使用list吧？是的，但是使用的是职责链模式！
      * 具体在InterceptorChain中实现！
      */
-    private Interceptor interceptor;
+    private final Interceptor interceptor;
     /**
      * 目标拦截器/插件上声明的需要执行拦截器的方法
      * 也即只有当执行目标类中的这些方法时才走拦截器
      */
-    private Set<Method> methods;
+    private final Set<Method> methods;
 
     public Plugin(Object target, Interceptor interceptor, Set<Method> methods) {
         this.target = target;
@@ -44,6 +46,7 @@ public class Plugin implements InvocationHandler {
 
     /**
      * 增强逻辑
+     * 就是插件逻辑！
      *
      * @param proxy
      * @param method
@@ -109,8 +112,9 @@ public class Plugin implements InvocationHandler {
         if (isProxy) {
             // 需要代理，因为拦截器上配置了目标类
             // 于是生成代理对象，代理逻辑就在Plugin中，需要被拦截的方法就会走上面的invoke方法！
-            return (T) Proxy.newProxyInstance(target.getClass().getClassLoader(), target.getClass().getInterfaces(),
-                    new Plugin(target, interceptor, methods));
+            return (T) Proxy.newProxyInstance(target.getClass().getClassLoader(),
+                target.getClass().getInterfaces(),
+                new Plugin(target, interceptor, methods));
         } else {
             // 不需要代理，即不走拦截器，就直接执行目标方法，返回的也是原始对象
 //            因为当前拦截器上未配置目标类，即无需拦截

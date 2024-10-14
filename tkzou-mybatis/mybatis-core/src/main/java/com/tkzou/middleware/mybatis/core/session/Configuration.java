@@ -50,7 +50,7 @@ public class Configuration {
      */
     private Map<String, MappedStatement> mappedStatements = new HashMap<>();
     /**
-     * 拦截器链
+     * 拦截器链，直接new出来
      */
     private InterceptorChain interceptorChain = new InterceptorChain();
     /**
@@ -149,7 +149,7 @@ public class Configuration {
 
     /**
      * 获取结果处理器，也即DefaultResultSetHandler
-     * 就是new出来的
+     * 但是是个代理对象
      * 封装了拦截器的逻辑，因此会先走拦截器的逻辑！！！
      *
      * @return
@@ -160,7 +160,7 @@ public class Configuration {
 
     /**
      * 获取参数处理器，也即DefaultParameterHandler
-     * 就是new出来的
+     * 但是是个代理对象
      * 封装了拦截器的逻辑，因此会先走拦截器的逻辑！！！
      *
      * @return
@@ -171,7 +171,7 @@ public class Configuration {
 
     /**
      * 获取sql语句处理器，也即PreparedStatementHandler
-     * 就是new出来的
+     * 但是是个代理对象
      * 封装了拦截器的逻辑，因此会先走拦截器的逻辑！！！
      *
      * @param ms

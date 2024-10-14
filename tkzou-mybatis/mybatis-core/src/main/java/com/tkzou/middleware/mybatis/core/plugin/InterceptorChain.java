@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * <p> 拦截器-责任链 </p>
+ * 相当于是个拦截器管理器
  *
  * @author zoutongkun
  * @description
@@ -19,11 +20,11 @@ public class InterceptorChain {
     List<Interceptor> interceptorList = Lists.newArrayList();
 
     /**
-     * 为指定对象执行所有拦截器！
-     * 比如SimpleExecutor
+     * 为指定对象比如SimpleExecutor生成代理对象，
+     * 其中会封装所有拦截器的增强逻辑！
      *
-     * @param target 需要添加拦截器逻辑的对象，如SimpleExecutor
-     * @return
+     * @param target 需要添加拦截器逻辑的目标对象，如SimpleExecutor
+     * @return 代理对象
      */
     public Object pluginAll(Object target) {
         //循环执行所有拦截器逻辑

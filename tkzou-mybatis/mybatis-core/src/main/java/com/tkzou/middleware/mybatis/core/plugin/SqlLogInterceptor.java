@@ -15,14 +15,14 @@ import java.sql.Statement;
  * @date 2024/4/26 01:26
  */
 @Intercepts({
-        @Signature(
-                type = StatementHandler.class,
-                method = "query",
-                args = Statement.class),
-        @Signature(
-                type = StatementHandler.class,
-                method = "update",
-                args = Statement.class)
+    @Signature(
+        type = StatementHandler.class,
+        method = "query",
+        args = Statement.class),
+    @Signature(
+        type = StatementHandler.class,
+        method = "update",
+        args = Statement.class)
 })
 @Slf4j
 public class SqlLogInterceptor implements Interceptor {
@@ -42,6 +42,14 @@ public class SqlLogInterceptor implements Interceptor {
         return result;
     }
 
+    /**
+     * 为目标类生成包含当前拦截器逻辑的代理对象
+     * 该代理对象的增强逻辑中会执行当前拦截器的intercept逻辑
+     *
+     * @param target
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T plugin(Object target) {
         return Plugin.wrap(target, this);
