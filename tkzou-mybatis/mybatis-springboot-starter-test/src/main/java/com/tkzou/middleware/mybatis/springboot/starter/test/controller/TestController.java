@@ -1,4 +1,4 @@
-package com.tkzou.middleware.mybatis.springboot.starter.test.api;
+package com.tkzou.middleware.mybatis.springboot.starter.test.controller;
 
 import com.tkzou.middleware.mybatis.springboot.starter.test.mapper.DemoMapper;
 import org.springframework.beans.factory.annotation.Autowired;

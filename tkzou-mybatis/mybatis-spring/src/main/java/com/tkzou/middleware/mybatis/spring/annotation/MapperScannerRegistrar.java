@@ -18,16 +18,21 @@ import java.util.Map;
 public class MapperScannerRegistrar implements ImportBeanDefinitionRegistrar {
 
     @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator importBeanNameGenerator) {
-//        AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition().getBeanDefinition();
+    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+                                        BeanDefinitionRegistry registry,
+                                        BeanNameGenerator importBeanNameGenerator) {
+//        AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition()
+//        .getBeanDefinition();
 //        beanDefinition.setBeanClass(MapperFactoryBean.class);
 //        beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(UserMapper.class);
 //        registry.registerBeanDefinition("userMapper", beanDefinition);
 //获取MapperScan注解中的属性value值，必须使用这种方式传入注解名称，而不能直接传maperScan！！！
-        Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(MapperScan.class.getName());
+        Map<String, Object> annotationAttributes =
+            importingClassMetadata.getAnnotationAttributes(MapperScan.class.getName());
         String packageName = (String) annotationAttributes.get("value");
-
+        //获取mapper扫描器
         ClassPathMapperScanner classPathMapperScanner = new ClassPathMapperScanner(registry);
+        //开启扫描！
         classPathMapperScanner.doScan(packageName);
     }
 }
