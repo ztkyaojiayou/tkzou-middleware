@@ -27,6 +27,7 @@ public class BoundSql {
     private String sql;
     /**
      * 原始sql中的参数字段，如“id”，“name”等
+     * todo 要求使用者在使用时按sql中的顺序编写，这里也是按此顺序进行保存！！！
      */
     private List<String> parameterMappings;
 

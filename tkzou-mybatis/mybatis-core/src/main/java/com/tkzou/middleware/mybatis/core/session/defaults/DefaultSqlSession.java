@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * <p> 默认SqlSession </p>
+ * 实现crud
  *
  * @author zoutongkun
  * @description
@@ -19,11 +20,11 @@ public class DefaultSqlSession implements SqlSession {
     /**
      * 也传入这个核心类，原材料应有尽有
      */
-    private Configuration configuration;
+    private final Configuration configuration;
     /**
      * 传入执行器
      */
-    private Executor executor;
+    private final Executor executor;
 
     public DefaultSqlSession(Configuration configuration, Executor executor) {
         this.configuration = configuration;
@@ -68,9 +69,21 @@ public class DefaultSqlSession implements SqlSession {
         return this.executor.query(ms, parameter);
     }
 
+    /**
+     * 获取mapper的代理对象
+     * 核心方法！！！
+     *
+     * @param mapper
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T getMapper(Class<T> mapper) {
-        return MapperProxyFactory.getProxy(mapper, this);
+        //通过代理工厂获取代理对象
+        //todo 这里就是通过一个代理工厂即可实现对所有mapper代理对象的获取，
+        // 但spring-mybatis给每个mapper都生成了一个代理工厂，并通过一个map管理起来，
+        // 但其实这些逻辑可以统一封装到MapperProxy中！
+        return MapperProxyFactory.newInstance(mapper, this);
     }
 
     @Override

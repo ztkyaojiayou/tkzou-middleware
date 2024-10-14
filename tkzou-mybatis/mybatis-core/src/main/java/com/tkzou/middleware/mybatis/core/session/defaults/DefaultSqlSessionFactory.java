@@ -26,6 +26,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
     @Override
     public SqlSession openSession(boolean autoCommit) {
+        //获取一个带事务的连接
         Transaction transaction = this.configuration.getTransaction(autoCommit);
         //使用了默认的DefaultSqlSession
         return new DefaultSqlSession(this.configuration, this.configuration.newExecutor(transaction));

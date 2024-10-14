@@ -16,14 +16,11 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import javax.sql.DataSource;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -156,12 +153,7 @@ public class XMLConfigBuilder {
     public void parseMapperXml(Configuration configuration) {
         // 解析xml
         SAXReader saxReader = new SAXReader();
-        saxReader.setEntityResolver(new EntityResolver() {
-            @Override
-            public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-                return new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
-            }
-        });  // 跳过 xml DTD 验证 -- 解决解析慢的问题
+        saxReader.setEntityResolver((publicId, systemId) -> new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes())));  // 跳过 xml DTD 验证 -- 解决解析慢的问题
 
         String xmlPath = System.getProperty("user.dir") + "/src/com/tkzou.middleware.mybatis.core/demo/mapper/UserMapper.xml";
 

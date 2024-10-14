@@ -1,7 +1,7 @@
 package com.tkzou.middleware.mybatis.core.mapping;
 
 /**
- * <p> SQL命令类型 </p>
+ * <p> SQL执行类型 </p>
  *
  * @author zoutongkun
  * @description

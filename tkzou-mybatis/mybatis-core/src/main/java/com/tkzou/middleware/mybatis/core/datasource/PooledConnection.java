@@ -7,6 +7,7 @@ import java.sql.Connection;
 
 /**
  * <p> 代理连接 </p>
+ * 连接池的方式实现
  *
  * @author zoutongkun
  * @description
@@ -34,15 +35,23 @@ public class PooledConnection implements InvocationHandler {
         this.connection = connection;
     }
 
+    /**
+     * 代理增强逻辑，主要是代理关闭连接的功能！！！
+     *
+     * @param proxy
+     * @param method
+     * @param args
+     * @return
+     * @throws Throwable
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         //单独处理一下close方法，即此时不是真正的关闭，而只是归还连接到连接池中！
         if (method.getName().equals(CLOSE)) {
             this.pooledDataSource.returnConnection(this.proxyConnection);
-        } else {
-            return method.invoke(this.connection, args);
+            return null;
         }
-        return null;
+        return method.invoke(this.connection, args);
     }
 
     /**
@@ -52,7 +61,7 @@ public class PooledConnection implements InvocationHandler {
      */
     public Connection getProxy() {
         Connection proxy = (Connection) Proxy.newProxyInstance(this.connection.getClass().getClassLoader(),
-                this.connection.getClass().getInterfaces(), this);
+            this.connection.getClass().getInterfaces(), this);
         this.proxyConnection = proxy;
         return proxy;
     }

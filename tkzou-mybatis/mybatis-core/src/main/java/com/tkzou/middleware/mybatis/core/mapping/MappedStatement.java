@@ -31,6 +31,7 @@ public class MappedStatement {
     /**
      * mapper中一个方法的唯一标识 eg: com.tkzou.middleware.mybatis.core.mapper.UserMapper.selectList
      * 定位到具体哪个mapper下的哪个方法
+     * todo 后续应该要加上参数类型，因为可能有重载方法！
      */
     private String id;
     /**
@@ -60,6 +61,12 @@ public class MappedStatement {
      */
     private SqlNode sqlSource;
 
+    /**
+     * 解析为带？的sql
+     *
+     * @param parameter
+     * @return
+     */
     public BoundSql getBoundSql(Object parameter) {
         if (this.sqlSource != null) {
             DynamicContext dynamicContext = new DynamicContext((Map<String, Object>) parameter);
@@ -67,9 +74,10 @@ public class MappedStatement {
             this.sql = dynamicContext.getSql();
         }
 
-        // sql解析  #{}  --- ?
+        // sql解析  #{}  ---> ?
         ParameterMappingTokenHandler parameterMappingTokenHandler = new ParameterMappingTokenHandler();
         GenericTokenParser genericTokenParser = new GenericTokenParser("#{", "}", parameterMappingTokenHandler);
+        //#{}  ---> ?
         String sql = genericTokenParser.parse(this.sql);
         List<String> parameterMappings = parameterMappingTokenHandler.getParameterMappings();
         return BoundSql.builder().sql(sql).parameterMappings(parameterMappings).build();

@@ -15,6 +15,7 @@ import java.util.List;
 /**
  * <p> 简单执行器 </p>
  * 封装了一级缓存的管理！
+ * 实现crud
  *
  * @author zoutongkun
  * @description
@@ -53,11 +54,15 @@ public class SimpleExecutor implements Executor {
         if (list != null) {
             return (List<T>) list;
         }
+        //获取sql语句处理器
         StatementHandler statementHandler = this.configuration.newStatementHandler(ms, parameter);
+        //sql语句预处理并设置好参数
         Statement statement = this.prepareStatement(statementHandler);
-        // 缓存没有时再查库
+        //查询
         list = statementHandler.query(statement);
+        //再设置到缓存中
         this.localCache.putObject(cacheKey, list);
+        //最后返回
         //同理，强转为泛型
         return (List<T>) list;
     }
@@ -66,9 +71,12 @@ public class SimpleExecutor implements Executor {
     @SneakyThrows
     @Override
     public int update(MappedStatement ms, Object parameter) {
+        //先清空一级缓存
         this.localCache.clear();
+        //sql语句预处理
         StatementHandler statementHandler = this.configuration.newStatementHandler(ms, parameter);
         Statement statement = this.prepareStatement(statementHandler);
+        //执行sql
         return statementHandler.update(statement);
     }
 
@@ -87,14 +95,28 @@ public class SimpleExecutor implements Executor {
         this.transaction.close();
     }
 
+    /**
+     * sql语句预处理
+     * 解析为带？的sql并设置参数
+     *
+     * @param statementHandler
+     * @return
+     */
     private Statement prepareStatement(StatementHandler statementHandler) {
+        //获取连接
         Connection connection = this.getConnection();
+        //sql预处理，此时会将原始sql中的参数变为？
         Statement statement = statementHandler.prepare(connection);
+        //设置参数，即把原始sql中的#{user.name}替换为实际传入的参数，此时万事俱备了！
         statementHandler.parameterize(statement);
         return statement;
     }
 
-
+    /**
+     * 获取sql连接
+     *
+     * @return
+     */
     @SneakyThrows
     private Connection getConnection() {
         return this.transaction.getConnection();

@@ -22,9 +22,12 @@ public class TestAppStarter {
 
     @Test
     public void testAppStarter() throws Exception {
+        //当前下面几步需要我们自己写，后续集成到spring后就不需要自己写了，直接注册成bean即可！
+        //1.先创建userMapper对象
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build();
         SqlSession sqlSession = sqlSessionFactory.openSession(false);
         UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+        //2.再直接调用即可
         System.out.println(JSONUtil.toJsonStr(userMapper.findOne(1)));
         System.out.println(JSONUtil.toJsonStr(userMapper.selectList(1, "tkzou")));
 
@@ -34,7 +37,7 @@ public class TestAppStarter {
 
         System.out.println(userMapper.selectOne(1));
         System.out.println(userMapper.insert(User.builder().name(RandomUtil.randomString(5)).age(RandomUtil
-                .randomInt(1, 100)).build()));
+            .randomInt(1, 100)).build()));
         System.out.println(userMapper.delete(5));
         System.out.println(userMapper.update(2, "xxx"));
         System.out.println(JSONUtil.toJsonStr(userMapper.selectList(1, "tkzou")));

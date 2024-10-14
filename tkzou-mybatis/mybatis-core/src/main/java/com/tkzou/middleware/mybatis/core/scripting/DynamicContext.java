@@ -12,8 +12,8 @@ import java.util.StringJoiner;
  */
 public class DynamicContext {
 
-    private Map<String, Object> bindings;
-    private StringJoiner sqlBuilder = new StringJoiner(" ");
+    private final Map<String, Object> bindings;
+    private final StringJoiner sqlBuilder = new StringJoiner(" ");
 
     public DynamicContext(Map<String, Object> bindings) {
         this.bindings = bindings;

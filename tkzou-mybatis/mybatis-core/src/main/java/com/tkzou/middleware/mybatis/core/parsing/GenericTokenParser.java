@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * <p> SQL解析器 </p>
+ * 将sql中的原始参数如#{id}转为？
  *
  * @author zoutongkun
  * @description 解析sql： select * from t_user where id = #{id} and name = #{name}
@@ -13,10 +14,18 @@ import java.util.List;
  * @date 2024/4/22 01:07
  */
 public class GenericTokenParser {
-
-    private String openToken; // 开始标记 -- eg: #{
-    private String closeToken; // 结束标记 -- eg: }
-    private TokenHandler tokenHandler; // 标记处理器
+    /**
+     * 开始标记 -- eg: #{
+     */
+    private final String openToken;
+    /**
+     * 结束标记 -- eg: }
+     */
+    private final String closeToken;
+    /**
+     * 标记处理器
+     */
+    private final TokenHandler tokenHandler;
 
     public GenericTokenParser(String openToken, String closeToken, TokenHandler tokenHandler) {
         this.openToken = openToken;
@@ -24,6 +33,12 @@ public class GenericTokenParser {
         this.tokenHandler = tokenHandler;
     }
 
+    /**
+     * 将sql中的原始参数如#{id}转为？
+     *
+     * @param text
+     * @return
+     */
     public String parse(String text) {
         if (StrUtil.isBlank(text)) {
             return "";

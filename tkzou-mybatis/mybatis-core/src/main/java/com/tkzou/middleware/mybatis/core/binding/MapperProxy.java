@@ -37,7 +37,7 @@ public class MapperProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // 获取mapper调用方法的参数名 -> 参数值
+        //1.获取mapper调用方法的参数名 -> 参数值
         //先保存一下
         Map<String, Object> paramValueMap = Maps.newHashMap();
         Parameter[] parameterList = method.getParameters();
@@ -45,21 +45,31 @@ public class MapperProxy implements InvocationHandler {
             Parameter parameter = parameterList[i];
             //获取方法中传入的参数，使用@Param注解来作映射！
             Param param = parameter.getAnnotation(Param.class);
+            //即参数名，如user
             String paramName = param.value();
-            paramValueMap.put(paramName, args[i]);
+            //该参数名对应的参数值，
+            //它可能是一个基础类型，如String或Integer,也可能是个对象，如user！
+            Object arg = args[i];
+            paramValueMap.put(paramName, arg);
         }
-
+        //2.获取当前方法的所有原材料，也即MappedStatement
         String statementId = this.mapperClass.getName() + "." + method.getName();
         MappedStatement ms = this.sqlSession.getConfiguration().getMappedStatement(statementId);
+        //3.获取crud操作类型
         SqlCommandType sqlCommandType = ms.getSqlCommandType();
         switch (sqlCommandType) {
+            //插入
             case INSERT:
                 return this.convertResult(ms, this.sqlSession.insert(statementId, paramValueMap));
+            //删除
             case DELETE:
                 return this.convertResult(ms, this.sqlSession.delete(statementId, paramValueMap));
+            //更新
             case UPDATE:
                 return this.convertResult(ms, this.sqlSession.update(statementId, paramValueMap));
+            //查询
             case SELECT:
+                //是否查询list
                 if (ms.getIsSelectMany()) {
                     return this.sqlSession.selectList(statementId, paramValueMap);
                 } else {
@@ -97,6 +107,4 @@ public class MapperProxy implements InvocationHandler {
         //其他类型不再适配，意义不大！
         throw new RuntimeException("该类sql的返回值不支持当前类型,类型为：" + returnType.getTypeName());
     }
-
-
 }

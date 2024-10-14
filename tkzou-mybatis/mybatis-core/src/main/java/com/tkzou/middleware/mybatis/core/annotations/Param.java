@@ -15,7 +15,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface Param {
-
+    /**
+     * sql的参数名称，如id，user等！
+     *
+     * @return
+     */
     String value();
 
 }

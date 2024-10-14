@@ -19,7 +19,7 @@ public interface Executor {
      * 表示：返回任意类型的list
      *
      * @param ms
-     * @param parameter 查询参数，一般就是map，但为什么不直接定义为map呢？方便按策略拓展
+     * @param parameter mapper中传入的查询参数，是个map，key为参数名称，value为对应的值。但为什么不直接定义为map呢？方便按策略拓展
      * @param <T>
      * @return
      */

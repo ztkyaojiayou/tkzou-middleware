@@ -1,7 +1,6 @@
 package com.tkzou.middleware.mybatis.spring.mapper;
 
 import com.tkzou.middleware.mybatis.core.session.SqlSession;
-import com.tkzou.middleware.mybatis.spring.test.mapper.UserMapper;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,9 +31,6 @@ public class MapperFactoryBean<T> implements FactoryBean<T> {
      */
     @Override
     public T getObject() {
-        MapperFactoryBean<UserMapper> userMapperMapperFactoryBean =
-            new MapperFactoryBean<>(UserMapper.class);
-
         //获取代理对象
         return this.sqlSession.getMapper(this.mapperInterface);
     }

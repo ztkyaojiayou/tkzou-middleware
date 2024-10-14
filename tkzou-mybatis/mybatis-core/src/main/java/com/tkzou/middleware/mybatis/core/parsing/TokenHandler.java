@@ -2,7 +2,7 @@ package com.tkzou.middleware.mybatis.core.parsing;
 
 /**
  * <p> 标记处理器 </p>
- * 这里使用了token这个说法，有一点点误导之嫌！
+ * 这里使用了token这个说法，有误导之嫌！
  *
  * @author zoutongkun
  * @description

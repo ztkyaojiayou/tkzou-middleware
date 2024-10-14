@@ -40,7 +40,7 @@ public class Configuration {
      * 出入参类型处理器
      * 在创建该类时就会被初始化！
      */
-    private Map<Class, TypeHandler> typeHandlerMap = Maps.newHashMap();
+    private Map<Class<?>, TypeHandler<?>> typeHandlerMap = Maps.newHashMap();
     /**
      * 用于保存所有mapper接口中所有方法的元信息，方便后续使用
      * 之后就可以直接get了，而无需每次都在执行sql时都单独解析一遍！
@@ -120,6 +120,7 @@ public class Configuration {
 
     /**
      * 获取一个mapper中某个方法的元信息
+     * 非常重要！
      *
      * @param id
      * @return
@@ -146,17 +147,39 @@ public class Configuration {
         return (Executor) this.interceptorChain.pluginAll(executor);
     }
 
+    /**
+     * 获取结果处理器，也即DefaultResultSetHandler
+     * 就是new出来的
+     * 封装了拦截器的逻辑，因此会先走拦截器的逻辑！！！
+     *
+     * @return
+     */
     public ResultSetHandler newResultSetHandler() {
         return (ResultSetHandler) this.interceptorChain.pluginAll(new DefaultResultSetHandler(this));
     }
 
+    /**
+     * 获取参数处理器，也即DefaultParameterHandler
+     * 就是new出来的
+     * 封装了拦截器的逻辑，因此会先走拦截器的逻辑！！！
+     *
+     * @return
+     */
     public ParameterHandler newParameterHandler() {
         return (ParameterHandler) this.interceptorChain.pluginAll(new DefaultParameterHandler(this));
     }
 
+    /**
+     * 获取sql语句处理器，也即PreparedStatementHandler
+     * 就是new出来的
+     * 封装了拦截器的逻辑，因此会先走拦截器的逻辑！！！
+     *
+     * @param ms
+     * @param parameter mapper中传入的查询参数，是个map，key为参数名称，value为对应的值
+     * @return
+     */
     public StatementHandler newStatementHandler(MappedStatement ms, Object parameter) {
         return (StatementHandler) this.interceptorChain.pluginAll(new PreparedStatementHandler(this, ms, parameter));
     }
-
 
 }

@@ -13,7 +13,7 @@ import ognl.Ognl;
  */
 public class BindingTokenHandler implements TokenHandler {
 
-    private DynamicContext context;
+    private final DynamicContext context;
 
     public BindingTokenHandler(DynamicContext context) {
         this.context = context;

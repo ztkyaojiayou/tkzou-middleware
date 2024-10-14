@@ -15,10 +15,10 @@ import java.sql.Connection;
  * @date 2024/4/26 01:26
  */
 @Intercepts({
-        @Signature(
-                type = StatementHandler.class,
-                method = "prepare",
-                args = {Connection.class})
+    @Signature(
+        type = StatementHandler.class,
+        method = "prepare",
+        args = {Connection.class})
 })
 public class LimitInterceptor implements Interceptor {
 
@@ -27,6 +27,7 @@ public class LimitInterceptor implements Interceptor {
 //        System.out.println("分页插件start");
         //强转一下，其实不太合理，使用泛型最佳！
         PreparedStatementHandler psh = (PreparedStatementHandler) invocation.getTarget();
+        //获取转为？后的sql
         BoundSql boundSql = psh.getBoundSql();
         String sql = boundSql.getSql();
         //防止执行多次query操作时重复添加limit

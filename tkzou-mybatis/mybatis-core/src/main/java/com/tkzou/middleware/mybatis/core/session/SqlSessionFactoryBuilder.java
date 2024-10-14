@@ -23,22 +23,19 @@ public class SqlSessionFactoryBuilder {
     public SqlSessionFactory build() {
         MapperAnnotationBuilder mapperAnnotationBuilder = new MapperAnnotationBuilder();
         Configuration configuration = mapperAnnotationBuilder.parse();
-        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(configuration);
-        return sqlSessionFactory;
+        return new DefaultSqlSessionFactory(configuration);
     }
 
     public SqlSessionFactory build(DataSource dataSource, Transaction transaction) {
         MapperAnnotationBuilder mapperAnnotationBuilder = new MapperAnnotationBuilder();
         Configuration configuration = mapperAnnotationBuilder.parse(dataSource, transaction, null);
-        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(configuration);
-        return sqlSessionFactory;
+        return new DefaultSqlSessionFactory(configuration);
     }
 
     public SqlSessionFactory build(DataSource dataSource, Transaction transaction, String mapperPackageName) {
         MapperAnnotationBuilder mapperAnnotationBuilder = new MapperAnnotationBuilder();
         Configuration configuration = mapperAnnotationBuilder.parse(dataSource, transaction, mapperPackageName);
-        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(configuration);
-        return sqlSessionFactory;
+        return new DefaultSqlSessionFactory(configuration);
     }
 
 

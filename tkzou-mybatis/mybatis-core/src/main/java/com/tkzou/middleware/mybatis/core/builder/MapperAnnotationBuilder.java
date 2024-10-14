@@ -1,7 +1,9 @@
 package com.tkzou.middleware.mybatis.core.builder;
 
+import cn.hutool.core.annotation.AnnotationUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
 import com.tkzou.middleware.mybatis.core.annotations.*;
@@ -16,14 +18,11 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import javax.sql.DataSource;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -41,12 +40,14 @@ import java.util.Set;
  * @date 2024/4/22 18:10
  */
 public class MapperAnnotationBuilder {
-
+    /**
+     * 支持的sql执行类型，也即crud操作
+     */
     private List<Class<? extends Annotation>> sqlAnnotationTypeList = Lists.newArrayList(Insert.class, Delete.class, Update.class, Select.class);
 
     public Configuration parse() {
         Configuration configuration = new Configuration();
-        // 解析mapper
+        // 解析mapper接口下各方法的元信息
         this.parseMapper(configuration, "com.tkzou.middleware.mybatis.core.mapper");
         //解析xml中的动态sql
         this.parseMapperXml(configuration);
@@ -55,40 +56,55 @@ public class MapperAnnotationBuilder {
 
     public Configuration parse(DataSource dataSource, Transaction transaction, String mapperPackageName) {
         Configuration configuration = this.parse();
+        //解析mapper接口下各方法的元信息
         this.parseMapper(configuration, mapperPackageName);
         configuration.setDataSource(dataSource);
         configuration.setTransaction(transaction);
         return configuration;
     }
 
+    /**
+     * 解析mapper接口下各方法的元信息
+     *
+     * @param configuration
+     * @param packageName
+     */
     @SneakyThrows
     private void parseMapper(Configuration configuration, String packageName) {
         if (StrUtil.isBlank(packageName)) {
             return;
         }
+        //扫描指定的mapper接口的包路径
         Set<Class<?>> classes = ClassUtil.scanPackage(packageName);
-        for (Class<?> aClass : classes) {
+        //遍历处理每一个mapper接口
+        for (Class<?> curClazz : classes) {
             //获取二级缓存注解，判断是否需要开启二级缓存-全局本地缓存，跨session
-            CacheNamespace cacheNamespace = aClass.getAnnotation(CacheNamespace.class);
+            CacheNamespace cacheNamespace = curClazz.getAnnotation(CacheNamespace.class);
             boolean isCache = cacheNamespace != null;
-            Method[] methods = aClass.getMethods();
-            for (Method method : methods) {
+            //扫描每个mapper接口中的所有方法
+            Method[] methods = curClazz.getMethods();
+            for (Method curMethod : methods) {
                 boolean isExistAnnotation = false;
                 SqlCommandType sqlCommandType = null;
-                String originalSql = ""; // 原始sql
+                // 原始sql
+                String originalSql = "";
+                //扫描当前方法中的curd注解
                 for (Class<? extends Annotation> sqlAnnotationType : this.sqlAnnotationTypeList) {
-                    Annotation annotation = method.getAnnotation(sqlAnnotationType);
-                    if (annotation != null) {
-                        originalSql = (String) annotation.getClass().getMethod("value").invoke(annotation);
-                        if (annotation instanceof Insert) {
+                    //试图获取该注解
+                    Annotation curAnnotation = curMethod.getAnnotation(sqlAnnotationType);
+                    if (ObjectUtil.isNotEmpty(curAnnotation)) {
+                        //获取该注解的value字段值，也即原始sql
+                        originalSql = AnnotationUtil.getAnnotationValue(curClazz, sqlAnnotationType, "value");
+                        if (curAnnotation instanceof Insert) {
                             sqlCommandType = SqlCommandType.INSERT;
-                        } else if (annotation instanceof Delete) {
+                        } else if (curAnnotation instanceof Delete) {
                             sqlCommandType = SqlCommandType.DELETE;
-                        } else if (annotation instanceof Update) {
+                        } else if (curAnnotation instanceof Update) {
                             sqlCommandType = SqlCommandType.UPDATE;
-                        } else if (annotation instanceof Select) {
+                        } else if (curAnnotation instanceof Select) {
                             sqlCommandType = SqlCommandType.SELECT;
                         }
+                        //只可能存在其中一个注解，这是约定！
                         isExistAnnotation = true;
                         break;
                     }
@@ -97,28 +113,33 @@ public class MapperAnnotationBuilder {
                     continue;
                 }
 
-                // 拿到mapper的返回类型
-                Class returnType = null;
+                // 拿到mapper中方法的返回类型，主要是关注查询类接口
+                Class<?> returnType = null;
+                //是否是查list
                 boolean isSelectMany = false;
-                Type genericReturnType = method.getGenericReturnType();
+                // 注意：这里获取方法的泛型中的返回类型，因为可能是list<T>，那么T才是实际的返回类型
+                Type genericReturnType = curMethod.getGenericReturnType();
+                //是否为list类型
                 if (genericReturnType instanceof ParameterizedType) {
-                    returnType = (Class) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
+                    returnType = (Class<?>) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
                     isSelectMany = true;
+                    //一般类型
                 } else if (genericReturnType instanceof Class) {
-                    returnType = (Class) genericReturnType;
+                    returnType = (Class<?>) genericReturnType;
                 }
 
-                // 封装
+                // 封装成MappedStatement
                 MappedStatement mappedStatement = MappedStatement.builder()
-                        .id(aClass.getName() + "." + method.getName())
-                        .sql(originalSql)
-                        .returnType(returnType)
-                        .sqlCommandType(sqlCommandType)
-                        .isSelectMany(isSelectMany)
-                        //开启二级缓存，也使用PerpetualCache，但它先于或高于一级缓存，可以跨session
-                        //key取class名称，不重要，只是一个标识！
-                        .cache(isCache ? new PerpetualCache(aClass.getName()) : null)
-                        .build();
+                    .id(curClazz.getName() + "." + curMethod.getName())
+                    .sql(originalSql)
+                    .returnType(returnType)
+                    .sqlCommandType(sqlCommandType)
+                    .isSelectMany(isSelectMany)
+                    //开启二级缓存，也使用PerpetualCache，但它先于或高于一级缓存，可以跨session
+                    //key取class名称，不重要，只是一个标识！
+                    .cache(isCache ? new PerpetualCache(curClazz.getName()) : null)
+                    .build();
+                //添加到configuration中
                 configuration.addMappedStatement(mappedStatement);
             }
         }
@@ -133,12 +154,7 @@ public class MapperAnnotationBuilder {
     public void parseMapperXml(Configuration configuration) {
         // 解析xml
         SAXReader saxReader = new SAXReader();
-        saxReader.setEntityResolver(new EntityResolver() {
-            @Override
-            public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-                return new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
-            }
-        });  // 跳过 xml DTD 验证 -- 解决解析慢的问题
+        saxReader.setEntityResolver((publicId, systemId) -> new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes())));  // 跳过 xml DTD 验证 -- 解决解析慢的问题
 
         String xmlPath = System.getProperty("user.dir") + "/src/com/tkzou.middleware.mybatis.core/demo/mapper/UserMapper.xml";
 
@@ -159,14 +175,14 @@ public class MapperAnnotationBuilder {
             Class<?> resultTypeClass = Class.forName(resultType);
             // 封装
             MappedStatement mappedStatement = MappedStatement.builder()
-                    .id(namespace + "." + methodName)
-                    .sql("")
-                    .sqlSource(mixedSqlNode)
-                    .returnType(resultTypeClass)
-                    .sqlCommandType(SqlCommandType.SELECT)
-                    .isSelectMany(false)
-                    .cache(new PerpetualCache(resultTypeClass.getName()))
-                    .build();
+                .id(namespace + "." + methodName)
+                .sql("")
+                .sqlSource(mixedSqlNode)
+                .returnType(resultTypeClass)
+                .sqlCommandType(SqlCommandType.SELECT)
+                .isSelectMany(false)
+                .cache(new PerpetualCache(resultTypeClass.getName()))
+                .build();
             configuration.addMappedStatement(mappedStatement);
         }
     }

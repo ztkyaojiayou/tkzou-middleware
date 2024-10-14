@@ -15,7 +15,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Update {
-
+    /**
+     * 原始sql
+     *
+     * @return
+     */
     String value();
 
 }

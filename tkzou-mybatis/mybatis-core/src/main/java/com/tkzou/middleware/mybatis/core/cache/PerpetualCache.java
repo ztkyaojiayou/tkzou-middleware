@@ -29,7 +29,7 @@ public class PerpetualCache implements Cache {
      * 源码中key的结构：id + offset + limit + sql + param value + environment id。
      * 这里我们简化一下，直接使用MappedStatement中的id+sql语句+参数作为key了
      */
-    private Map<Object, Object> cacheMap = new HashMap<>();
+    private final Map<Object, Object> cacheMap = new HashMap<>();
 
     public PerpetualCache(String id) {
         this.id = id;

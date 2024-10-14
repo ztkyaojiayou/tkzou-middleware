@@ -16,7 +16,7 @@ import java.sql.Connection;
  */
 public class SpringManagedTransaction implements Transaction {
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
     private Connection connection;
     private boolean autoCommit;
 

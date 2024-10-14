@@ -27,7 +27,7 @@ public class MapperProxyFactory {
      * @param <T>
      * @return
      */
-    public static <T> T getProxy(Class<T> mapperClass, SqlSession sqlSession) {
+    public static <T> T newInstance(Class<T> mapperClass, SqlSession sqlSession) {
         /**
          * 第一个参数：类加载器
          * 第二个参数：增强方法所在的类，这个类实现的接口，表示这个代理类可以执行哪些方法。

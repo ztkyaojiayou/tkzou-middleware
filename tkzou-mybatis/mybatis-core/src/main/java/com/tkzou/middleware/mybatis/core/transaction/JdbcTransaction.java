@@ -7,6 +7,7 @@ import java.sql.Connection;
 
 /**
  * <p> JDBC事务 </p>
+ * 注意：事务肯定是包含连接的，它是在获取了连接的基础上进行增强！
  *
  * @author zoutongkun
  * @description
@@ -16,7 +17,7 @@ public class JdbcTransaction implements Transaction {
     /**
      * 数据源
      */
-    private DataSource dataSource;
+    private final DataSource dataSource;
     /**
      * 保存获取到的数据库连接
      */
@@ -24,7 +25,7 @@ public class JdbcTransaction implements Transaction {
     /**
      * 是否自动提交
      */
-    private boolean autoCommit;
+    private final boolean autoCommit;
 
     public JdbcTransaction(DataSource dataSource, boolean autoCommit) {
         this.dataSource = dataSource;
@@ -34,6 +35,7 @@ public class JdbcTransaction implements Transaction {
     @SneakyThrows
     @Override
     public Connection getConnection() {
+        //获取一个连接，是个代理连接，是从连接池中获取的
         Connection connection = this.dataSource.getConnection();
         connection.setAutoCommit(this.autoCommit);
         //保存一下这个连接，相当于初始化了，
