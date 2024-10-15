@@ -2,6 +2,7 @@ package com.tkzou.middleware.configcenter.client.config;
 
 import com.tkzou.middleware.configcenter.client.core.ConfigService;
 import com.tkzou.middleware.configcenter.client.listener.ConfigContextRefresher;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,6 +20,7 @@ public class ConfigCenterAutoConfiguration {
      * @return
      */
     @Bean
+    @ConditionalOnMissingBean
     public ConfigCenterConfig configCenterConfig() {
         return new ConfigCenterConfig();
     }
@@ -37,11 +39,12 @@ public class ConfigCenterAutoConfiguration {
 
     /**
      * 配置刷新器
+     *
      * @return
      */
     @Bean
-    public ConfigContextRefresher configContextRefresher() {
-        return new ConfigContextRefresher();
+    public ConfigContextRefresher configContextRefresher(ConfigCenterConfig configCenterConfig, ConfigService configService) {
+        return new ConfigContextRefresher(configCenterConfig, configService);
     }
 
 }

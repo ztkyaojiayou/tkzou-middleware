@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 public class ConfigRpcClient {
 
     //即http请求调用工具类
-    private final RestTemplate restTemplate = new RestTemplate();
+    private static final RestTemplate restTemplate = new RestTemplate();
 
     private final String serverAddr;
 

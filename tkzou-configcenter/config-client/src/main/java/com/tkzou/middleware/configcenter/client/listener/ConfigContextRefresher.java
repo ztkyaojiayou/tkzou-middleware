@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationListener;
 import javax.annotation.Resource;
 
 /**
+ * 添加配置文件的监听器
  * 自动刷新bean配置到ioc容器，此时ioc容器已经启动完毕了，所有的bean都已经加载了！--步骤3
  * 此时就会为每一个从配置中心获取的配置文件添加一个配置文件更新的监听者，也即回调方法，也即ConfigFileChangedListener的一个实现，
  * <p>
@@ -34,8 +35,8 @@ public class ConfigContextRefresher implements ApplicationListener<ApplicationRe
     @Resource
     private ConfigCenterConfig configCenterConfig;
     /**
-     * 初始化该bean时就已经启动了一个定时任务去监听配置中心的文件是否更新了，
-     * 当更新时就会添加一个该类的回调，具体就是执行registerListeners方法，
+     * 初始化该bean时就已经启动了一个定时任务去定时拉取和检查配置中心的文件是否更新了，
+     * 当更新时就会执行对应的监听器中的onFileChanged方法，
      * 该方法会发布一个RefreshEvent事件，由带有@refreshScope注解的监听器进行监听，
      * 具体就是SpringCloud中RefreshEventListener类会去监听这个事件，
      * 一旦监听到这个事件，它就会刷新注入到对象的属性！！！
@@ -43,16 +44,20 @@ public class ConfigContextRefresher implements ApplicationListener<ApplicationRe
     @Resource
     private ConfigService configService;
 
+    public ConfigContextRefresher(ConfigCenterConfig configCenterConfig, ConfigService configService) {
+        this.configCenterConfig = configCenterConfig;
+        this.configService = configService;
+    }
+
     private ApplicationContext applicationContext;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         //ioc容器初始化完成后，就会发布一个ApplicationReadyEvent事件，当前类就会监听该事件，
         //监听到后，会给每一个从远程配置中心获取到的配置文件都注册一个配置文件更新的监听器/回调方法，以便于动态刷新ioc容器！
-        //它属于项目的初始化准备工作！真正触发是在实例化ConfigService对象时，
-        //它会同时启动一个定时任务去拉取配置中心中的最新值并和本地原值进行比对，
+        //它属于项目的初始化准备工作！
+        // 真正触发是在实例化ConfigService对象时，它会同时启动一个定时任务去拉取配置中心中的最新值并和本地原值进行比对，
         //若发现有更新，则会触发对应的事件，以告知spring-cloud来动态刷新对应bean的属性值！！！
-
         //我们是通过监听ApplicationReadyEvent事件来注册各个配置文件的监听器，
         //此时，ioc容器已经加载完成。
         //ApplicationReadyEvent 的调用点是 listeners.running(context);
@@ -60,7 +65,7 @@ public class ConfigContextRefresher implements ApplicationListener<ApplicationRe
     }
 
     /**
-     * 对配置文件注册对应的监听器
+     * 对配置文件注册对应的监听器，这是属于项目初始化阶段
      * 是对每一个配置文件都要设置一个监听器
      * 这里的fileId指的是整个配置文件，如xxx.properties，其实就是ConfigFile中的fileId
      * 这里我们就通过一个配置文件来做示范了。

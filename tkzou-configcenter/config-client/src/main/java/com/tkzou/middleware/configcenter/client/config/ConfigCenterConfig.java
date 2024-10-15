@@ -1,22 +1,18 @@
 package com.tkzou.middleware.configcenter.client.config;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * 当前配置中心的配置文件
  * 用于配置配置中心的基本信息！
+ * 需要由使用者进行配置！
  *
  * @author zoutongkun
  * @date 2022/9/30 11:38
  */
-@ConfigurationProperties("spring.cloud.zoutongkun.config")
+@ConfigurationProperties("spring.cloud.tkzou.config.client")
 @Data
-@Component
 public class ConfigCenterConfig {
 
     /**

@@ -29,25 +29,30 @@ public class ConfigService {
     private final ConfigRpcClient configRpcClient;
 
     /**
-     * 单线程的线程池，用于当时拉取配置中心的配置信息
+     * 单线程的线程池，用于定时拉取配置中心的配置信息
      */
     private static final ScheduledExecutorService THREAD_POOL_EXECUTOR = new ScheduledThreadPoolExecutor(1,
-            new ThreadFactory() {
-                private final AtomicLong atomicLong = new AtomicLong();
+        new ThreadFactory() {
+            private final AtomicLong atomicLong = new AtomicLong();
 
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r, "ConfigService-" + atomicLong.getAndIncrement());
-                    //作为守护线程在后台运行！
-                    thread.setDaemon(true);
-                    return thread;
-                }
-            });
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r, "ConfigService-" + atomicLong.getAndIncrement());
+                //作为守护线程在后台运行！
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
 
     /**
      * 配置文件id和对应监听器映射
      * 在ioc容器初始化完成后，由ConfigContextRefresher
-     * 监听ApplicationReadyEvent事件来初始化该map
+     * 监听ApplicationReadyEvent事件来初始化该map，其中：
+     * key:配置文件id
+     * value:对应的事件监听器，用于通知springboot动态刷新使用了该配置文件的bean
+     * 每一个配置文件都要设置一个对应的监听器，比如:
+     * 对于applicant.yml文件，设置一个applicant.yml的监听器
+     * 对于applicant.properties文件，设置一个applicant.properties的监听器
      */
     private final Map<String, ConfigFileChangedListener> configFileChangeListenerMap = new ConcurrentHashMap<>();
 
@@ -74,11 +79,12 @@ public class ConfigService {
     /**
      * 构造器，此时配置中心的配置文件已经读取过一次了，只需要刷新即可！
      * 易知当初始化该bean时，就启动了一个定时任务去扫描配置中心啦！
-     * @param serverAddr
+     *
+     * @param configServerUrl 远程配置中心的url
      */
-    public ConfigService(String serverAddr) {
+    public ConfigService(String configServerUrl) {
         //1.将configClient也实例化，就是使用的最原始的new的方式！！！
-        this.configRpcClient = new ConfigRpcClient(serverAddr);
+        this.configRpcClient = new ConfigRpcClient(configServerUrl);
         //2.同时启用一个定时任务，完成新配置的拉取，其实属于业务操作了！！！
         // 这里做两件事：
         // 1.将最新配置拉取到本地保存
@@ -98,9 +104,10 @@ public class ConfigService {
     }
 
     /**
-     * 根据配置文件id获取对应的配置文件信息，属于最新的数据
+     * 从配置中心获取最新的配置信息
+     * 根据配置文件id从远程配置中心获取对应的配置文件信息，属于最新的数据
      */
-    public ConfigFile getConfig(String fileId) {
+    public ConfigFile getConfigByRpc(String fileId) {
         return configRpcClient.getConfig(fileId);
     }
 
@@ -108,29 +115,36 @@ public class ConfigService {
      * 检查并更新配置文件
      */
     private void startCheckAndUpdateConfigJob() {
-        //每隔5s中从配置中心拉取（pull）文件，判断文件是不是有更新，如果有更新就回调对应的监听器
-        THREAD_POOL_EXECUTOR.scheduleWithFixedDelay(this::notifyChangedConfigFile, 1, 5, TimeUnit.SECONDS);
+        //每隔5s中从配置中心拉取（pull）文件，判断文件是不是有更新，如果有更新就回调对应的监听器，通知springboot进行属性的动态刷新
+        THREAD_POOL_EXECUTOR.scheduleWithFixedDelay(this::pullConfigAndNotifySpringboot, 1, 5, TimeUnit.SECONDS);
     }
 
-    private void notifyChangedConfigFile() {
+    /**
+     * 从服务端拉取的最新配置文件
+     * 主要做两件事：
+     * 1.更新本地缓存
+     * 2.通知springboot进行属性的动态刷新！！！
+     */
+    private void pullConfigAndNotifySpringboot() {
         //遍历每一个已经从配置中心获取到的配置文件，检查并更新！
         for (Map.Entry<String, ConfigFileChangedListener> entry : configFileChangeListenerMap.entrySet()) {
             String fileId = entry.getKey();
-            //1.从服务端拉取的最新配置文件
-            //就是走http请求
-            ConfigFile newConfigFile = configRpcClient.getConfig(fileId);
-            // 2.校验文件是否有更新，若未更新，则跳过，否则发送事件更新通知！
+            //1.从服务端拉取的最新配置文件--就是走http请求
+            ConfigFile newConfigFile = getConfigByRpc(fileId);
             // 本地缓存的配置文件，即旧的配置文件
             ConfigFile oldConfigFile = configFileCache.get(fileId);
             if (!ObjectUtils.isEmpty(oldConfigFile) && !ObjectUtils.isEmpty(newConfigFile)) {
+                //2.更新配置文件至本地缓存
+                configFileCache.put(fileId, newConfigFile);
+                // 3.校验文件是否有更新，若未更新，则跳过，否则发送事件更新通知,通知springboot进行属性的动态刷新！
+                //至于springboot是如何动态刷新则先不用管啦！！！
                 if (oldConfigFile.getLastUpdateTimestamp() < newConfigFile.getLastUpdateTimestamp()) {
                     //当发现缓存的数据更新的时间小于最新查询的文件的更新时间，说明配置文件有更新，然后回调对应的监听器
                     //目的：通知spring-cloud进行动态刷新对应的bean属性（具体而言，其实是删除旧bean，再重新生成新bean，但对外是通过一个代理bean来实现)！！！
                     entry.getValue().onFileChanged(newConfigFile);
                 }
             }
-            //3.同时更新配置文件至本地缓存
-            configFileCache.put(fileId, newConfigFile);
+
         }
     }
 
