@@ -13,6 +13,7 @@ package com.tkzou.middleware.mybatis.core.plugin;
 public interface Interceptor {
     /**
      * 拦截逻辑
+     * 也即拦截器自身的逻辑
      *
      * @param invocation 目标方法元信息/快照
      * @return 当前方法被拦截后的返回值
@@ -25,7 +26,7 @@ public interface Interceptor {
      * 且做到了方法级的拦截！！！
      * 务必掌握！
      *
-     * @param target
+     * @param target 目标对象，也即被代理的对象
      * @param <T>
      * @return
      */

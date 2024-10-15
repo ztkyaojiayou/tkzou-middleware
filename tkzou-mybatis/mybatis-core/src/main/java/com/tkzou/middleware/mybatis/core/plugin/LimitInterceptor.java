@@ -48,7 +48,7 @@ public class LimitInterceptor implements Interceptor {
     }
 
     /**
-     * 获取指定对象的代理对象
+     * 获取指定对象的代理对象，但也可能不会被代理，和拦截器指定的切点有关！
      * 该代理对象的增强逻辑中会执行当前拦截器的intercept逻辑！
      * 比如代理Executor接口，如SimpleExecutor
      *

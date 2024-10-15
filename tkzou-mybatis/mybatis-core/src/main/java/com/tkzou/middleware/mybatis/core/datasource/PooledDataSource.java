@@ -101,7 +101,7 @@ public class PooledDataSource implements DataSource {
 
 
     @Override
-    public Connection getConnection(String username, String password) throws SQLException {
+    public Connection getConnection(String username, String password) {
         return null;
     }
 
