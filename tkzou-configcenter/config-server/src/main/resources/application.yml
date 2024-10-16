@@ -1,5 +1,10 @@
 server:
   port: 8099
 
-#tkzou.config:
-#  store-type: memory
+spring:
+  cloud:
+    tkzou:
+      config:
+        #配置中心服务端
+        server:
+          storeType: file  #f服务端存储配置文件的方式
