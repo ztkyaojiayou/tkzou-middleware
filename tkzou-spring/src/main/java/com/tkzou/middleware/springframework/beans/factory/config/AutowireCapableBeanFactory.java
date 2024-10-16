@@ -24,6 +24,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
     /**
      * 执行BeanPostProcessors的postProcessAfterInitialization方法
+     * 此时已经实例化了一个对象了，此时一般就是对这个对象进行修饰，比如根据条件为其生成代理对象！
      *
      * @param existingBean
      * @param beanName

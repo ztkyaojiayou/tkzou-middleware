@@ -22,6 +22,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
             //--此时即便有属性，也先不管，后续会统一使用set设置属性值！！！
             //关于getDeclaredConstructor，参考：https://blog.csdn.net/weixin_49116772/article/details/131170855
             Constructor declaredConstructor = beanClass.getDeclaredConstructor();
+            //就是反射创建呀！！！
             return declaredConstructor.newInstance();
         } catch (Exception e) {
             throw new BeansException("Failed to instantiate [" + beanClass.getName() + "]", e);

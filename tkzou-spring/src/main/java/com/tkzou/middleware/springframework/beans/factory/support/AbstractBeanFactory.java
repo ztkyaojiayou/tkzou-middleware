@@ -29,7 +29,7 @@ import java.util.Map;
 public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
 
     /**
-     * 单独保存一下所有的后置处理器，以便随时获取使用
+     * 单独保存一下所有的后置处理器（包括spring自带的和用户自定义的！），以便随时获取使用
      * 比如有些后置处理器是用于在bean的初始化前后进行拓展，
      * 此时就是遍历一下所有的这些后置处理器，再找出需要的类型，执行一下对应的方法即可！
      * 这些bean在创建时也会加入到ioc容器中！
@@ -62,6 +62,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * 逻辑：
      * 先从容器中获取，若没有则先将该bean注册进容器同时返回
      * 说明：使用了单例模式呀！！！
+     * 但可能为空，此时就需要执行createBean方法创建！
      *
      * @param beanName
      * @return
@@ -69,8 +70,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      */
     @Override
     public Object getBean(String beanName) throws BeansException {
-        //1.先直接去bean工厂/容器中获取该bean对象
-        //这里我们默认获取的是单例对象
+        //1.先直接去bean工厂/容器中获取该bean对象，这里就会试图从三级缓存中依次获取！
+        //这里我们默认获取的是单例对象，但可能为空，此时就需要执行createBean方法创建！
         Object sharedInstance = getSingleton(beanName);
         if (ObjectUtils.isNotEmpty(sharedInstance)) {
             //此时可能是FactoryBean，也可能是普通的bean，对于前者，单独处理，
@@ -116,6 +117,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                     object = this.factoryBeanObjectCache.get(beanName);
                     if (object == null) {
                         //1.1.2若没有，则再通过getObject方法创建！
+                        //该方法在实际项目中一般就是获取代理对象，比如在mybatis和feign中都是这么使用的！！
                         object = factoryBean.getObject();
                         //再加入缓存，这里beanName没有和原FactoryBean做区分，因为分别存在了两个缓存中
                         //todo 但其实在源码中是做了区分的，即对于FactoryBean，它在beanName前面加了一个&字符后再存入单例池中的，

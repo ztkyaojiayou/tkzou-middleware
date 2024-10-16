@@ -104,7 +104,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName) {
         //遍历出所有的InstantiationAwareBeanPostProcessor，
-        //这里一般是执行用户自定义的后置处理器，比如可以直接为当前bean创建一个bean！
+        //这里一般是执行用户自定义的后置处理器，比如可以直接创建一个bean！
         //todo 可以算是适配器模式！
         for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
             if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
@@ -221,7 +221,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             //3.再将该beanName和最终生成的bean对象绑定，并存入bean容器中！
             this.addSingleton(beanName, exposedObject);
         }
-        //4.同时返回该生成的bean对象
+        //4.同时返回该生成的bean对象，至此当前bean创建完成！
         return exposedObject;
     }
 
@@ -355,7 +355,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @return
      */
     protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
-        //1.处理实现了aware接口的bean，将当前类对象赋值到目标类中！
+        //1.处理实现了aware接口的bean，将当前类对象也即ioc容器赋值到目标类中！
         if (bean instanceof BeanFactoryAware) {
             ((BeanFactoryAware) bean).setBeanFactory(this);
         }

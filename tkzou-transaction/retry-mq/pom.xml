@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>v2-mq</artifactId>
+    <artifactId>retry-mq</artifactId>
     <description>mq级的分布式事务重试方案</description>
 
     <properties>

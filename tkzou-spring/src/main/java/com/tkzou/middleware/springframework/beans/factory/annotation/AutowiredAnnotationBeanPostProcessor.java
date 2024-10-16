@@ -98,10 +98,12 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
                     //字段名称
                     dependentBeanName = field.getName();
                     //先试图通过字段名称+type查找
+                    //若没有就顺势创建！！！
                     dependentBean = beanFactory.getBean(dependentBeanName, fieldType);
                     if (dependentBean == null) {
                         //若还没有，就再只按type找，此时若只有一个，则返回即可，
                         // 但也可能有多个，且名称都和字段名不同，此时会报错！
+                        //若没有就顺势创建！！！
                         dependentBean = beanFactory.getBean(fieldType);
                     }
                 }

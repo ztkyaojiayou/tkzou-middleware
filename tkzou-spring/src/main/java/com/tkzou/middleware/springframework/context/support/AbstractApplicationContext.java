@@ -45,23 +45,31 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
      */
     @Override
     public void refresh() throws BeansException {
-        //1.先创建beanFactory，同时加载BeanDefinition
+        //1.先创建beanFactory，同时加载BeanDefinition，非常重要，这是生成bean的原材料！！！
         refreshBeanFactory();
         ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-        //2.添加ApplicationContextAwareProcessor，用于处理Aware接口
+        //2.单独添加ApplicationContextAwareProcessor，用于处理Aware接口
         //让继承自ApplicationContextAware的bean能感知bean
         //也即初始化了该后置处理器！
+        //但这里对ApplicationContextAwareProcessor的初始化是直接new出来的，而不是走getBean方法创建，
+        //大概是因为这个处理器是spring自带的，就没有必要多此一举了，但对于用户自定义的该处理器则依旧走getBean方法，
+        //也即在后面的invokeBeanFactoryPostProcessor方法中实现！
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 
-        //2.在bean实例化之前，先执行BeanFactoryPostProcessor
-        //
+        //2.执行BeanFactoryPostProcessor
+        // 在bean实例化之前，先执行BeanFactoryPostProcessor（会先单独创建这些bean，再执行），
+        // 此时所有的BeanDefinition都已经加载完毕，
+        // 这里就是支持对它（任意bean，而不只是某一个，因为此时还没有走到某一个具体bean的流程）进行修改！
         invokeBeanFactoryPostProcessor(beanFactory);
-        //3.再在bean实例化之前注册BeanPostProcessor，也即用于执行对应的那两个方法
+
+        //3.注册所有的BeanPostProcessor
+        // 再在bean实例化之前注册所有的BeanPostProcessor，也即用于执行对应的那两个方法
         // 此时可以修改beanDefinition的属性值，如对属性中占位符的处理！
         registerBeanPostProcessor(beanFactory);
 
         //5.初始化事件发布者，此时会把创建的事件发布者对象直接添加到ioc容器中
         initApplicationEventMulticaster();
+
         //6.注册事件监听器，此时也会触发getBean，只是是针对单个bean而已！
         registerListeners();
 
@@ -83,6 +91,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
         //4.最后提前实例化所有的单例bean--核心
         //此时就是扫描所有bean并将其添加到ioc容器中
+        //易知，spring在启动时就是在不厌其烦地分门别类地创建各种bean哈哈哈哈哈
+        //特别好理解
         beanFactory.preInstantiateSingletons();
     }
 
@@ -104,7 +114,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         //直接从ioc容器中获取所有实现了ApplicationListener接口的bean，
         // 若没有则也会触发创建bean的逻辑，因此无脑get即可！
         getBeansOfType(ApplicationListener.class).values()
-                .forEach(applicationListener -> applicationEventMulticaster.addApplicationListener(applicationListener));
+            .forEach(applicationListener -> applicationEventMulticaster.addApplicationListener(applicationListener));
     }
 
     /**
@@ -114,6 +124,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     protected void initApplicationEventMulticaster() {
         //得到的就是DefaultListableBeanFactory，具体是在子类中完成初始化的
         ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+        //也是直接new即可，因为是spring自己的呀！
         applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
         //手动将这个对象注册到ioc中
         beanFactory.addSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, applicationEventMulticaster);
@@ -164,7 +175,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         //此时因为还没有集中进行bean初始化，因此在get时会单独触发对应的create方法，
         //并将创建完成的bean加入到ioc容器中！！！
         Map<String, BeanPostProcessor> beanPostProcessorMap = beanFactory.getBeansOfType(BeanPostProcessor.class);
-        //2.再依次注册
+        //2.再依次注册，即创建该bean并添加到ioc容器待命备用！
         for (BeanPostProcessor beanPostProcessor : beanPostProcessorMap.values()) {
             beanFactory.addBeanPostProcessor(beanPostProcessor);
         }
@@ -179,7 +190,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         //1.先创建所有的BeanFactoryPostProcessor型的bean
         //此时就会直接创建这些bean并将其加入到ioc容器中！
         Map<String, BeanFactoryPostProcessor> beanFactoryPostProcessorMap =
-                beanFactory.getBeansOfType(BeanFactoryPostProcessor.class);
+            beanFactory.getBeansOfType(BeanFactoryPostProcessor.class);
         //2.再依次执行，可以修改beanDefinition的属性值，如对属性中占位符的处理！
         for (BeanFactoryPostProcessor beanFactoryPostProcessor : beanFactoryPostProcessorMap.values()) {
             beanFactoryPostProcessor.postProcessBeanFactory(beanFactory);

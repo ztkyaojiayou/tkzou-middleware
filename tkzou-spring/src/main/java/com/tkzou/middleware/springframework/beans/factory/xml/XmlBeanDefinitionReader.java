@@ -127,22 +127,44 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     protected void doLoadBeanDefinitions(InputStream inputStream) throws DocumentException {
         SAXReader reader = new SAXReader();
         Document document = reader.read(inputStream);
-
         Element root = document.getRootElement();
+        //1.先解析xml中的bean
+        //具体就是解析context:component-scan标签并扫描指定包中的类，提取类信息，组装成BeanDefinition
+        loadFromXml(root);
+        String scanPath = "";
 
-        //解析context:component-scan标签并扫描指定包中的类，提取类信息，组装成BeanDefinition
+        //2.再根据配置的包路径解析带bean注解的bean，如@Component等！！！
+        // 即扫描包--核心方法，也即把带有@Component及其衍生注解的类信息组装成BeanDefinition对象！！！
         Element componentScan = root.element(COMPONENT_SCAN_ELEMENT);
         if (componentScan != null) {
             //如"com.tkzou.middleware.spring"
-            String scanPath = componentScan.attributeValue(BASE_PACKAGE_ATTRIBUTE);
+            scanPath = componentScan.attributeValue(BASE_PACKAGE_ATTRIBUTE);
             if (StrUtil.isEmpty(scanPath)) {
                 throw new BeansException("The value of base-package attribute can not be empty or" +
                     " null");
             }
-            //扫描包--核心方法，也即把带有@Component注解的类信息组装成BeanDefinition对象
-            scanPackage(scanPath);
         }
+        loadFromScanPath(scanPath);
+    }
 
+    /**
+     * 解析xml文件中的component-scan标签，
+     * 并将该包路径下带有component注解的类生成BeanDefinition对象
+     * 最重要，最核心，因为最常用呀！
+     *
+     * @param scanPath
+     */
+    private void loadFromScanPath(String scanPath) {
+        scanPackage(scanPath);
+    }
+
+    /**
+     * 解析xml文件中的bean标签，并生成BeanDefinition对象
+     *
+     * @param root
+     * @throws DocumentException
+     */
+    private void loadFromXml(Element root) throws DocumentException {
         List<Element> beanList = root.elements(BEAN_ELEMENT);
         for (Element bean : beanList) {
             //1.解析bean标签

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
+ * 读取并解析配置文件！！！
  * 解析xml中的占位符，使用properties配置文件中的值替换
  * 如把xml中的${jdbc.url}替换成jdbc.properties文件中url的值
  * 实现起来很简单，理解即可。
@@ -25,7 +26,7 @@ public class PropertyPlaceholderConfigurer implements BeanFactoryPostProcessor {
 
     public static final String PLACEHOLDER_SUFFIX = "}";
     /**
-     * todo 目前还不知道有什么作用
+     * 就是我们项目中的配置文件，比如applicant.properties或xml！！！
      */
     private String location;
 
@@ -46,7 +47,7 @@ public class PropertyPlaceholderConfigurer implements BeanFactoryPostProcessor {
 
         //3.最后注册占位符解析器，供解析@Value注解使用
         PlaceholderResolvingStringValueResolver valueResolver =
-                new PlaceholderResolvingStringValueResolver(properties);
+            new PlaceholderResolvingStringValueResolver(properties);
         beanFactory.addEmbeddedValueResolver(valueResolver);
 
     }
