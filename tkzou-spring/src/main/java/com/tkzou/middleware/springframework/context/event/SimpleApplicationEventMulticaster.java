@@ -25,11 +25,17 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
         setBeanFactory(beanFactory);
     }
 
+    /**
+     * 发布事件
+     * 使用了适配器模式！
+     *
+     * @param event
+     */
     @Override
     public void multicastEvent(ApplicationEvent event) {
         //遍历所有监听者
         for (ApplicationListener<ApplicationEvent> applicationListener : applicationListeners) {
-            //判断当前监听者是否监听了该事件
+            //判断当前监听者是否监听了该事件，相当于适配器模式！
             if (supportsEvent(applicationListener, event)) {
                 //由监听者执行自己的处理逻辑
                 applicationListener.onApplicationEvent(event);
