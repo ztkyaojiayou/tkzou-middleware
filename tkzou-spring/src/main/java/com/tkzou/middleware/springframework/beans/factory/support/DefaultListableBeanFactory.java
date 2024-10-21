@@ -21,8 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
     /**
      * 存放beanName和对应的BeanDefinition的map/容器
+     * 所有需要注册为bean的类都需要先加载到这个map中！！！
      */
-    private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
+    private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
 
     /**
      * 获取对应的beanDefinition对象
@@ -34,7 +35,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
      */
     @Override
     public BeanDefinition getBeanDefinition(String beanName) {
-        //才容器中获取
+        //从beanDefinitionMap中取原材料！
         BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
         //判空
         if (ObjectUtils.isEmpty(beanDefinition)) {
@@ -80,7 +81,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     @Override
     public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
         Map<String, T> res = new HashMap<>();
-        //遍历beanDefinitionMap
+        //从beanDefinitionMap中取原材料！
         beanDefinitionMap.forEach((beanName, beanDefinition) -> {
             Class beanClass = beanDefinition.getBeanClass();
             //isAssignableFrom:是用来判断子类和父类的关系的，或接口的实现类和接口的关系的,默认所有的类的终极父类都是Object
@@ -98,6 +99,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     @Override
     public <T> T getBean(Class<T> requiredType) throws BeansException {
         List<String> beanNames = new ArrayList<>();
+        //从beanDefinitionMap中取原材料！
         for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
             Class beanClass = entry.getValue().getBeanClass();
             //找出使用符合目标类型的beanName
@@ -112,11 +114,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         }
 
         throw new BeansException(requiredType + "expected single bean but found " +
-                beanNames.size() + ": " + beanNames);
+            beanNames.size() + ": " + beanNames);
     }
 
     @Override
     public String[] getBeanDefinitionNames() {
+//        从beanDefinitionMap中取原材料！
         Set<String> beanNames = beanDefinitionMap.keySet();
         return beanNames.toArray(new String[0]);
     }

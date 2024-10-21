@@ -174,6 +174,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         //1.先创建所有的BeanPostProcessor型的bean
         //此时因为还没有集中进行bean初始化，因此在get时会单独触发对应的create方法，
         //并将创建完成的bean加入到ioc容器中！！！
+        //且要注意：这些bean都是先从beanDefinitionMap获取原材料的！
+        //也因此，我们自定义的后置处理器都需要加@component等注解才可以！！！
         Map<String, BeanPostProcessor> beanPostProcessorMap = beanFactory.getBeansOfType(BeanPostProcessor.class);
         //2.再依次注册，即创建该bean并添加到ioc容器待命备用！
         for (BeanPostProcessor beanPostProcessor : beanPostProcessorMap.values()) {
@@ -254,6 +256,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
      */
     @Override
     public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
+        //从beanDefinitionMap中取原材料！
         return getBeanFactory().getBeansOfType(type);
     }
 

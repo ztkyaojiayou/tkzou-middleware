@@ -3,6 +3,7 @@ package com.tkzou.middleware.springframework.context.event;
 import com.tkzou.middleware.springframework.beans.BeansException;
 import com.tkzou.middleware.springframework.beans.factory.BeanFactory;
 import com.tkzou.middleware.springframework.beans.factory.BeanFactoryAware;
+import com.tkzou.middleware.springframework.beans.factory.config.ConfigurableBeanFactory;
 import com.tkzou.middleware.springframework.context.ApplicationEvent;
 import com.tkzou.middleware.springframework.context.ApplicationListener;
 
@@ -22,12 +23,25 @@ public abstract class AbstractApplicationEventMulticaster implements Application
      * 相当于事件监听器注册中心
      */
     protected final Set<ApplicationListener<ApplicationEvent>> applicationListeners = new HashSet<>();
-
-    private BeanFactory beanFactory;
+    /**
+     * ioc容器
+     */
+    private ConfigurableBeanFactory beanFactory;
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
+        if (!(beanFactory instanceof ConfigurableBeanFactory)) {
+            throw new IllegalStateException("Not running in a ConfigurableBeanFactory: " + beanFactory);
+        }
+        this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+    }
+
+    private ConfigurableBeanFactory getBeanFactory() {
+        if (this.beanFactory == null) {
+            throw new IllegalStateException("ApplicationEventMulticaster cannot retrieve listener beans " +
+                "because it is not associated with a BeanFactory");
+        }
+        return this.beanFactory;
     }
 
     @Override

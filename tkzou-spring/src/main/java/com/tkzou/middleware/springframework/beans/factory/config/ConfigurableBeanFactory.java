@@ -5,8 +5,7 @@ import com.tkzou.middleware.springframework.core.convert.ConversionService;
 import com.tkzou.middleware.springframework.util.StringValueResolver;
 
 /**
- * 不知道是干嘛，先写着！
- * 更新：提供添加/扫描/注册BeanPostProcessor
+ * 专门用于提供添加/扫描/注册BeanPostProcessor的ioc容器
  *
  * @author zoutongkun
  */
