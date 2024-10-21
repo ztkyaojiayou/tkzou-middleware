@@ -45,10 +45,10 @@ public class CacheUpdateMessageListener implements MessageListener<CacheUpdateMe
         try {
             // 如果是当前节点，则不做清除（这里主要是兼容redis更新的场景，而对于删除操作，则当前节点的本地缓存也需要删除！）
             if (!DoubleCacheConfig.SYSTEM_ID.equals(cacheUpdateMessage.getSystemId())) {
-                // 发送清理本地缓存的信息
+                // 清理本地缓存，无需通知其他节点
                 secondLevelCacheService.clearNotSend(cacheUpdateMessage.getCacheNames(), cacheUpdateMessage.getKey());
                 log.info("onMessage # clear local cache {}, the key is {}",
-                        cacheUpdateMessage.getCacheNames(), cacheUpdateMessage.getKey());
+                    cacheUpdateMessage.getCacheNames(), cacheUpdateMessage.getKey());
             }
         } catch (Exception e) {
             log.error("onMessage error: # " + e.getMessage(), e);

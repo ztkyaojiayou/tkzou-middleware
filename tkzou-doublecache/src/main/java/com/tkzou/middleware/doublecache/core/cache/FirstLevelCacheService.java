@@ -138,7 +138,6 @@ public class FirstLevelCacheService implements DoubleCacheService {
     @Override
     public boolean saveByAsync(final String[] cacheNames, final Object cacheKey,
                                final Object cacheValue, long ttl) {
-
         // 异步线程池执行处理
         serviceCallExecutorService.execute(() -> save(cacheNames, cacheKey, cacheValue, ttl));
         return true;
@@ -153,9 +152,7 @@ public class FirstLevelCacheService implements DoubleCacheService {
      */
     @Override
     public boolean deleteByAsync(final String[] cacheNames, final Object cacheKey) {
-
         serviceCallExecutorService.execute(() -> delete(cacheNames, cacheKey));
-
         return true;
     }
 

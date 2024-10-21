@@ -1,5 +1,6 @@
 package com.tkzou.middleware.doublecache.config;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.tkzou.middleware.doublecache.common.NamedThreadFactory;
 import com.tkzou.middleware.doublecache.core.cache.DoubleCacheService;
 import com.tkzou.middleware.doublecache.core.cache.FirstLevelCacheService;
@@ -7,7 +8,6 @@ import com.tkzou.middleware.doublecache.core.cache.SecondLevelCacheService;
 import com.tkzou.middleware.doublecache.core.listener.CacheUpdateMessageListener;
 import com.tkzou.middleware.doublecache.core.notify.NotifyByRedisImpl;
 import com.tkzou.middleware.doublecache.core.notify.NotifyService;
-import com.tkzou.middleware.doublecache.utils.SpringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 两级缓存自动配置类
+ * 所有需要初始化的bean都统一在这儿new！！！
  *
  * @author zoutongkun
  */
@@ -47,8 +48,8 @@ import java.util.concurrent.TimeUnit;
 public class DoubleCacheAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(DoubleCacheAutoConfiguration.class);
-    public static final String REDIS_EXECUTOR = "redisExecutor";
-    public static final String THREAD_NAME_PREFIX = "Redisson-Pool";
+    public static final String DOUBLE_CACHE__EXECUTOR = "doubleCacheExecutor";
+    public static final String THREAD_NAME_PREFIX = "double-cache-thread-pool";
 
     /**
      * 缓存参数配置
@@ -69,12 +70,12 @@ public class DoubleCacheAutoConfiguration {
     @Bean
     public ExecutorService redisExecutor() {
         return new ThreadPoolExecutor(
-                doubleCacheConfig.getExecutorCoreSize(),
-                doubleCacheConfig.getExecutorMaxSize(),
-                doubleCacheConfig.getExecutorAliveTime(),
-                TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(doubleCacheConfig.getExecutorQueueCapacity()),
-                new NamedThreadFactory(THREAD_NAME_PREFIX));
+            doubleCacheConfig.getExecutorCoreSize(),
+            doubleCacheConfig.getExecutorMaxSize(),
+            doubleCacheConfig.getExecutorAliveTime(),
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(doubleCacheConfig.getExecutorQueueCapacity()),
+            new NamedThreadFactory(THREAD_NAME_PREFIX));
     }
 
     /**
@@ -82,7 +83,7 @@ public class DoubleCacheAutoConfiguration {
      */
     @PostConstruct
     public void addShutdown() {
-        Object redisExecutorObj = SpringUtils.getBean(REDIS_EXECUTOR);
+        Object redisExecutorObj = SpringUtil.getBean(DOUBLE_CACHE__EXECUTOR);
         if (null != redisExecutorObj) {
             ExecutorService redisExecutor = (ExecutorService) redisExecutorObj;
             // 关闭钩子处理
@@ -93,7 +94,7 @@ public class DoubleCacheAutoConfiguration {
                         logger.info("Redisson Pool Executor did not terminate in the specified time.");
                         List<Runnable> droppedTasks = redisExecutor.shutdownNow();
                         logger.info("Redisson Pool Executor was abruptly shutdown. " + droppedTasks.size() + " tasks " +
-                                "will not be executed."); //optional **
+                            "will not be executed."); //optional **
                     }
                 } catch (InterruptedException e) {
                     logger.error("Redisson Pool Executor shutdown Error: " + e.getMessage(), e);
@@ -109,7 +110,7 @@ public class DoubleCacheAutoConfiguration {
         if (null != doubleCacheConfig.getHost()) {
             // 单机连接方式
             SingleServerConfig serverConfig =
-                    config.useSingleServer().setAddress("redis://" + doubleCacheConfig.getHost() + ":" + doubleCacheConfig.getPort());
+                config.useSingleServer().setAddress("redis://" + doubleCacheConfig.getHost() + ":" + doubleCacheConfig.getPort());
             serverConfig.setDatabase(doubleCacheConfig.getDatabase());
             serverConfig.setPassword(doubleCacheConfig.getPassword());
             serverConfig.setConnectionMinimumIdleSize(doubleCacheConfig.getMinIdleSize());
@@ -131,7 +132,7 @@ public class DoubleCacheAutoConfiguration {
             serversConfig.setSlaveConnectionMinimumIdleSize(doubleCacheConfig.getMinIdleSize());
 
             Arrays.stream(doubleCacheConfig.getClusterNodes().split(",")).forEach(host -> serversConfig.addNodeAddress(
-                    "redis://" + host.trim()));
+                "redis://" + host.trim()));
             serversConfig.setPassword(doubleCacheConfig.getPassword());
             redisson = Redisson.create(config);
         }
@@ -172,10 +173,14 @@ public class DoubleCacheAutoConfiguration {
                                            ExecutorService redisExecutor) {
         DoubleCacheService doubleCacheService;
         // 判断是否开启两级缓存，默认只开启redis缓存
+        //1.开启两级缓存
         if (doubleCacheConfig.isEnableSecondCache()) {
+            //此时先初始化一级缓存，也即redis
             DoubleCacheService secondDoubleCacheService = new FirstLevelCacheService(redissonClient, redisExecutor, doubleCacheConfig);
+            //再初始二级缓存，它依赖redis
             doubleCacheService = new SecondLevelCacheService(secondDoubleCacheService, notifyService, doubleCacheConfig);
         } else {
+            //2.否则就只初始化一级缓存，也即redis
             doubleCacheService = new FirstLevelCacheService(redissonClient, redisExecutor, doubleCacheConfig);
         }
         return doubleCacheService;
@@ -191,13 +196,13 @@ public class DoubleCacheAutoConfiguration {
      * @return
      */
     @ConditionalOnProperty(
-            value = "app.cache.enableSecondCache",
-            havingValue = "true")
+        value = "app.cache.enableSecondCache",
+        havingValue = "true")
     @Bean
     public RTopic subscribe(RedissonClient redissonClient, DoubleCacheService caffeineDoubleCacheService) {
         RTopic rTopic = redissonClient.getTopic(doubleCacheConfig.getTopic());
         CacheUpdateMessageListener messageListener =
-                new CacheUpdateMessageListener((SecondLevelCacheService) caffeineDoubleCacheService);
+            new CacheUpdateMessageListener((SecondLevelCacheService) caffeineDoubleCacheService);
         rTopic.addListener(messageListener);
         return rTopic;
     }

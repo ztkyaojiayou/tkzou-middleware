@@ -9,7 +9,8 @@ import static com.tkzou.middleware.doublecache.utils.KeyGenerators.SHA;
 
 
 /**
- * 缓存删除
+ * 删除时的缓存策略
+ *
  * @author zoutongkun
  */
 @Target({ElementType.METHOD, ElementType.TYPE})

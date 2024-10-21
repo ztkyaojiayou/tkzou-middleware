@@ -78,7 +78,6 @@ public class DoubleCacheConfig {
     @Value("${app.cache.redis.pool.timeout: 3000}")
     private int timeout;
 
-
     /**
      * Redis主机连接信息
      */
@@ -125,7 +124,6 @@ public class DoubleCacheConfig {
      */
     @Value("${app.cache.caffeine.topic: cache:redis:caffeine:topic}")
     private String topic;
-
 
     /**
      * 访问后过期时间，单位毫秒

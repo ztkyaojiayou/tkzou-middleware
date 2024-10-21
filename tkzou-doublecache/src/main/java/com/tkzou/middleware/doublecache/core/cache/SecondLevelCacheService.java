@@ -1,5 +1,6 @@
 package com.tkzou.middleware.doublecache.core.cache;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.tkzou.middleware.doublecache.config.DoubleCacheConfig;
@@ -25,33 +26,33 @@ public class SecondLevelCacheService implements DoubleCacheService {
     private static final Logger logger = LoggerFactory.getLogger(SecondLevelCacheService.class);
 
     /**
-     * 二级缓存
+     * 二级缓存需要依赖redis缓存
      */
-    private DoubleCacheService secondDoubleCacheService;
+    private final DoubleCacheService firstCacheService;
 
     /**
      * Caffeine内部缓存
      * key：cacheName，理解为命名空间即可
      * value：cache，即具体的缓存
      */
-    private ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>();
 
     /**
      * Redis 发送服务接口
      * 用于保持缓存的一致性
      */
-    private NotifyService notifyService;
+    private final NotifyService notifyService;
 
     /**
      * 缓存配置参数
      */
-    private DoubleCacheConfig doubleCacheConfig;
+    private final DoubleCacheConfig doubleCacheConfig;
 
 
-    public SecondLevelCacheService(DoubleCacheService secondDoubleCacheService,
+    public SecondLevelCacheService(DoubleCacheService firstCacheService,
                                    NotifyService notifyService,
                                    DoubleCacheConfig doubleCacheConfig) {
-        this.secondDoubleCacheService = secondDoubleCacheService;
+        this.firstCacheService = firstCacheService;
         this.notifyService = notifyService;
         this.doubleCacheConfig = doubleCacheConfig;
     }
@@ -64,6 +65,7 @@ public class SecondLevelCacheService implements DoubleCacheService {
      */
     public void clearNotSend(String[] cacheNames, Object key) {
         for (String cacheName : cacheNames) {
+            //直接清理即可，无需通知其他节点了，因为当前消息就是由其他节点触发的！！！
             doClearAndSend(cacheName, key, false);
         }
     }
@@ -112,10 +114,12 @@ public class SecondLevelCacheService implements DoubleCacheService {
 
         if (null == result) {
             // 2.从Redis缓存获取
-            result = secondDoubleCacheService.get(cacheName, cacheKey);
+            result = firstCacheService.get(cacheName, cacheKey);
             logger.info("getFromCache # fetch data from redis cache.");
-            // 3.再保存更新Caffeine缓存
-            saveCaffeineCache(cacheName, cacheKey, result, caffeineCache);
+            if (ObjectUtil.isNotEmpty(result)) {
+                // 3.再更新本地缓存，但无需发通知删除其他节点的本地缓存，因为此时redis的值并没有更新，只是单纯是本地缓存失效了！
+                saveCaffeineCache(cacheName, cacheKey, result, caffeineCache);
+            }
         }
 
         return result;
@@ -142,17 +146,18 @@ public class SecondLevelCacheService implements DoubleCacheService {
 
     @Override
     public boolean save(String[] cacheNames, Object cacheKey, Object cacheValue, long ttl) {
-        //先写到redis
-        boolean result = secondDoubleCacheService.save(cacheNames, cacheKey, cacheValue, ttl);
-        // 再保存并广播更新二级缓存
+        //1.先写到redis
+        boolean result = firstCacheService.save(cacheNames, cacheKey, cacheValue, ttl);
+        //2.再保存本地缓存并广播其他节点以清除（而非保存！）二级缓存
         saveAndSend(cacheNames, cacheKey, cacheValue);
         return result;
     }
 
     @Override
     public boolean saveByAsync(String[] cacheNames, Object cacheKey, Object cacheValue, long ttl) {
-        boolean result = secondDoubleCacheService.saveByAsync(cacheNames, cacheKey, cacheValue, ttl);
-        // 保存并广播更新二级缓存
+        //1.先异步写到redis
+        boolean result = firstCacheService.saveByAsync(cacheNames, cacheKey, cacheValue, ttl);
+        //2.再保存本地缓存并广播其他节点以清除（而非保存！）二级缓存
         saveAndSend(cacheNames, cacheKey, cacheValue);
         return result;
     }
@@ -169,14 +174,18 @@ public class SecondLevelCacheService implements DoubleCacheService {
 
     @Override
     public boolean delete(String[] cacheNames, Object cacheKey) {
-        boolean result = secondDoubleCacheService.delete(cacheNames, cacheKey);
+        //1.先删除redis
+        boolean result = firstCacheService.delete(cacheNames, cacheKey);
+        //2.再删除各个节点的本地缓存
         clearAndSend(cacheNames, cacheKey);
         return result;
     }
 
     @Override
     public boolean delete(String[] cacheNames) {
-        boolean result = secondDoubleCacheService.delete(cacheNames);
+        //1.先删除redis
+        boolean result = firstCacheService.delete(cacheNames);
+        //2.再删除各个节点的本地缓存
         clearAndSend(cacheNames);
         return result;
     }
@@ -187,38 +196,42 @@ public class SecondLevelCacheService implements DoubleCacheService {
      * @param cacheNames
      */
     private void clearAndSend(String[] cacheNames) {
+        // 先清理当前节点自己的本地缓存
         for (String cacheName : cacheNames) {
             doClearAndSend(cacheName, null, false);
         }
-        // 发送Redis缓存更新消息
+        // 再发送Redis缓存更新消息，清理各个节点的本地缓存
         notifyService.sendMessage(cacheNames, null);
     }
 
     /**
-     * 保存并且发送缓存（支持批量清理）
+     * 保存并且发送缓存（支持批量清理）更新的通知到其他节点
      *
      * @param cacheNames
      * @param key
      */
     private void saveAndSend(String[] cacheNames, Object key, Object cacheValue) {
+        //1.先保存到当前节点自己的本地缓存
         for (String cacheName : cacheNames) {
             doSaveAndSend(cacheName, key, cacheValue, false);
         }
-        // 发送Redis缓存更新消息, 所有cacheNames统一发送
+        //2.发送Redis缓存更新消息,目的是清除其他节点上的本地缓存，而非更新，这样更容易保证一致性！！！
+        // 所有cacheNames统一发送
         notifyService.sendMessage(cacheNames, key);
     }
 
     /**
-     * 清理缓存（支持批量清理）
+     * 清理缓存（支持批量清理）并通知其他节点以清除
      *
      * @param cacheNames
      * @param key
      */
     private void clearAndSend(String[] cacheNames, Object key) {
+        //1.先清理当前节点自己的本地缓存
         for (String cacheName : cacheNames) {
             doClearAndSend(cacheName, key, false);
         }
-        // 发送Redis缓存更新消息
+        //2.再发送Redis缓存更新消息，目的是清除其他节点上的本地缓存
         notifyService.sendMessage(cacheNames, key);
     }
 
@@ -264,6 +277,7 @@ public class SecondLevelCacheService implements DoubleCacheService {
             caffeineCache.invalidate(key);
         }
 
+        //需要发送时才发送，触发删除操作的节点才需要发送以通知给其他节点进行删除！
         if (isNeedSend) {
             // 发送Redis缓存更新消息
             notifyService.sendMessage(cacheName, key);
