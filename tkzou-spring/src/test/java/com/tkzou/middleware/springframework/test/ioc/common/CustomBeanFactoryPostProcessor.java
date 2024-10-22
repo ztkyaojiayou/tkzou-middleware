@@ -17,7 +17,8 @@ import com.tkzou.middleware.springframework.beans.factory.config.BeanFactoryPost
 public class CustomBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        //对person对象的beanDefinition进行修改！
+        //这里可以对任意也即被加载到了beanDefinition的bean进行修改
+        //如对person对象的beanDefinition进行修改！
         BeanDefinition personBeanDefinition = beanFactory.getBeanDefinition("person");
         PropertyValues propertyValues = personBeanDefinition.getPropertyValues();
         //修改name属性值

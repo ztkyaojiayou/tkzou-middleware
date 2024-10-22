@@ -34,7 +34,8 @@ public class CglibAopProxy implements AopProxy {
         enhancer.setInterfaces(advised.getTargetSource().getTargetClass());
         //指定增强逻辑
         enhancer.setCallback(new DynamicAdvisedInterceptor(advised));
-        return null;
+        //生成代理对象
+        return enhancer.create();
     }
 
     /**
@@ -61,15 +62,18 @@ public class CglibAopProxy implements AopProxy {
          * @throws Throwable
          */
         @Override
-        public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+        public Object intercept(Object proxy, Method method, Object[] args,
+                                MethodProxy methodProxy) throws Throwable {
             //参考jdk的实现逻辑--JdkDynamicAopProxy
             // 获取目标对象
             Object target = advised.getTargetSource().getTarget();
             Class<?> targetClass = target.getClass();
-            Object retVal = null;
-            List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
-            CglibMethodInvocation methodInvocation = new CglibMethodInvocation(proxy, target, method, args,
-                    targetClass, chain, methodProxy);
+            Object retVal;
+            List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method,
+                targetClass);
+            CglibMethodInvocation methodInvocation = new CglibMethodInvocation(proxy, target,
+                method, args,
+                targetClass, chain, methodProxy);
             if (chain == null || chain.isEmpty()) {
                 retVal = methodProxy.invoke(target, args);
             } else {
@@ -81,10 +85,12 @@ public class CglibAopProxy implements AopProxy {
             //移至了ReflectiveMethodInvocation中
 //
 //            //封装CglibMethodInvocation，本质就是个ReflectiveMethodInvocation，也即目标方法的快照
-//            CglibMethodInvocation methodInvocation = new CglibMethodInvocation(advised.getTargetSource().getTarget(),
+//            CglibMethodInvocation methodInvocation = new CglibMethodInvocation(advised
+//            .getTargetSource().getTarget(),
 //                    method, objects, methodProxy);
 //            //同jdk的实现逻辑，先判断一下切入点表达式，看是否需要执行增强逻辑！
-//            if (advised.getMethodMatcher().matches(method, advised.getTargetSource().getTarget().getClass())) {
+//            if (advised.getMethodMatcher().matches(method, advised.getTargetSource().getTarget
+//            ().getClass())) {
 //                //1.执行带有增强逻辑和原方法的方法
 //                return advised.getMethodInterceptor().invoke(methodInvocation);
 //            }
@@ -102,15 +108,18 @@ public class CglibAopProxy implements AopProxy {
             // 构造器
             public CglibMethodInvocation(Object proxy, Object target, Method method,
                                          Object[] arguments, Class<?> targetClass,
-                                         List<Object> interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
-                super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
+                                         List<Object> interceptorsAndDynamicMethodMatchers,
+                                         MethodProxy methodProxy) {
+                super(proxy, target, method, arguments, targetClass,
+                    interceptorsAndDynamicMethodMatchers);
                 this.methodProxy = methodProxy;
             }
 
             /**
              * 执行目标方法
              * todo 为什么需要使用methodProxy去执行目标方法？直接使用method.invoke不行吗？？？
-             *   答案是可以的，只是使用这种方式效率更高，因为cglib内部已经封装了反射的逻辑，所以使用methodProxy效率更高！！！但其实源码中还是使用父类的proceed方法来执行的。。。
+             *   答案是可以的，只是使用这种方式效率更高，因为cglib内部已经封装了反射的逻辑，所以使用methodProxy
+             *   效率更高！！！但其实源码中还是使用父类的proceed方法来执行的。。。
              * 参考：https://blog.csdn.net/qq_43799161/article/details/123604338
              *
              * @return
