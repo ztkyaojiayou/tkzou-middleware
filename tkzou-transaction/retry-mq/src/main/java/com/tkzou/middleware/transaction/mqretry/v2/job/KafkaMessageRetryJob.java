@@ -11,9 +11,11 @@
 //
 //import java.util.List;
 //
-///**
-// * @author zoutongkun
-// */
+/**
+ * kafka消息重试投递job
+ *
+ * @author zoutongkun
+ */
 //@Service
 //@Slf4j
 //public class KafkaMessageRetryJob  {

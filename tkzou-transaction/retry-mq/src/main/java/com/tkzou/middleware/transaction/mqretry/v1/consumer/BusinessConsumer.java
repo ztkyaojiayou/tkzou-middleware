@@ -49,11 +49,13 @@ public class BusinessConsumer {
             try {
                 BusinessDTO businessDTO = JSONUtil.toBean(json.toString(), BusinessDTO.class);
                 //消费消息，业务处理
-                Boolean result = processMessage(businessDTO);
-                if (result) {
+                Boolean result = null;
+                try {
+                    result = processMessage(businessDTO);
                     //成功时
                     handleSuccessMsg(record);
-                } else {
+                } catch (Exception e) {
+                    e.printStackTrace();
                     //失败时
                     handleFailMsg(record);
                 }

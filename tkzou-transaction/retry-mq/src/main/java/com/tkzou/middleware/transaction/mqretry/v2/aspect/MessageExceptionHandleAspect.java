@@ -12,7 +12,6 @@
 //import org.aspectj.lang.annotation.Aspect;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
-//import org.springframework.validation.annotation.Validated;
 //
 //import java.util.List;
 //import java.util.Map;
@@ -28,26 +27,15 @@
 //@Component
 //@Slf4j
 //public class MessageExceptionHandleAspect {
-//    @Autowired
-//    private MessageRetryProperties messageRetryProperties;
-//    @Autowired
-//    private KafkaMessageRetrievalModel messageRetrievalModel;
-//    @Autowired
-//    private ConsumerPoolService poolService;
-//    @Autowired
-//    private ConsumerGroupErrorLoader consumerGroupErrorLoader;
-//    @Autowired
-//    private ConsumerGroupContextFactory groupContextFactory;
 //
 //    /**
 //     * 环绕通知
 //     * 切processor包下所有类中的processRecord方法!
-//     *
+//     * 其实可以直接切@kafkaListener注解的方法！！！
 //     * @param jp
 //     * @throws Throwable
 //     */
-//    @Around("execution(* com.tkzou.middleware.localmsgretry.mqretry.v2.processor.*
-//    .processRecord(..))")
+//    @Around("execution(* com.tkzou.middleware.transaction.mqretry.v2.processor.*.processRecord(..))")
 //    public void aroundProcess(ProceedingJoinPoint jp) throws Throwable {
 //        Class<?> targetClass = jp.getTarget().getClass();
 //        Object[] args = jp.getArgs();
@@ -94,8 +82,8 @@
 //            //执行目标方法
 //            jp.proceed();
 //        } catch (Exception e) {
-//            //失败时也入库
-//            messageRetrievalModel.insert(topic, consumerGroup.name(), key, type, JsonUtils
+//            //失败时直接入库
+//           insert(topic, consumerGroup.name(), key, type, JsonUtils
 //            .toString(messageMap),
 //                    StringUtils.left(e.getMessage(), 65535));
 //            pauseByFailure(consumerGroup);
