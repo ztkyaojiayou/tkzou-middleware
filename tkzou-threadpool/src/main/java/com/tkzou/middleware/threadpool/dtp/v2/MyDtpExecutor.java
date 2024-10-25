@@ -11,7 +11,8 @@ import java.util.concurrent.*;
  *
  * @author zoutongkun
  */
-public class DtpExecutor extends ThreadPoolExecutor {
+public class MyDtpExecutor extends ThreadPoolExecutor {
+
     private String threadPoolId;
 
     /**
@@ -26,7 +27,7 @@ public class DtpExecutor extends ThreadPoolExecutor {
      * @param threadFactory
      * @param handler
      */
-    public DtpExecutor(String threadPoolId, int corePoolSize, int maximumPoolSize, long keepAliveTime, @NotNull TimeUnit unit, @NotNull BlockingQueue<Runnable> workQueue, @NotNull ThreadFactory threadFactory, @NotNull RejectedExecutionHandler handler) {
+    public MyDtpExecutor(String threadPoolId, int corePoolSize, int maximumPoolSize, long keepAliveTime, @NotNull TimeUnit unit, @NotNull BlockingQueue<Runnable> workQueue, @NotNull ThreadFactory threadFactory, @NotNull RejectedExecutionHandler handler) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, wrapProxyRejectedHandler(threadPoolId, handler));
         this.threadPoolId = threadPoolId;
     }
@@ -44,7 +45,7 @@ public class DtpExecutor extends ThreadPoolExecutor {
      * @param threadFactory
      * @param handler
      */
-    public DtpExecutor(String threadPoolId, Long maxRejectNum, int corePoolSize, int maximumPoolSize, long keepAliveTime, @NotNull TimeUnit unit, @NotNull BlockingQueue<Runnable> workQueue, @NotNull ThreadFactory threadFactory, @NotNull RejectedExecutionHandler handler) {
+    public MyDtpExecutor(String threadPoolId, Long maxRejectNum, int corePoolSize, int maximumPoolSize, long keepAliveTime, @NotNull TimeUnit unit, @NotNull BlockingQueue<Runnable> workQueue, @NotNull ThreadFactory threadFactory, @NotNull RejectedExecutionHandler handler) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, wrapProxyRejectedHandler(threadPoolId, handler, maxRejectNum));
         this.threadPoolId = threadPoolId;
     }

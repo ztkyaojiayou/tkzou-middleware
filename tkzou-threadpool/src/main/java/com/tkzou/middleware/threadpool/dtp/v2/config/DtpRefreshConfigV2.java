@@ -50,12 +50,13 @@ public class DtpRefreshConfigV2 implements InitializingBean {
 
             /**
              * 接收配置文件中的数据--核心
-             * @param s 字符流，而非配置文件的json，需要先解析！！！
+             *
+             * @param newConfigInfo 字符流，而非配置文件的json，需要先解析！！！
              */
             @Override
-            public void receiveConfigInfo(String s) {
+            public void receiveConfigInfo(String newConfigInfo) {
                 //读取配置文件并刷新
-                refreshConfig(s);
+                refreshConfig(newConfigInfo);
             }
         });
     }

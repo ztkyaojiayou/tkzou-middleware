@@ -12,3 +12,13 @@ spring:
       config:
         server-addr: 192.168.174.129:8848
         file-extension: yml
+  dtp:
+    executors:
+      # 线程池1
+      - poolName: dtpExecutor1
+        corePoolSize: 5
+        maximumPoolSize: 10
+      # 线程池2
+      - poolName: dtpExecutor2
+        corePoolSize: 2
+        maximumPoolSize: 15

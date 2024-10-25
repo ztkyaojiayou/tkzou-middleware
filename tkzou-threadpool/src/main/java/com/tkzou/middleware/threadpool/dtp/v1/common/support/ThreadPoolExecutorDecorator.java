@@ -1,0 +1,101 @@
+package com.tkzou.middleware.threadpool.dtp.v1.common.support;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.*;
+
+/**
+ * @author zoutongkun
+ * @Date 2023/5/20 18:28
+ */
+@Slf4j
+@AllArgsConstructor
+public class ThreadPoolExecutorDecorator implements ExecutorDecorator<ThreadPoolExecutor> {
+    private final ThreadPoolExecutor threadPoolExecutor;
+
+    public static ThreadPoolExecutorDecorator wrap(ThreadPoolExecutor threadPoolExecutor) {
+        return new ThreadPoolExecutorDecorator(threadPoolExecutor);
+    }
+
+    @Override
+    public ThreadPoolExecutor getOrigins() {
+        return threadPoolExecutor;
+    }
+
+    @Override
+    public void setCorePoolSize(int corePoolSize) {
+        threadPoolExecutor.setCorePoolSize(corePoolSize);
+    }
+
+    @Override
+    public int getCorePoolSize() {
+        return threadPoolExecutor.getCorePoolSize();
+    }
+
+    @Override
+    public void setMaximumPoolSize(int maximumPoolSize) {
+        threadPoolExecutor.setMaximumPoolSize(maximumPoolSize);
+    }
+
+    @Override
+    public int getMaximumPoolSize() {
+        return threadPoolExecutor.getMaximumPoolSize();
+    }
+
+    @Override
+    public int getLargestPoolSize() {
+        return threadPoolExecutor.getLargestPoolSize();
+    }
+
+    @Override
+    public long getTaskNum() {
+        return getOrigins().getTaskCount();
+    }
+
+    @Override
+    public int getQueueSize() {
+        return getOrigins().getQueue().size();
+    }
+
+    @Override
+    public int getQueueRemainingCapacity() {
+        return getOrigins().getQueue().remainingCapacity();
+    }
+
+    @Override
+    public void setKeepAliveTime(long keepAliveTime, TimeUnit timeUnit) {
+        threadPoolExecutor.setKeepAliveTime(keepAliveTime, timeUnit);
+    }
+
+    @Override
+    public void setThreadFactory(ThreadFactory threadFactory) {
+        threadPoolExecutor.setThreadFactory(threadFactory);
+    }
+
+    @Override
+    public ThreadFactory getThreadFactory() {
+        return threadPoolExecutor.getThreadFactory();
+    }
+
+    @Override
+    public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
+        threadPoolExecutor.setRejectedExecutionHandler(rejectedExecutionHandler);
+    }
+
+    @Override
+    public RejectedExecutionHandler getRejectedExecutionHandler() {
+        return threadPoolExecutor.getRejectedExecutionHandler();
+    }
+
+    @Override
+    public BlockingQueue<Runnable> getQueue() {
+        return threadPoolExecutor.getQueue();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        log.info("线程池已被关闭");
+        threadPoolExecutor.shutdown();
+    }
+}
