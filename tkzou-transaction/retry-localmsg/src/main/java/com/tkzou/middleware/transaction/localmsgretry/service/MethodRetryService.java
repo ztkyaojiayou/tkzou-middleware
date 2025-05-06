@@ -61,7 +61,7 @@ public class MethodRetryService {
             return;
         }
 
-        //保存执行数据
+        //保存执行数据--注意：此时和前面的操作是在同一个事务中的，这一点非常重要！！！
         saveRecord(record);
         //2.则添加一个事务同步器，并重写afterCompletion方法（此方法在事务提交后会做回调）
         //作用是当事务提交后（此时这条执行rpc方法的消息就确保在本地事务写成功啦！）执行一次该rpc方法，

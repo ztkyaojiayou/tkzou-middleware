@@ -365,7 +365,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         //3.执行bean的初始化的方法（核心）
         this.invokeInitMethods(beanName, wrappedBean, beanDefinition);
         //4.执行BeanPostProcessor的后置处理方法
-        //这里也会创建代理对象！！！
+        //这里会根据实际情况是否创建代理对象！！！
         wrappedBean = this.applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
         return wrappedBean;
     }

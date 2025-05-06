@@ -68,9 +68,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         registerBeanPostProcessor(beanFactory);
 
         //5.初始化事件发布者，此时会把创建的事件发布者对象直接添加到ioc容器中
+        //但其实就一个，即SimpleApplicationEventMulticaster
         initApplicationEventMulticaster();
 
-        //6.注册事件监听器，此时也会触发getBean，只是是针对单个bean而已！
+        //6.注册事件监听者，此时也会触发getBean，只是是针对单个bean而已！
         registerListeners();
 
         //7.注册类型转换器和提前实例化单例bean--核心
@@ -177,7 +178,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         //且要注意：这些bean都是先从beanDefinitionMap获取原材料的！
         //也因此，我们自定义的后置处理器都需要加@component等注解才可以！！！
         Map<String, BeanPostProcessor> beanPostProcessorMap = beanFactory.getBeansOfType(BeanPostProcessor.class);
-        //2.再依次注册，即创建该bean并添加到ioc容器待命备用！
+        //2.再依次注册，即添加这些bean到ioc容器待命备用！--这里的容器是beanPostProcessors，而并非单例池中的那个容器！但只要知道是保存起来了就可以了！
         for (BeanPostProcessor beanPostProcessor : beanPostProcessorMap.values()) {
             beanFactory.addBeanPostProcessor(beanPostProcessor);
         }

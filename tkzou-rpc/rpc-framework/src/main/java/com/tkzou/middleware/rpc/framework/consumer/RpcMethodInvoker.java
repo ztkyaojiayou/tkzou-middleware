@@ -13,7 +13,7 @@ import com.tkzou.middleware.rpc.framework.protocol.ServiceInstance;
  */
 public class RpcMethodInvoker implements MethodInvoker {
 
-    private ServiceInstance serviceInstance;
+    private final ServiceInstance serviceInstance;
 
     public RpcMethodInvoker(ServiceInstance serviceInstance) {
         this.serviceInstance = serviceInstance;
